@@ -10,7 +10,7 @@ users, in order to confirm the solvency of OKX.
 
 ### Building the source
 
-Building this open source tool requires Go (version 1.17) .
+Building this open source tool requires Go (version >= 1.17).
 
 ```shell
 make all
@@ -51,13 +51,13 @@ You can use CheckBalance to verify the OKX wallet address balance with the corre
 Sum of all address balances
 
 ```shell
-  ./build/CheckBalance --por_csv_filename ./example/okx_por_example.csv
+  ./build/CheckBalance --rpc_json_filename="./example/rpc.json" --por_csv_filename ./example/okx_por_example.csv
 ```
 
 Query the snapshot height balance on the chain
 
 ```shell
-./build/checkbalance --mode="single_coin" --coin_name="ETH" --rpc_json_filename="./example/rpc.json" --por_csv_filename="./example/okx_por_example.csv"
+./build/CheckBalance --mode="single_coin" --coin_name="ETH" --rpc_json_filename="./example/rpc.json" --por_csv_filename="./example/okx_por_example.csv"
 ```
 
 ## Liabilities
