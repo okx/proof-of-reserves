@@ -22,6 +22,31 @@
       }
     },
     {
+      "name": "usdt-omni",
+      "coin": "btc",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "omni-usdt",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "",
+        "jsonPattern": "",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "enabled": false
+      }
+    },
+    {
       "name": "eth",
       "coin": "eth",
       "api": {
@@ -41,7 +66,7 @@
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
-          "apikey": "BpkQks5ux6EBctqjqJ7L",
+          "apikey": "BpkQjqJ7L",
           "Content-Type": "application/json",
           "Authorization":       "Basic"
         },
@@ -70,7 +95,7 @@
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
-          "apikey": "BpkQks5ux6EBctqjqJ7L",
+          "apikey": "BpkQjqJ7L",
           "Content-Type": "application/json",
           "Authorization":       "Basic"
         },
@@ -83,7 +108,7 @@
         {
           "project": "comp",
           "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
-          "height": "16019460",
+          "height": "16023023",
           "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
           "balance": "10615561162853"
         }
