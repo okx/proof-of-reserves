@@ -1,0 +1,275 @@
+{
+  "coins": [
+    {
+      "name": "btc",
+      "coin": "btc",
+      "api": {
+        "endpoint": "",
+        "jsonPattern": "",
+        "defaultUnit": "",
+        "tokenAddress": "",
+        "customHeaders": {},
+        "enabled": false
+      },
+      "rpc": {
+        "endpoint": "http://47.52.109.182:8832/",
+        "jsonPattern": "$.result.total_amount",
+        "defaultUnit": "BTC",
+        "customHeaders": {},
+        "authUser": "por",
+        "authPassword": "por",
+        "enabled": true
+      }
+    },
+    {
+      "name": "eth",
+      "coin": "eth",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "ETH",
+        "tokenAddress": "",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {
+          "apikey": "BpkQks5ux6EBctqjqJ7L",
+          "Content-Type": "application/json",
+          "Authorization":       "Basic"
+        },
+        "authUser": "",
+        "authPassword": "",
+        "enabled": true
+      }
+    },
+    {
+      "name": "usdt-erc20",
+      "coin": "eth",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {
+          "apikey": "BpkQks5ux6EBctqjqJ7L",
+          "Content-Type": "application/json",
+          "Authorization":       "Basic"
+        },
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "enabled": true
+      },
+      "witheList": [
+        {
+          "project": "comp",
+          "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
+          "height": "16019460",
+          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
+          "balance": "10615561162853"
+        }
+      ]
+    },
+    {
+      "name": "usdt-trc20",
+      "coin": "tron",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+        "enabled": false
+      }
+    },
+    {
+      "name": "usdt-poly",
+      "coin": "polygon",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://polygon-rpc.com",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        "enabled": false
+      }
+    },
+    {
+      "name": "usdt-avaxc",
+      "coin": "avaxc",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://avalanche-mainnet.infura.io/v3/aac8ea61932e408f88b984bc2708c3ae",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+        "enabled": false
+      }
+    },
+    {
+      "name": "usdt-arbitrum",
+      "coin": "arbitrum",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://arb1.arbitrum.io/rpc",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "enabled": false
+      }
+    },
+    {
+      "name": "usdt-optimism",
+      "coin": "optimism",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "USDT",
+        "tokenAddress": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://mainnet.optimism.io",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+        "enabled": false
+      }
+    },
+    {
+      "name": "eth-arbitrum",
+      "coin": "arbitrum",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "ETH",
+        "tokenAddress": "",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://arb1.arbitrum.io/rpc",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "",
+        "enabled": false
+      }
+    },
+    {
+      "name": "eth-optimism",
+      "coin": "optimism",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "ETH",
+        "tokenAddress": "",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept":       "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "https://mainnet.optimism.io",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "",
+        "enabled": false
+      }
+    }
+  ]
+}
