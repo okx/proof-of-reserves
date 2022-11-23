@@ -30,11 +30,11 @@ There is an rpc.json configuration file in the binary zip and in the source code
 ```text
 "api": {
     "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history", // OKLink API
-    "jsonPattern": "$.data.balance",
+    "jsonPattern": "$.data[0].balance",
     "defaultUnit": "",                          // display unit
     "tokenAddress": "",                         // token contract address
     "customHeaders": {
-        "x-apiKey": "OKLink apiKey",            // OKLink apiKey
+        "Ok-Access-Key": "OKLink apiKey",       // OKLink apiKey
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "*/*"
     },
@@ -104,7 +104,7 @@ Install the Bitcoin Core client, synchronize to the latest height, and then roll
 
 ### Usage
 
-**coin_name** Supported: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM'
+**coin_name** Supported: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
 
 **mode** Supported: 'single_address','single_coin_total_balance','single_coin','all_coin','all_coin_total_balance'
 

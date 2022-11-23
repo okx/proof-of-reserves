@@ -32,11 +32,11 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 ```text
 "api": {
     "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history", // OKLink API
-    "jsonPattern": "$.data.balance",
+    "jsonPattern": "$.data[0].balance",
     "defaultUnit": "",                          // 显示单位
     "tokenAddress": "",                         // token合约地址
     "customHeaders": {
-        "x-apiKey": "OKLink apiKey",            // OKLink apiKey
+        "Ok-Access-Key": "OKLink apiKey",       // OKLink apiKey
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "*/*"
     },
@@ -105,7 +105,7 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 ### Usage
 
-**coin_name** 支持: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM'
+**coin_name** 支持: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
 
 **mode** 支持: 'single_address','single_coin_total_balance','single_coin','all_coin','all_coin_total_balance'
 
