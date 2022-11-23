@@ -2,7 +2,7 @@
 
 ## Background
 
-OKX launches Proof of Reserve (PoR) to improve the security and transparency of user's assets. These tools will allow
+OKX launches [Proof of Reserves (PoR)](https://www.okx.com/proof-of-reserves) to improve the security and transparency of user's assets. These tools will allow
 you to independently audit OKX's Proof of Reserves and verify OKX's reserves exceed the exchange's known liabilities to
 users, in order to confirm the solvency of OKX.
 
@@ -36,8 +36,8 @@ Proof-of-Reserves executable are in the cmd directory
 
 ## Reserves
 
-Download OKX's Proof of Reserves File, verify the ownership of the OKX's public address, and check whether the OKX
-snapshot height balance is consistent with the published balance.
+Download OKX's [Proof of Reserves File](https://static.coinall.ltd/cdn/okx/por/okx_por_20221122.csv), verify the ownership of the OKX's public address, and check whether the OKX
+snapshot height balance is consistent with the published balance.  [Details here](https://www.okx.com/support/hc/en-us/articles/10781041719437-How-to-verify-OKX-s-ownership-and-balance-of-the-wallet-address-)
 
 ### VerifyAddress
 
@@ -71,7 +71,7 @@ Query the snapshot height balance on the chain
 ## Liabilities
 
 OKX's PoR uses Merkle tree technology to allow each user to independently review OKX's digital asset reserve on the
-basis of protecting user privacy.
+basis of protecting user privacy. [Details here](https://www.okx.com/support/hc/en-us/articles/10660988139661-How-to-verify-if-your-assets-are-included-in-the-OKX-Merkle-tree-)
 
 ### MerkleValidator
 

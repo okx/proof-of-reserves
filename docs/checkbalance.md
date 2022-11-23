@@ -13,6 +13,9 @@ There is an rpc.json configuration file in the binary zip and in the source code
 - If you build a node yourself or use a third-party node, please configure the rpc option of the corresponding crypto. For details, please see [Get Node RPC](#get-node-rpc)
 
 ```text
+// The RPC configuration supports the following coins:
+// 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM'
+
 "rpc": {
     "endpoint": "http://127.0.0.1:8332/",       // node rpc
     "jsonPattern": "$.result.total_amount",
@@ -28,6 +31,9 @@ There is an rpc.json configuration file in the binary zip and in the source code
 - If you use OKLink open API, please configure the api option of the corresponding crypto. (Note: You need to go to the OKLink website to obtain the apiKey. For details, please see [Get OKLink apiKey](#get-oklink-apikey))
 
 ```text
+// The API configuration supports the following coins:
+// 'ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
+
 "api": {
     "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history", // OKLink API
     "jsonPattern": "$.data[0].balance",
@@ -39,6 +45,28 @@ There is an rpc.json configuration file in the binary zip and in the source code
         "Accept": "*/*"
     },
     "enabled": true                             // this configuration switch enables OKLink API queries
+}
+```
+
+**Explanation**
+1. When both RPC and API are configured, RPC is used for queries.
+2. The snapshot file contains the USDT pledged to the Compound platform. Since the Node RPC does not support querying the USDT pledged to the Compound platform, when the USDT-ERC20 RPC configuration is enabled, the USDT balance pledged to the Compound platform is retrieved from the following configuration. You can use the [Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042) to verify this.
+
+```text
+{
+    "name": "usdt-erc20",
+    "coin": "eth",
+    "api": { ... },
+    "rpc": { ... },
+    "witheList": [
+        {
+            "project": "comp",
+            "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
+            "height": "16023042",
+            "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
+            "balance": "10664614958377"
+        }
+    ]
 }
 ```
 
