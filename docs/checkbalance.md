@@ -48,10 +48,10 @@ Once you have obtained the executable and snapshot file and configured rpc.json,
 
 ```bash
 # Verify single address balance
-./CheckBalance --mode="single_address" --coin_name="BTC" --address="3BdEq8vnX1o1J4Zpwj6wkPh5FxrgxLAibr" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okx_por_20221122.csv
 
 # Verify the total of all address balances
-./CheckBalance --mode="single_coin_total_balance" --coin_name="BTC" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221122.csv
 
 ```
 
