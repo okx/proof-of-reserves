@@ -264,6 +264,7 @@ func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator
 				log.Infof("verify coin %s, address %s balance failed, in chain balance:%s, in por balance:%s", coin, v.Address, balance, value.Balance)
 			}
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
@@ -281,10 +282,11 @@ func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 		}
 		// compare
 		if balance == v.Balance {
-			log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", coin, v.Address, balance, v.Balance)
+			log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, v.Balance)
 		} else {
-			log.Infof("verify coin %s, address %s balance failed, in chain balance: %s, in por balance: %s", coin, v.Address, balance, v.Balance)
+			log.Infof("verify coin %s, address %s balance failed, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, v.Balance)
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
