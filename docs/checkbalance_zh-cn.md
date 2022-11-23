@@ -15,6 +15,9 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 - 如果您自己搭建节点或使用三方节点，请配置对应币种的rpc选项。详细请看[节点RPC获取](#节点rpc获取)
 
 ```text
+// RPC配置支持的币种：
+// 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM'
+
 "rpc": {
     "endpoint": "http://127.0.0.1:8332/",       // 节点rpc
     "jsonPattern": "$.result.total_amount",
@@ -30,6 +33,9 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 - 如果您使用OKLink open API，请配置对应币种的api选项。（注意：您需要到OKLink网站获取apiKey。详细请看[获取OKLink apiKey](#获取oklink-apikey)）
 
 ```text
+// API配置支持的币种：
+// 'ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
+
 "api": {
     "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history", // OKLink API
     "jsonPattern": "$.data[0].balance",
@@ -43,6 +49,29 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
     "enabled": true                             // 此配置开关 走OKLink API查询
 }
 ```
+
+**说明**
+1. 当同时配置RPC和API时，会使用RPC进行查询。
+2. 快照文件包含质押在Compound平台的USDT，由于节点不支持查询质押在Compound平台的USDT，当USDT-ERC20 RPC配置开启时，会从以下配置中获取质押在Compound平台上的USDT余额。您可以使用[Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042)进行验证。
+
+```text
+{
+    "name": "usdt-erc20",
+    "coin": "eth",
+    "api": { ... },
+    "rpc": { ... },
+    "witheList": [
+        {
+            "project": "comp",
+            "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
+            "height": "16023042",
+            "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
+            "balance": "10664614958377"
+        }
+    ]
+}
+```
+
 
 ## 验证余额
 
