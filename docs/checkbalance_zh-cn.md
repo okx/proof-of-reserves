@@ -27,7 +27,7 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 }
 ```
 
-- 如果您使用OKLink open API，请配置对应币种的api选项。（注意：您需要到到OKLink网站获取apiKey。详细请看[获取OKLink apiKey](#获取oklink-apikey)）
+- 如果您使用OKLink open API，请配置对应币种的api选项。（注意：您需要到OKLink网站获取apiKey。详细请看[获取OKLink apiKey](#获取oklink-apikey)）
 
 ```text
 "api": {
@@ -50,10 +50,10 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 ```bash
 # 验证单个地址余额
-./CheckBalance --mode="single_address" --coin_name="btc" --address="3BdEq8vnX1o1J4Zpwj6wkPh5FxrgxLAibr" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okx_por_20221122.csv
 
 # 验证所有地址余额总和
-./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221122.csv
 
 ```
 
@@ -76,9 +76,9 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 3. 进入 bin 目录，运行 `./bitcoind` 命令，启动节点。
 4. 等待节点同步到最新高度，大约需要12个小时。
-5. 同步到最新高度后，需要回滚节点到OKX快照高度，以查询快照高度余额，操作如下：
+5. 同步到最新高度后，需要回滚节点到欧易快照高度，以查询快照高度余额，操作如下：
     1. 上BTC浏览器上查询快照高度的下一个高度的区块hash，复制此区块hash并填入下面命令的hash值部分。
-    2. 运行 `./bitcoin-cli invalidateblock 00000000000000000004aeef6699b7ec45eae8c599aa548e3f03caee4f34f607` 命令。
+    2. 运行 `./bitcoin-cli invalidateblock 00000000000000000005829017993a7a21e4b7c731c95b9cb979c01294a7bd27` 命令。
     3. 等待节点回滚到快照高度，可以运行 `./bitcoin-cli getblockcount` 命令查看是否回滚完成，也可以查看节点输出日志判断。
 
 ### 获取evm系归档节点
@@ -124,11 +124,11 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 single address：
 
 ```shell
-./checkbalance --mode="single_address" --coin_name="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./CheckBalance --mode="single_address" --coin_name="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
 
 single coin total address：
 
 ```shell
-./checkbalance --mode="single_coin_total_balance" --coin_name="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./CheckBalance --mode="single_coin_total_balance" --coin_name="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
