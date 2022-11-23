@@ -48,10 +48,10 @@ Once you have obtained the executable and snapshot file and configured rpc.json,
 
 ```bash
 # Verify single address balance
-./CheckBalance --mode="single_address" --coin_name="btc" --address="3BdEq8vnX1o1J4Zpwj6wkPh5FxrgxLAibr" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okx_por_20221122.csv
 
 # Verify the total of all address balances
-./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221116.csv
+./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221122.csv
 
 ```
 
@@ -76,7 +76,7 @@ Install the Bitcoin Core client, synchronize to the latest height, and then roll
 4. Wait for the node to synchronize to the latest height, it will take about 12 hours.
 5. After synchronizing to the latest height, you need to roll back the node to the OKX snapshot height to query the balance of the snapshot height. The steps are as follows:
     1. Go to the BTC browser to query the block hash of the next height of the snapshot height, copy this block hash and fill in the hash value part of the command below.
-    2. Run `./bitcoin-cli invalidateblock 00000000000000000004aeef6699b7ec45eae8c599aa548e3f03caee4f34f607` command.
+    2. Run `./bitcoin-cli invalidateblock 00000000000000000005829017993a7a21e4b7c731c95b9cb979c01294a7bd27` command.
     3. Wait for the node to roll back to the snapshot height, you can run `./bitcoin-cli getblockcount` command to check whether the roll back is complete, you can also view the node output log judgment.
 
 ### Get EVM Archive Node
@@ -123,11 +123,11 @@ Install the Bitcoin Core client, synchronize to the latest height, and then roll
 single address:
 
 ```shell
-./checkbalance --mode="single_address" --coin_name="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./CheckBalance --mode="single_address" --coin_name="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
 
 single coin total address:
 
 ```shell
-./checkbalance --mode="single_coin_total_balance" --coin_name="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./CheckBalance --mode="single_coin_total_balance" --coin_name="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
