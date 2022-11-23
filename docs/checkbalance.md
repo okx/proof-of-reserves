@@ -123,11 +123,11 @@ Install the Bitcoin Core client, synchronize to the latest height, and then roll
 single address:
 
 ```shell
-./checkbalance --mode="single_address" --coin="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./checkbalance --mode="single_address" --coin_name="ETH" --address="0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
 
 single coin total address:
 
 ```shell
-./checkbalance --mode="single_coin_total_balance" --coin="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
+./checkbalance --mode="single_coin_total_balance" --coin_name="ETH" --rpc_json_filename="rpc.json" --por_csv_filename="por_test.csv"
 ```
