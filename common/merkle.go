@@ -150,10 +150,10 @@ func (m *MerkleProof) Validate() bool {
 		node = NewPath(left, right, node.Balances, m.Path[i].Balances, m.Path[i].Height+1)
 	}
 	root := m.Path[len(m.Path)-1]
-	fmt.Println(fmt.Sprintf("root BTC balance : %s ,root BTC balance in file: %s ", node.Balances.BTC, root.Balances.BTC))
-	fmt.Println(fmt.Sprintf("root ETH balance : %s ,root ETH balance in file: %s ", node.Balances.ETH, root.Balances.ETH))
-	fmt.Println(fmt.Sprintf("root USDT balance : %s ,root USDT balance in file: %s ", node.Balances.USDT, root.Balances.USDT))
-	fmt.Println(fmt.Sprintf("root hash: %s ,root hash in file: %s ", node.Hash, root.Hash))
+	fmt.Println(fmt.Sprintf("root BTC balance : %s, root BTC balance in file: %s ", node.Balances.BTC, root.Balances.BTC))
+	fmt.Println(fmt.Sprintf("root ETH balance : %s, root ETH balance in file: %s ", node.Balances.ETH, root.Balances.ETH))
+	fmt.Println(fmt.Sprintf("root USDT balance : %s, root USDT balance in file: %s ", node.Balances.USDT, root.Balances.USDT))
+	fmt.Println(fmt.Sprintf("root hash: %s, root hash in file: %s ", node.Hash, root.Hash))
 	if node.Hash != root.Hash || !node.Balances.Equal(root.Balances) || node.Height != root.Height {
 		return false
 	}
