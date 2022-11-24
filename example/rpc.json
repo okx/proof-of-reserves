@@ -107,10 +107,9 @@
       "whiteList": [
         {
           "project": "comp",
+          "projectFullName": "compound",
           "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
-          "height": "16023042",
-          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
-          "balance": "10664614958377"
+          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9"
         }
       ]
     },
