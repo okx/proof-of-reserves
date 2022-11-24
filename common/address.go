@@ -22,7 +22,7 @@ type AddressBalanceValidator struct {
 	once                        sync.Once
 	coinJSONConfig              string
 	confMap                     map[string]*coin
-	confCoinAddressWitheListMap map[string]*coinAddress
+	confCoinAddressWhiteListMap map[string]*coinAddress
 }
 
 type coin struct {
@@ -46,7 +46,7 @@ type coin struct {
 		TokenAddress  string            `json:"tokenAddress"`
 		Enabled       bool              `json:"enabled"`
 	} `json:"rpc"`
-	WitheList []*coinAddress `json:"witheList"`
+	WhiteList []*coinAddress `json:"whiteList"`
 }
 
 type coinAddress struct {
@@ -90,16 +90,16 @@ func (r *AddressBalanceValidator) loadCoinJSON(content []byte) error {
 		return err
 	}
 	coinMap := make(map[string]*coin)
-	addressWitheListMap := make(map[string]*coinAddress)
+	addressWhiteListMap := make(map[string]*coinAddress)
 	for _, value := range data.Coins {
 		if _, exist := coinMap[value.Name]; !exist {
 			coinMap[value.Name] = value
 		}
-		if len(value.WitheList) > 0 {
-			for _, addr := range value.WitheList {
+		if len(value.WhiteList) > 0 {
+			for _, addr := range value.WhiteList {
 				key := fmt.Sprintf("%s:%s:%s", value.Name, addr.Address, addr.Height)
-				if _, exist := addressWitheListMap[key]; !exist {
-					addressWitheListMap[key] = addr
+				if _, exist := addressWhiteListMap[key]; !exist {
+					addressWhiteListMap[key] = addr
 				}
 				if addr.Project == "" || addr.Balance == "" || addr.Address == "" || addr.Height == "" {
 					err = errors.New(fmt.Sprintf("%s not config the whitelist project/address/height/balance filed", value.Name))
@@ -107,10 +107,9 @@ func (r *AddressBalanceValidator) loadCoinJSON(content []byte) error {
 				}
 			}
 		}
-
 	}
 	r.confMap = coinMap
-	r.confCoinAddressWitheListMap = addressWitheListMap
+	r.confCoinAddressWhiteListMap = addressWhiteListMap
 
 	return err
 }
@@ -135,10 +134,10 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 	var balanceRes interface{}
 	var defaultUnit string
 	if pConf.RPC.Enabled {
-		// get address balance from withe list
+		// get address balance from white list
 		key := fmt.Sprintf("%s:%s:%s", pConf.Name, address, height)
-		if _, exist := r.confCoinAddressWitheListMap[key]; exist {
-			return r.confCoinAddressWitheListMap[key].Balance, nil
+		if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
+			return r.confCoinAddressWhiteListMap[key].Balance, nil
 		}
 
 		var request *client.JsonRpcRequest
@@ -219,11 +218,11 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 			return result, err
 		}
 		var project, tokenAddress string
-		// get address coin name from withe list
+		// get address coin name from white list
 		key := fmt.Sprintf("%s:%s:%s", pConf.Name, address, height)
-		if _, exist := r.confCoinAddressWitheListMap[key]; exist {
-			project = r.confCoinAddressWitheListMap[key].Project
-			tokenAddress = r.confCoinAddressWitheListMap[key].TokenAddress
+		if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
+			project = r.confCoinAddressWhiteListMap[key].Project
+			tokenAddress = r.confCoinAddressWhiteListMap[key].TokenAddress
 		} else {
 			project = ""
 			tokenAddress = pConf.API.TokenAddress
@@ -336,8 +335,8 @@ func (r *AddressBalanceValidator) GetCoinAddressTotalBalance(coin, height string
 				address := item.(string)
 				// ignore white list address
 				key := fmt.Sprintf("%s:%s:%s", pConf.Name, address, height)
-				if _, exist := r.confCoinAddressWitheListMap[key]; exist {
-					balance := r.confCoinAddressWitheListMap[key].Balance
+				if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
+					balance := r.confCoinAddressWhiteListMap[key].Balance
 					balanceInt, _ := big.NewInt(0).SetString(balance, 10)
 					totalBalance = totalBalance.Add(totalBalance, balanceInt)
 					continue

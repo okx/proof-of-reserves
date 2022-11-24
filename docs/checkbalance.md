@@ -58,7 +58,7 @@ There is an rpc.json configuration file in the binary zip and in the source code
     "coin": "eth",
     "api": { ... },
     "rpc": { ... },
-    "witheList": [
+    "whiteList": [
         {
             "project": "comp",
             "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",

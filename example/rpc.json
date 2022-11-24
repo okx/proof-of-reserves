@@ -104,7 +104,7 @@
         "tokenAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
         "enabled": false
       },
-      "witheList": [
+      "whiteList": [
         {
           "project": "comp",
           "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",

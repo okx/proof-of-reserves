@@ -60,7 +60,7 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
     "coin": "eth",
     "api": { ... },
     "rpc": { ... },
-    "witheList": [
+    "whiteList": [
         {
             "project": "comp",
             "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
