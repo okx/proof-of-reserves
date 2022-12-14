@@ -1,4 +1,4 @@
-module github.com/okex/proof-of-reserves
+module github.com/okx/proof-of-reserves
 
 go 1.17
 

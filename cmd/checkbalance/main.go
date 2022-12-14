@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/okex/proof-of-reserves/client"
-	"github.com/okex/proof-of-reserves/common"
+	"github.com/okx/proof-of-reserves/client"
+	"github.com/okx/proof-of-reserves/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"math"

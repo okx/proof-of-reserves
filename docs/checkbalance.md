@@ -50,7 +50,7 @@ There is an rpc.json configuration file in the binary zip and in the source code
 
 **Explanation**
 1. When both RPC and API are configured, RPC is used for queries.
-2. The snapshot file contains the USDT pledged to the Compound platform. Since the Node RPC does not support querying the USDT pledged to the Compound platform, when the USDT-ERC20 RPC configuration is enabled, the USDT balance pledged to the Compound platform is retrieved from the following configuration. You can use the [Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042) to verify this.
+2. The snapshot file contains the USDT pledged to the Compound platform, the configuration is as follows. Since the Node RPC does not support querying the USDT pledged to the Compound platform, when the USDT-ERC20 RPC configuration is enabled, the USDT balance pledged to the Compound platform is retrieved from the snapshot data. You can use the [Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042) to verify this.
 
 ```text
 {
@@ -58,13 +58,12 @@ There is an rpc.json configuration file in the binary zip and in the source code
     "coin": "eth",
     "api": { ... },
     "rpc": { ... },
-    "witheList": [
+    "whiteList": [
         {
-            "project": "comp",
-            "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
-            "height": "16023042",
-            "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
-            "balance": "10664614958377"
+          "project": "comp",
+          "projectFullName": "compound",
+          "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
+          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9"
         }
     ]
 }

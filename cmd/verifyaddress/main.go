@@ -6,7 +6,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
-	"github.com/okex/proof-of-reserves/common"
+	"github.com/okx/proof-of-reserves/common"
 	"github.com/spf13/cobra"
 	"io"
 	"math/big"

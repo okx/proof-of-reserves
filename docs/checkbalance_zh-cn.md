@@ -52,7 +52,7 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 **说明**
 1. 当同时配置RPC和API时，会使用RPC进行查询。
-2. 快照文件包含质押在Compound平台的USDT，由于节点不支持查询质押在Compound平台的USDT，当USDT-ERC20 RPC配置开启时，会从以下配置中获取质押在Compound平台上的USDT余额。您可以使用[Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042)进行验证。
+2. 快照文件包含质押在Compound平台的USDT，相关配置如下。由于节点不支持查询质押在Compound平台的USDT，当USDT-ERC20 RPC配置开启时，会从快照数据中获取质押在Compound平台上的USDT余额， 您可以使用[Compound API](https://api.compound.finance/api/v2/account?addresses%5B%5D=0xb99cc7e10fe0acc68c50c7829f473d81e23249cc&block_number=16023042)进行验证。
 
 ```text
 {
@@ -60,13 +60,12 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
     "coin": "eth",
     "api": { ... },
     "rpc": { ... },
-    "witheList": [
+    "whiteList": [
         {
-            "project": "comp",
-            "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
-            "height": "16023042",
-            "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
-            "balance": "10664614958377"
+          "project": "comp",
+          "projectFullName": "compound",
+          "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
+          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9"
         }
     ]
 }
