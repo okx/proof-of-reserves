@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/okex/proof-of-reserves/client"
+	"github.com/okx/proof-of-reserves/client"
 	"github.com/oliveagle/jsonpath"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"

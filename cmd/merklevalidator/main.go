@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/okex/proof-of-reserves/common"
+	"github.com/okx/proof-of-reserves/common"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
