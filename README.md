@@ -36,7 +36,7 @@ Proof-of-Reserves executable are in the cmd directory
 
 ## Reserves
 
-Download OKX's [Proof of Reserves File](https://static.coinall.ltd/cdn/okx/por/okx_por_20221122.csv), verify the ownership of the OKX's public address, and check whether the OKX
+Download OKX's [Proof of Reserves File](https://www.okx.com/cn/proof-of-reserves/download), verify the ownership of the OKX's public address, and check whether the OKX
 snapshot height balance is consistent with the published balance.  [Details here](https://www.okx.com/support/hc/en-us/articles/10781041719437-How-to-verify-OKX-s-ownership-and-balance-of-the-wallet-address-)
 
 ### VerifyAddress
