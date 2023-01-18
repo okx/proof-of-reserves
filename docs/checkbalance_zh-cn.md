@@ -1,9 +1,9 @@
-# 验证欧易钱包储备金地址余额
+# 验证OKCoin钱包储备金地址余额
 
 您可以通过以下步骤验证：
 
-1. 快照高度时刻的特定币种链上地址余额，与欧易公布的快照文件中地址余额进行对比，从而验证是否一致。
-2. 快照高度时刻的特定币种链上地址余额总和，与欧易公布的快照文件中地址余额总和进行对比，验证是否一致。
+1. 快照高度时刻的特定币种链上地址余额，与OKCoin公布的快照文件中地址余额进行对比，从而验证是否一致。
+2. 快照高度时刻的特定币种链上地址余额总和，与OKCoin公布的快照文件中地址余额总和进行对比，验证是否一致。
 
 查询快照高度时刻地址余额时，可以配置节点rpc进行余额查询，或者配置OKLink的open API进行余额查询。以下是详细步骤介绍：
 
@@ -23,8 +23,8 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
     "jsonPattern": "$.result.total_amount",
     "defaultUnit": "BTC",                       // 显示单位
     "customHeaders": {},
-    "authUser": "OKX",                          // 访问节点需要的用户名，如访问btc节点
-    "authPassword": "OKXWallet",                // 访问节点需要的密码，如访问btc节点
+    "authUser": "OKCoin",                       // 访问节点需要的用户名，如访问btc节点
+    "authPassword": "OKCoinWallet",             // 访问节点需要的密码，如访问btc节点
     "tokenAddress": "",                         // token合约地址
     "enabled": true                             // 此配置开关启用节点查询
 }
@@ -78,10 +78,10 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 ```bash
 # 验证单个地址余额
-./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okx_por_20221122.csv
+./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okcoin_por_20221122.csv
 
 # 验证所有地址余额总和
-./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221122.csv
+./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okcoin_por_20221122.csv
 
 ```
 
@@ -91,20 +91,20 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 ### Bitcoin节点
 
-安装Bitcoin Core客户端，同步到最新高度，然后将区块回滚到欧易快照时的高度。
+安装Bitcoin Core客户端，同步到最新高度，然后将区块回滚到OKCoin快照时的高度。
 
 1. 可在此处下载Bitcoin Core软件：<https://bitcoincore.org/en/download/> ，请下载 0.21 或之后的版本。
 2. 需要编辑Bitcoin Core的配置文件，以使节点RPC可访问。创建 ~/.bitcoin/bitcoin.conf 文件并用编辑器打开或运行 `vi ~/.bitcoin/bitcoin.conf` 命令，编辑
 
     ```bash
     server=1
-    rpcuser=OKX
-    rpcpassword=OKXWallet
+    rpcuser=OKCoin
+    rpcpassword=OKCoinWallet
     ```
 
 3. 进入 bin 目录，运行 `./bitcoind` 命令，启动节点。
 4. 等待节点同步到最新高度，大约需要12个小时。
-5. 同步到最新高度后，需要回滚节点到欧易快照高度，以查询快照高度余额，操作如下：
+5. 同步到最新高度后，需要回滚节点到OKCoin快照高度，以查询快照高度余额，操作如下：
     1. 上BTC浏览器上查询快照高度的下一个高度的区块hash，复制此区块hash并填入下面命令的hash值部分。
     2. 运行 `./bitcoin-cli invalidateblock 00000000000000000005829017993a7a21e4b7c731c95b9cb979c01294a7bd27` 命令。
     3. 等待节点回滚到快照高度，可以运行 `./bitcoin-cli getblockcount` 命令查看是否回滚完成，也可以查看节点输出日志判断。
