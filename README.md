@@ -85,7 +85,7 @@ assets of OKX.
 ```
 
 if using v2
-1. Visit https://okx.com/proof-of-reserves/download?tab=liabilities to download the full merkle tree file
+1. Visit [Full merkle tree file download page](https://okx.com/proof-of-reserves/download?tab=liabilities) to download the full merkle tree file
 2. Login to OKX and visit Audit page to copy and save the data as user_info_file.json
 3. Run the following command to check whether your assets are included in the total user assets of OKX.
 ```shell
