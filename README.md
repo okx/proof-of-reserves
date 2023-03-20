@@ -75,6 +75,8 @@ basis of protecting user privacy. [Details here](https://www.okx.com/support/hc/
 
 ### MerkleValidator
 
+if using v1
+
 Log in to OKX, go to the Audits page to view audit details, download the Merkle tree path data, copy and save it as a
 file merkle_proof_file.json, and run the following command to check whether your assets are included in the total user
 assets of OKX. 
@@ -83,7 +85,12 @@ assets of OKX.
 ./build/MerkleValidator --merkle_proof_file ./example/merkle_proof_file.json
 ```
 
+if using v2
 
-
-
+1.Visit https://okx.com/proof-of-reserves/download?tab=liabilities to download the full merkle tree file
+2.Login to OKX and visit Audit page to copy and save the data as merkle_proof_file.json
+3.Run the following command to check whether your assets are included in the total user assets of OKX.
+```shell
+./MerkleValidator --merkle_file full-liabilities-merkle-tree.txt --user_info_file merkle_proof_file.json
+```
 
