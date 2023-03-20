@@ -74,7 +74,7 @@ OKX's PoR uses Merkle tree technology to allow each user to independently review
 basis of protecting user privacy. [Details here](https://www.okx.com/support/hc/en-us/articles/10660988139661-How-to-verify-if-your-assets-are-included-in-the-OKX-Merkle-tree-)
 
 ### MerkleValidator
-#### Currently, the latest version has been released, which is compatible with v1. The following is the operation flow of the two versions
+#### Currently, version v2 has been released, which is compatible with v1. The following is the operation flow of the two versions
 if using v1
 1. Log in to OKX, go to the Audits page to view audit details, download the Merkle tree path data, copy and save it as a
 file merkle_proof_file.json, and run the following command to check whether your assets are included in the total user
