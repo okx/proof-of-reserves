@@ -62,6 +62,7 @@ def por_user_verify_proofs():
                 print(INCLUSION_PROOF_FAIL_INFO)
     
     print("============ Validation finished =============")
+    input()
 
 
 
