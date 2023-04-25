@@ -7,3 +7,11 @@ okx_por_*.csv
 *_address_balance.csv
 venv/
 origin/
+*.pyc
+venv
+zk_STARK/build
+zk_STARK/dist
+zk_STARK/inclusion_proof_data
+zk_STARK/sum_proof_data
+zk_STARK/user_data
+.DS_Store
