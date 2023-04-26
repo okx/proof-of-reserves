@@ -168,7 +168,7 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	for coin, balance := range coinTotalBalance {
 		coinTotalBalanceResult = append(coinTotalBalanceResult, fmt.Sprintf("%s(%s)", coin, balance.Round(2).String()))
 	}
-	fmt.Printf("Total balance: [%s]", strings.Join(coinTotalBalanceResult, ","))
+	fmt.Printf("Total balance: [%s]\n", strings.Join(coinTotalBalanceResult, ","))
 
 	if len(fail) == 0 {
 		fmt.Println("Verify address signature end, all address passed")

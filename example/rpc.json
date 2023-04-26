@@ -62,7 +62,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -91,7 +91,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -311,7 +311,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -471,10 +471,14 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
-        "customHeaders": {},
+        "customHeaders": {
+          "apikey": "BpkQjqJ7L",
+          "Content-Type": "application/json",
+          "Authorization": "Basic"
+        },
         "authUser": "",
         "authPassword": "",
         "tokenAddress": "0x75231f58b43240c9718dd58b4967c5114342a86c",
@@ -783,7 +787,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -813,7 +817,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -843,7 +847,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -873,7 +877,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
@@ -903,7 +907,7 @@
         "enabled": true
       },
       "rpc": {
-        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc1",
+        "endpoint": "https://fullnode.okg.com/api/etharchive/mainnet/native/analysis/rpc",
         "jsonPattern": "$.result",
         "defaultUnit": "",
         "customHeaders": {
