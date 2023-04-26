@@ -205,24 +205,26 @@ func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator
 	destCoins := getDestCoinList(coin)
 	coinDataList := make([]*common.CoinData, 0)
 	for _, value := range common.PorCoinDataMap {
-		if strings.Contains(strings.Join(destCoins, ","), value.Coin) {
-			coinDataList = append(coinDataList, value)
+		for _, destCoin := range destCoins {
+			if destCoin == value.Coin {
+				coinDataList = append(coinDataList, value)
+			}
 		}
 	}
 
 	for _, v := range coinDataList {
-		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(coin), v.Address, v.SnapshotHeight)
+		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(v.Coin), v.Address, v.SnapshotHeight)
 		if err != nil {
 			log.Errorf("get address %s balance from blockchain failed, error: %v", v.Address, err)
 			continue
 		}
-		balance = convertCoinBalanceToBaseUnit(coin, balance, -1)
+		balance = convertCoinBalanceToBaseUnit(v.Coin, balance, -1)
 		// compare
-		if value, exist := common.PorCoinDataMap[fmt.Sprintf("%s:%s", coin, v.Address)]; exist {
+		if value, exist := common.PorCoinDataMap[fmt.Sprintf("%s:%s", v.Coin, v.Address)]; exist {
 			if isCoinBalanceEqual(balance, value.Balance) {
-				log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", coin, v.Address, balance, value.Balance)
+				log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, value.Balance)
 			} else {
-				log.Infof("verify coin %s, address %s balance failed, in chain balance:%s, in por balance:%s", coin, v.Address, balance, value.Balance)
+				log.Infof("verify coin %s, address %s balance failed, in chain balance:%s, in por balance:%s", v.Coin, v.Address, balance, value.Balance)
 			}
 		}
 		time.Sleep(500 * time.Millisecond)
@@ -236,7 +238,7 @@ func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 			log.Errorf("get address %s balance from blockchain failed, error: %v", v.Address, err)
 			continue
 		}
-		balance = convertCoinBalanceToBaseUnit(coin, balance, -1)
+		balance = convertCoinBalanceToBaseUnit(v.Coin, balance, -1)
 		// compare
 		if isCoinBalanceEqual(balance, v.Balance) {
 			log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, v.Balance)
