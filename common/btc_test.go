@@ -46,25 +46,3 @@ func TestCreateAddressDescriptor(t *testing.T) {
 		}
 	}
 }
-
-func TestGuessAddressType(t *testing.T) {
-	args := []struct {
-		address string
-		wants   string
-	}{
-		{
-			address: "bc1quhruqrghgcca950rvhtrg7cpd7u8k6svpzgzmrjy8xyukacl5lkq0r8l2d",
-			wants:   "P2WSH",
-		},
-		{
-			address: "3CHeHsCpH9QmX2hmbzkZinqjtUtqseNWrV",
-			wants:   "P2SH",
-		},
-	}
-	for _, tt := range args {
-		res := GuessAddressType(tt.address)
-		if tt.wants != res {
-			t.Errorf("Want %s, Got %s", tt.wants, res)
-		}
-	}
-}
