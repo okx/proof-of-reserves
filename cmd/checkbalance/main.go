@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/okx/proof-of-reserves/client"
 	"github.com/okx/proof-of-reserves/common"
+	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"math"
-	"math/big"
 	"os"
 
 	"strings"
@@ -15,6 +15,8 @@ import (
 )
 
 var coin, addr, mode, rpcJsonFileName, porCsvFileName string
+
+var porCoinTotalBalance map[string]decimal.Decimal
 
 var rootCmd = &cobra.Command{
 	Use:   "checkbalance",
@@ -36,6 +38,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&mode, "mode", "", "")
 	rootCmd.PersistentFlags().StringVar(&rpcJsonFileName, "rpc_json_filename", "rpc.json", "")
 	rootCmd.PersistentFlags().StringVar(&porCsvFileName, "por_csv_filename", "", "")
+	// set decimal precision
+	decimal.DivisionPrecision = 18
 }
 
 func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
@@ -49,41 +53,31 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 	// init por csv data
 	log.Info("loading por csv data...")
 	var err error
-	common.PorCoinDataMap, common.PorCoinGeneralDataMap, err = common.InitPorCsvDataMap(porCsvFileName)
+	common.PorCoinDataMap, err = common.InitPorCsvDataMap(porCsvFileName)
 	if err != nil {
 		log.Errorf("load por csv data failed, error: %v", err)
 		return
 	}
 
-	porCoinTotalBalance := make(map[string]*big.Int)
-	for coinName := range common.PorCoinGeneralDataMap {
-		if _, exist := porCoinTotalBalance[coinName]; !exist {
-			porCoinTotalBalance[coinName] = big.NewInt(0)
-		}
-	}
-
+	porCoinTotalBalance = make(map[string]decimal.Decimal)
 	// scan por data
 	for k, v := range common.PorCoinDataMap {
 		keys := strings.Split(k, ":")
 		coinName := keys[0]
-
-		if _, exist := porCoinTotalBalance[coinName]; exist {
-			if v.Balance == "" {
-				log.Errorf("balance is null, coin: %s, address: %s", coinName, v.Address)
-				continue
-			}
-			b, _ := big.NewInt(0).SetString(v.Balance, 10)
-			porCoinTotalBalance[coinName] = porCoinTotalBalance[coinName].Add(porCoinTotalBalance[coinName], b)
+		if v.Balance == "" {
+			log.Errorf("balance is null, coin: %s, address: %s", coinName, v.Address)
+			continue
 		}
-
-		// stats address count
-		if item, exist := common.PorCoinGeneralDataMap[coinName]; exist {
-			item.AddressCount++
+		b, _ := decimal.NewFromString(v.Balance)
+		if _, exist := porCoinTotalBalance[coinName]; exist {
+			porCoinTotalBalance[coinName] = porCoinTotalBalance[coinName].Add(b)
+		} else {
+			porCoinTotalBalance[coinName] = b
 		}
 
 		// recover btc P2PKH address pubkey
-		if coinName == "btc" {
-			addrTye := common.GuessAddressType(v.Address)
+		if coinName == "BTC" {
+			addrTye := common.GuessUtxoCoinAddressType(v.Address)
 			if addrTye == "P2PKH" {
 				// recover pubKey
 				pubkey := common.RecoveryPubKeyFromSign(v.Address, v.Message, v.Sign1)
@@ -95,12 +89,6 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	for coinName, balance := range porCoinTotalBalance {
-		if _, exist := common.PorCoinGeneralDataMap[coinName]; exist {
-			common.PorCoinGeneralDataMap[coinName].Balance = balance.String()
-		}
-	}
-
 	// init Validator
 	validator, err := common.NewAddressBalanceValidator(rpcJsonFileName)
 	if err != nil {
@@ -108,12 +96,17 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	coin = strings.ToLower(coin)
+	coin = strings.ToUpper(coin)
 	mode = strings.ToLower(mode)
 	// check coin_name
 	if coin != "" {
-		if _, exist := common.PorCoinGeneralDataMap[coin]; !exist {
+		if _, exist := common.PorCoinUnitMap[coin]; !exist {
 			log.Errorf("por data not support the coin %s, please set the correct one!", coin)
+			return
+		}
+		// coin black list
+		if _, exist := common.CheckBalanceCoinBlackList[coin]; exist {
+			log.Errorf("check balance not support the coin %s, please set the correct one!", coin)
 			return
 		}
 	}
@@ -131,6 +124,7 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	start = time.Now().UTC()
 	switch mode {
 	case "single_address":
 		if coin == "" {
@@ -142,7 +136,6 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		start = time.Now().UTC()
 		log.Infof("start to verify coin %s, address %s balance...", coin, addr)
 		VerifySingleAddressBalance(validator, coin, addr)
 		log.Infof("verify coin %s, address %s balance finished, consume time %ds", coin, addr, time.Now().UTC().Unix()-start.Unix())
@@ -153,13 +146,11 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		start = time.Now().UTC()
 		log.Infof("start to verify coin %s every signle address balance...", coin)
 		VerifySingleCoinAllAddressBalance(validator, coin)
 		log.Infof("verify coin %s total address balance finished, consume time %ds", coin, time.Now().UTC().Unix()-start.Unix())
 
 	case "all_coin":
-		start = time.Now().UTC()
 		log.Info("start to verify all coin address balance...")
 		VerifyAllCoinAddressBalance(validator)
 		log.Infof("verify all coin address balance finished, consume time %ds", time.Now().UTC().Unix()-start.Unix())
@@ -170,95 +161,65 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		start = time.Now().UTC()
 		log.Infof("start to verify coin %s total address balance...", coin)
 		VerifyCoinAddressTotalBalance(validator, coin)
 		log.Infof("verify coin %s total address balance finished, consume time %ds", coin, time.Now().UTC().Unix()-start.Unix())
 
 	case "all_coin_total_balance":
-		start = time.Now().UTC()
 		log.Info("start to verify all coin total address balance...")
 		VerifyAllCoinAddressTotalBalance(validator)
 		log.Infof("verify all coin total address balance finished, consume time %ds", time.Now().UTC().Unix()-start.Unix())
 
 	default:
 		// return por data info
-		BTCAmount, ETHAmount, USDTAmount := big.NewFloat(0), big.NewFloat(0), big.NewFloat(0)
-		for _, value := range common.PorCoinGeneralDataMap {
-			coinName := strings.Split(value.Coin, "-")
-			b, _ := big.NewFloat(0).SetString(value.Balance)
-			switch coinName[0] {
-			case "btc":
-				BTCAmount = BTCAmount.Add(BTCAmount, b)
-				b = b.Mul(b, big.NewFloat(math.Pow(10, -8)))
-			case "eth":
-				ETHAmount = ETHAmount.Add(ETHAmount, b)
-				b = b.Mul(b, big.NewFloat(math.Pow(10, -18)))
-			case "usdt":
-				USDTAmount = USDTAmount.Add(USDTAmount, b)
-				b = b.Mul(b, big.NewFloat(math.Pow(10, -6)))
-			default:
-				log.Errorf("unsupport coin %s in por dara.", coinName)
-			}
-			bFloat64, _ := b.Float64()
-			log.Infof("por data, coin: %s, snapshot height: %s, address count: %d, total balance: %0.4f", strings.ToUpper(value.Coin), value.SnapshotHeight,
-				value.AddressCount, bFloat64)
+		log.Info("por coin total balance:")
+		for coin, value := range porCoinTotalBalance {
+			log.Infof("coin %s, por total balance %s.", coin, value.String())
 		}
-
-		BTCAmountFloat64 := BTCAmount.Mul(BTCAmount, big.NewFloat(math.Pow(10, -8)))
-		ETHAmountFloat64 := ETHAmount.Mul(ETHAmount, big.NewFloat(math.Pow(10, -18)))
-		USDTAmountFloat64 := USDTAmount.Mul(USDTAmount, big.NewFloat(math.Pow(10, -6)))
-
-		// BTC,ETH,USDT total balance
-		log.Infof("por data: BTC total balance %0.4f, ETH(ALL) total balance %0.4f, USDT(ALL) total balance %0.4f", BTCAmountFloat64, ETHAmountFloat64, USDTAmountFloat64)
 	}
 }
 
 func VerifySingleAddressBalance(validator *common.AddressBalanceValidator, coin, addr string) {
-	coinInfo, exist := common.PorCoinGeneralDataMap[coin]
+	value, exist := common.PorCoinDataMap[fmt.Sprintf("%s:%s", coin, addr)]
 	if !exist {
 		log.Errorf("unsupport the coin %s, please check the coin_name!", coin)
 		return
 	}
-	height := coinInfo.SnapshotHeight
-	balance, err := validator.GetCoinAddressBalanceInfo(coin, addr, height)
+	height := value.SnapshotHeight
+	balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(coin), addr, height)
 	if err != nil {
 		log.Errorf("get coin %s, address %s balance from blockchain failed!", coin, addr)
 		return
 	}
+
+	balance = convertCoinBalanceToBaseUnit(coin, balance, -1)
 	// compare
-	if value, exist := common.PorCoinDataMap[fmt.Sprintf("%s:%s", coin, addr)]; exist {
-		if balance == value.Balance {
-			log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", coin, addr, balance, value.Balance)
-		} else {
-			log.Infof("verify coin %s, address %s balance failed, in chain balance: %s, in por balance: %s", coin, addr, balance, value.Balance)
-		}
+	if isCoinBalanceEqual(balance, value.Balance) {
+		log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", coin, addr, balance, value.Balance)
+	} else {
+		log.Infof("verify coin %s, address %s balance failed, in chain balance: %s, in por balance: %s", coin, addr, balance, value.Balance)
 	}
 }
 
 func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator, coin string) {
-	coinInfo, exist := common.PorCoinGeneralDataMap[coin]
-	if !exist {
-		log.Errorf("unsupport the coin %s, please choose the correct one!", coin)
-		return
-	}
-	height := coinInfo.SnapshotHeight
+	destCoins := getDestCoinList(coin)
 	coinDataList := make([]*common.CoinData, 0)
 	for _, value := range common.PorCoinDataMap {
-		if value.Coin == coin {
+		if strings.Contains(strings.Join(destCoins, ","), value.Coin) {
 			coinDataList = append(coinDataList, value)
 		}
 	}
 
 	for _, v := range coinDataList {
-		balance, err := validator.GetCoinAddressBalanceInfo(coin, v.Address, height)
+		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(coin), v.Address, v.SnapshotHeight)
 		if err != nil {
 			log.Errorf("get address %s balance from blockchain failed, error: %v", v.Address, err)
 			continue
 		}
+		balance = convertCoinBalanceToBaseUnit(coin, balance, -1)
 		// compare
 		if value, exist := common.PorCoinDataMap[fmt.Sprintf("%s:%s", coin, v.Address)]; exist {
-			if balance == value.Balance {
+			if isCoinBalanceEqual(balance, value.Balance) {
 				log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", coin, v.Address, balance, value.Balance)
 			} else {
 				log.Infof("verify coin %s, address %s balance failed, in chain balance:%s, in por balance:%s", coin, v.Address, balance, value.Balance)
@@ -270,18 +231,14 @@ func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator
 
 func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 	for _, v := range common.PorCoinDataMap {
-		coinInfo, exist := common.PorCoinGeneralDataMap[v.Coin]
-		if !exist {
-			log.Errorf("unsupport the coin %s, please choose the correct one!", coin)
+		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(v.Coin), v.Address, v.SnapshotHeight)
+		if err != nil {
+			log.Errorf("get address %s balance from blockchain failed, error: %v", v.Address, err)
 			continue
 		}
-		height := coinInfo.SnapshotHeight
-		balance, err := validator.GetCoinAddressBalanceInfo(v.Coin, v.Address, height)
-		if err != nil {
-			log.Error(err)
-		}
+		balance = convertCoinBalanceToBaseUnit(coin, balance, -1)
 		// compare
-		if balance == v.Balance {
+		if isCoinBalanceEqual(balance, v.Balance) {
 			log.Infof("verify coin %s, address %s balance success, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, v.Balance)
 		} else {
 			log.Infof("verify coin %s, address %s balance failed, in chain balance: %s, in por balance: %s", v.Coin, v.Address, balance, v.Balance)
@@ -291,44 +248,117 @@ func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 }
 
 func VerifyCoinAddressTotalBalance(validator *common.AddressBalanceValidator, coin string) {
-	coinInfo, exist := common.PorCoinGeneralDataMap[coin]
-	if !exist {
-		log.Errorf("unsupport the coin %s, please choose the correct one!", coin)
-		return
-	}
-	height := coinInfo.SnapshotHeight
-	addressList := make([]string, 0)
+	totalBalance, totalPorBalance := decimal.NewFromInt(0), decimal.NewFromInt(0)
+	coinAddressListMap, coinSnapshotHeightMap := make(map[string][]string), make(map[string]string)
+	// get dest coins
+	destCoins := getDestCoinList(coin)
 	for _, value := range common.PorCoinDataMap {
-		if value.Coin == coin {
-			if value.Address == "" {
-				continue
-			}
+		for index := range destCoins {
+			if value.Coin == destCoins[index] {
+				if value.Address == "" {
+					continue
+				}
 
-			if coin == "btc" && value.Script == "" {
-				continue
-			}
+				if coin == "BTC" && value.Script == "" {
+					continue
+				}
 
-			addressList = append(addressList, value.Address)
+				if _, exist := coinAddressListMap[value.Coin]; exist {
+					coinAddressListMap[value.Coin] = append(coinAddressListMap[value.Coin], value.Address)
+				} else {
+					coinAddressListMap[value.Coin] = []string{value.Address}
+				}
+
+				if _, exist := coinSnapshotHeightMap[value.Coin]; !exist {
+					coinSnapshotHeightMap[value.Coin] = value.SnapshotHeight
+				}
+			}
 		}
 	}
 
-	totalBalance, err := validator.GetCoinAddressTotalBalance(coin, height, addressList)
-	if err != nil {
-		log.Errorf("get coin %s total address balance from blockchain failed, error: %v", coin, err)
-		return
+	for coinTemp, addressList := range coinAddressListMap {
+		height := coinSnapshotHeightMap[coinTemp]
+		if len(addressList) == 0 {
+			log.Errorf("no address to verify coin %s total balance", coin)
+			return
+		}
+		amount, err := validator.GetCoinAddressTotalBalance(strings.ToLower(coinTemp), height, addressList)
+		if err != nil {
+			log.Errorf("get coin %s total address balance from blockchain failed, error: %v", coin, err)
+			return
+		}
+		coinAmount, _ := decimal.NewFromString(amount)
+		// USDC-OKC20 precision is 18, convert to 6
+		if coinTemp == "USDC-OKC20" {
+			coinAmountDecimal, _ := decimal.NewFromString(convertCoinBalanceToBaseUnit(coinTemp, coinAmount.String(), -1))
+			totalBalance = totalBalance.Add(coinAmountDecimal.Mul(decimal.NewFromInt(1000000)))
+		} else {
+			totalBalance = totalBalance.Add(coinAmount)
+		}
+
+		porAmount := porCoinTotalBalance[coinTemp]
+		totalPorBalance = totalPorBalance.Add(porAmount)
+
+		log.Infof("coin %s, in chain balance: %s, in por balance: %s", coinTemp,
+			convertCoinBalanceToBaseUnit(coinTemp, coinAmount.String(), -1), porAmount.String())
 	}
+
+	// convert coin balance to base unit
+	toalBalance := convertCoinBalanceToBaseUnit(coin, totalBalance.String(), -1)
 	// compare
-	if totalBalance == coinInfo.Balance {
-		log.Infof("verify coin %s total address balance success, in chain balance: %s, in por balance: %s", coin, totalBalance, coinInfo.Balance)
+	if isCoinBalanceEqual(toalBalance, totalPorBalance.String()) {
+		log.Infof("verify coin %s total address balance success, in chain balance: %s, in por balance: %s", coin, toalBalance, totalPorBalance.String())
 	} else {
-		log.Infof("verify coin %s total address balance failed, in chain balance: %s, in por balance: %s", coin, totalBalance, coinInfo.Balance)
+		log.Infof("verify coin %s total address balance failed, in chain balance: %s, in por balance: %s", coin, toalBalance, totalPorBalance.String())
 	}
 }
 
 func VerifyAllCoinAddressTotalBalance(validator *common.AddressBalanceValidator) {
-	for _, value := range common.PorCoinGeneralDataMap {
-		VerifyCoinAddressTotalBalance(validator, value.Coin)
+	for coin := range porCoinTotalBalance {
+		VerifyCoinAddressTotalBalance(validator, coin)
 	}
+}
+
+func convertCoinBalanceToBaseUnit(coin, amount string, round int32) string {
+	precision, exist := common.PorCoinBaseUnitPrecisionMap[coin]
+	if !exist {
+		log.Errorf("coin %s not exist in base unit precision map", coin)
+		precision = 8
+	}
+	amountDecimal, _ := decimal.NewFromString(amount)
+	amountDecimal = amountDecimal.Div(decimal.NewFromInt(int64(math.Pow10(precision))))
+	if round < 0 {
+		return amountDecimal.String()
+	} else {
+		return amountDecimal.Round(round).String()
+	}
+}
+
+func isCoinBalanceEqual(amount01, amount02 string) bool {
+	amountDecimal01, _ := decimal.NewFromString(amount01)
+	amountDecimal02, _ := decimal.NewFromString(amount02)
+	return amountDecimal01.Equals(amountDecimal02)
+}
+
+func getDestCoinList(coin string) []string {
+	coinList := make([]string, 0)
+	destCoin := common.PorCoinUnitMap[strings.ToUpper(coin)]
+	if strings.ToUpper(coin) != destCoin {
+		coinList = append(coinList, coin)
+	} else {
+		for k, v := range common.PorCoinUnitMap {
+			if v == destCoin {
+				// check coin black list
+				if _, exist := common.CheckBalanceCoinBlackList[k]; exist {
+					log.Errorf("check balance not support the coin %s, ignore por total balance: %s", k, porCoinTotalBalance[k].String())
+					continue
+				}
+				coinList = append(coinList, k)
+			}
+		}
+	}
+
+	return coinList
 }
 
 func main() {

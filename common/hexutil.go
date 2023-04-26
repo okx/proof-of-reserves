@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/hex"
+	"golang.org/x/crypto/sha3"
 	"strconv"
 )
 
@@ -69,4 +70,10 @@ func mapError(err error) error {
 		return ErrOddLength
 	}
 	return err
+}
+
+func Sha256Hash(bytes []byte) []byte {
+	sha256 := sha3.New256()
+	sha256.Write(bytes)
+	return sha256.Sum(nil)
 }

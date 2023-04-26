@@ -294,17 +294,11 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 	balanceDecimal, _ := decimal.NewFromString(balanceStr)
 
 	if defaultUnit != "" {
-		coinNameList := strings.Split(pConf.Name, "-")
-		switch strings.ToLower(coinNameList[0]) {
-		case "btc":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 8))).String()
-		case "eth":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 18))).String()
-		case "usdt":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 6))).String()
-		default:
+		coinBaseUnit, exist := PorCoinBaseUnitPrecisionMap[strings.ToUpper(pConf.Name)]
+		if !exist {
 			log.Errorf("unsupport coin name %s in rpc json file.", pConf.Name)
 		}
+		result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, float64(coinBaseUnit)))).String()
 	} else {
 		result = balanceDecimal.String()
 	}
@@ -536,7 +530,7 @@ func (r *AddressBalanceValidator) DividedAddressList(addresses []interface{}, ch
 }
 
 func (r *AddressBalanceValidator) generateAddressDescriptor(coin, address string) (result string, err error) {
-	addrType := GuessAddressType(address)
+	addrType := GuessUtxoCoinAddressType(address)
 	if addrType == "" {
 		err = errors.New(fmt.Sprintf("coin:%s, invalid address %s", coin, address))
 		log.Error(err)
