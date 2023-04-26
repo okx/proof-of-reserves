@@ -323,15 +323,7 @@
         "authPassword": "",
         "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
         "enabled": false
-      },
-      "whiteList": [
-        {
-          "project": "comp",
-          "projectFullName": "compound",
-          "address": "0xb99cc7e10fe0acc68c50c7829f473d81e23249cc",
-          "tokenAddress": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9"
-        }
-      ]
+      }
     },
     {
       "name": "usdc-okc20",
@@ -339,7 +331,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "USDC",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xc946DAf81b08146B1C7A8Da2A851Ddf2B3EAaf85",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -469,7 +461,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKB",
         "tokenAddress": "0x75231f58b43240c9718dd58b4967c5114342a86c",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -495,7 +487,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xdF54B6c6195EA4d948D03bfD818D365cf175cFC2",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -521,7 +513,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xfA520efC34C81bfC1E3DD48b7fE9fF326049f986",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -547,7 +539,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0x3F8969Be2FC0770dCc174968e4B4ff146E0ACDaF",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -573,7 +565,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xaa27bADaa3C9ec9081b8f6C9cDd2bf375F143780",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -599,7 +591,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xabc732f6f69a519F6d508434481376B6221eb7d5",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -625,7 +617,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0x99970778E2715bBc9Cf8fb83D10dCBC2D2D551A3",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -651,7 +643,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xA715f624EB32c6C960b0E044B10CDe585d5f5984",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -677,7 +669,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0x59D226BB0a4d74274D4354EBb6a0E1A1Aa5175B6",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -703,7 +695,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0x18D103b7066AEedb6005B78A462Ef9027329b1EA",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -729,7 +721,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0xbeb67dE6cC5aF652b2d9B0235750eD70F5a2cB0D",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -755,7 +747,7 @@
       "api": {
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "okb",
+        "defaultUnit": "OKT",
         "tokenAddress": "0x00505505a7576d6734704FABB16f41924e3E384b",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
@@ -957,31 +949,6 @@
         "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
         "jsonPattern": "$.data[0].balance",
         "defaultUnit": "OPTIMISM",
-        "tokenAddress": "",
-        "customHeaders": {
-          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "*/*"
-        },
-        "enabled": true
-      },
-      "rpc": {
-        "endpoint": "",
-        "jsonPattern": "$.result",
-        "defaultUnit": "",
-        "authUser": "",
-        "authPassword": "",
-        "tokenAddress": "",
-        "enabled": false
-      }
-    },
-    {
-      "name": "elf",
-      "coin": "elf",
-      "api": {
-        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
-        "jsonPattern": "$.data[0].balance",
-        "defaultUnit": "FIL",
         "tokenAddress": "",
         "customHeaders": {
           "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
