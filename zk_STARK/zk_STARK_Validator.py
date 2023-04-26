@@ -1,6 +1,5 @@
 from mk_and_verify_proofs import verify_batch_proof, verify_trunk_proof, verify_single_inclusion_proof
 from constants import MODULUS, COINS
-import json
 import sys
 import re
 import os

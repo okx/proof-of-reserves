@@ -2,10 +2,6 @@
 # See https://vitalik.ca/general/2022/11/19/proof_of_solvency.html
 # It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value. 
 # This is a basic version of the solution.
-# Most of the modules used here including fft and fri etc. came from "../mimc_stark".
-
-# THIS IS EDUCATIONAL CODE, NOT PRODUCTION! HIRE A SECURITY AUDITOR
-# WHEN BUILDING SOMETHING FOR PRODUCTION USE.
 
 from permuted_tree import merkelize,keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
 from poly_utils import PrimeField
@@ -25,7 +21,7 @@ f = PrimeField(MODULUS)
 def mk_por_proof(ids, coins, uts, data_path):
     start_time = time.time()
 
-    # tranform data into the field, -1 => MODULUS -1
+    # tranform data into the field, -x => MODULUS -x
     transform_into_field(coins, MODULUS)
     assert is_a_power_of_2(uts) and uts <= MAX_UTS, "invalid uts"
 
@@ -183,7 +179,6 @@ def mk_por_proof(ids, coins, uts, data_path):
         prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)]
 
     save_data(data_path, sum_proof, mtree, sum_values, COINS)
-    # print("mk por proof in %.4f sec: " % (time.time() - start_time))
     return
 
 # sum_values: The sum values of each coin ant total coin that prover claimed
@@ -284,7 +279,5 @@ def verify_por_proof(sum_values, proof):
         # check correctness of the linear combination
         assert verify_l(k, x_to_the_steps, l_of_x, [t_of_x, b_of_x, id_of_x, tc_of_x[0], tc_of_x[2:], cc_of_x], tc_of_x[1], MODULUS)
 
-    # print('Verified %d consistency checks' % SPOT_CHECK_SECURITY_FACTOR)
-    # print('Verified sum proof in %.4f sec' % (time.time() - start_time))
     return True
 
