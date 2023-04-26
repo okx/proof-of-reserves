@@ -25,6 +25,11 @@ require (
 )
 
 require (
+	github.com/openweb3/go-rpc-provider v0.3.0 // indirect
+	github.com/sigurn/crc16 v0.0.0-20211026045750-20ab5afb07e3 // indirect
+)
+
+require (
 	github.com/Groestlcoin/go-groestl-hash v0.0.0-20181012171753-790653ac190c // indirect
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/dchest/blake256 v1.0.0 // indirect
