@@ -1,0 +1,27 @@
+{
+    "hash": "cd7b0c79c62f3c680cdd8e536604b7db1d6e7752dd1111ae4d778103adfec4b9",
+    "nodes": [
+        {
+            "balances": {
+                "BTC": "0.0000487",
+                "ETH": "0",
+                "USDT": "0"
+            },
+            "hash": "9efbc1a68c383bd8627b73d9a4be6fd552e5a61dc0afb6d217d26e558e96307c"
+        },
+        {
+            "balances": {
+                "BTC": "0.0000013",
+                "ETH": "0",
+                "USDT": "0"
+            },
+            "hash": "ea62bdc3456fd45f2bc49cbd9f076d8b5ecd6407090258e51c45c03c15c4b863"
+        }
+    ],
+    "nonce": "b6f6ea7584742839791ab923f4f1980d7ca3ff7c5d3f3fd9cc2a18c598503553",
+    "totalBalances": {
+        "BTC": "0.00005",
+        "ETH": "0",
+        "USDT": "0"
+    }
+}
