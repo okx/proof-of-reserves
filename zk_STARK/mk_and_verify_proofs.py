@@ -156,7 +156,10 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
     trunk_inclusion_proof["total_value"] = int.from_bytes(batch_entry_data[:32], 'big')
     j = 0
     for coin in COINS:
-        trunk_inclusion_proof[coin] = int.from_bytes(batch_entry_data[(j+1)*32:(j+2)*32], 'big')
+        value = int.from_bytes(batch_entry_data[(j+1)*32:(j+2)*32], 'big')
+        if value > MAX_USER_VALUE:
+            value = value - MODULUS
+        trunk_inclusion_proof[coin] = value
         j += 1
     trunk_inclusion_proof["random_number"] = str(batch_entry_data[len(batch_entry_data)-32:].hex())
     trunk_inclusion_proof["merkle_path"] = mk_branch(trunk_mtree, (UTS_FOR_TRUNK * (batch_index + 1) + UTS_FOR_TRUNK-2) * EXTENSION_FACTOR)
@@ -177,7 +180,10 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
         batch_inclusion_proof["total_value"] = int.from_bytes(user_entry_data[:32], 'big')
         j = 0
         for coin in COINS:
-            batch_inclusion_proof[coin] = int.from_bytes(user_entry_data[(j+1)*32:(j+2)*32], 'big')
+            value = int.from_bytes(user_entry_data[(j+1)*32:(j+2)*32], 'big')
+            if value > MAX_USER_VALUE:
+                value = value - MODULUS
+            batch_inclusion_proof[coin] = value
             j += 1
         batch_inclusion_proof["random_number"] = str(user_entry_data[len(user_entry_data)-32:].hex())
         batch_inclusion_proof["user_index"] = i
@@ -225,7 +231,8 @@ def verify_single_inclusion_proof(proof_file):
         j = 0
         temp = b''
         for coin in COINS:
-            temp = temp + batch_inclusion_proof[coin].to_bytes(32, 'big')
+            value = batch_inclusion_proof[coin] % MODULUS
+            temp = temp + value.to_bytes(32, 'big')
             j += 1
         user_entry = user_entry + keccak_256(temp) + bytes.fromhex(batch_inclusion_proof["user_id"]) + bytes.fromhex(batch_inclusion_proof["random_number"])
         assert user_leaf == keccak_256(user_entry)
@@ -236,7 +243,8 @@ def verify_single_inclusion_proof(proof_file):
         j = 0
         temp = b''
         for coin in COINS:
-            temp = temp + trunk_inclusion_proof[coin].to_bytes(32, 'big')
+            value = trunk_inclusion_proof[coin] % MODULUS
+            temp = temp + value.to_bytes(32, 'big')
             j += 1
         batch_entry = batch_entry + keccak_256(temp) + bytes.fromhex(trunk_inclusion_proof["batch_id"]) + bytes.fromhex(trunk_inclusion_proof["random_number"])
         assert batch_leaf == keccak_256(batch_entry)

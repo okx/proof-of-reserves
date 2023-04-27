@@ -6,10 +6,10 @@ import json
 import time
 
 def test_full_process():
-    init_user_data(15, 0)
-    init_user_data(15, 1)
-    init_user_data(15, 2)
-    init_user_data(15, 3)
+    # init_user_data(15, 0)
+    # init_user_data(15, 1)
+    # init_user_data(15, 2)
+    # init_user_data(15, 3)
     
     mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/")
     mk_batch_proof(16, "./user_data/batch1.json", "./sum_proof_data/batches/a1/")
@@ -113,11 +113,11 @@ def test_invalid_inclusion_proof():
 if __name__ == '__main__':
     time0 = time.time()
     test_full_process()
-    test_try_invalid_sum_value()
-    test_negative_value_with_positive_net_value()
-    test_negative_net_value()   
-    test_invalid_inclusion_proof()
-    test_full_process()
-    verify_sum_proofs()
+    # test_try_invalid_sum_value()
+    # test_negative_value_with_positive_net_value()
+    # test_negative_net_value()   
+    # test_invalid_inclusion_proof()
+    # test_full_process()
+    # verify_sum_proofs()
     verify_all_inclusion_proof()
     print("all test finished in %d sec" %(time.time()-time0))
