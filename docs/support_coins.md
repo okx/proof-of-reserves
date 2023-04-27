@@ -9,7 +9,6 @@
 | BTC      | Bitcoin   |
 | ETH      | Ethereum  |
 | ETH      | Arbitrum  |
-| ETH      | Arbitrum  |
 | ETH      | Optimism  |
 | USDT     | Ethereum  |
 | USDT     | Tron      |
@@ -43,7 +42,6 @@
 |--------|------------------|
 | BTC    | Bitcoin          |
 | ETH    | Ethereum         |
-| ETH    | Arbitrum         |
 | ETH    | Arbitrum         |
 | ETH    | Optimism         |
 | USDT   | Ethereum         |
