@@ -54,7 +54,7 @@
 | USDT   | Optimism         |
 | USDC   | Ethereum         |
 | USDC   | OKC              |
-| USDT   | Tron             |
+| USDC   | Tron             |
 | USDC   | Polygon          |
 | USDC   | Avalanche        |
 | USDC   | Arbitrum         |
