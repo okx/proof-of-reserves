@@ -96,7 +96,7 @@ def test_negative_net_value():
 def test_invalid_inclusion_proof():
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "r") as ff:
         inclusion_proof_json = json.load(ff)  
-        inclusion_proof_json["batch_inclusion_proof"]["total_value"] += 1
+        inclusion_proof_json["batch_inclusion_proof"]["total_value"] = str(int(inclusion_proof_json["batch_inclusion_proof"]["total_value"]) + 1)
         
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "w") as ff:
         json.dump(inclusion_proof_json, ff)
@@ -113,11 +113,11 @@ def test_invalid_inclusion_proof():
 if __name__ == '__main__':
     time0 = time.time()
     test_full_process()
-    # test_try_invalid_sum_value()
-    # test_negative_value_with_positive_net_value()
-    # test_negative_net_value()   
-    # test_invalid_inclusion_proof()
-    # test_full_process()
-    # verify_sum_proofs()
+    test_try_invalid_sum_value()
+    test_negative_value_with_positive_net_value()
+    test_negative_net_value()   
+    test_invalid_inclusion_proof()
+    test_full_process()
+    verify_sum_proofs()
     verify_all_inclusion_proof()
     print("all test finished in %d sec" %(time.time()-time0))
