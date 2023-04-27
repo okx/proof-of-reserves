@@ -6,10 +6,10 @@ import json
 import time
 
 def test_full_process():
-    init_user_data(15, 0)
-    init_user_data(15, 1)
-    init_user_data(15, 2)
-    init_user_data(15, 3)
+    # init_user_data(15, 0)
+    # init_user_data(15, 1)
+    # init_user_data(15, 2)
+    # init_user_data(15, 3)
     
     mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/")
     mk_batch_proof(16, "./user_data/batch1.json", "./sum_proof_data/batches/a1/")
@@ -96,7 +96,7 @@ def test_negative_net_value():
 def test_invalid_inclusion_proof():
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "r") as ff:
         inclusion_proof_json = json.load(ff)  
-        inclusion_proof_json["batch_inclusion_proof"]["total_value"] += 1
+        inclusion_proof_json["batch_inclusion_proof"]["total_value"] = str(int(inclusion_proof_json["batch_inclusion_proof"]["total_value"]) + 1)
         
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "w") as ff:
         json.dump(inclusion_proof_json, ff)

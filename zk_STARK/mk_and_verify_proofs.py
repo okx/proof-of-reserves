@@ -153,10 +153,13 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
     trunk_inclusion_proof = {}
     trunk_inclusion_proof["trunk_mtree_root"] = trunk_mtree[1]
     trunk_inclusion_proof["batch_id"] = str(batch_entry_data[(coin_num+1)*32:(coin_num+2)*32].hex())
-    trunk_inclusion_proof["total_value"] = int.from_bytes(batch_entry_data[:32], 'big')
+    trunk_inclusion_proof["total_value"] = str(int.from_bytes(batch_entry_data[:32], 'big'))
     j = 0
     for coin in COINS:
-        trunk_inclusion_proof[coin] = int.from_bytes(batch_entry_data[(j+1)*32:(j+2)*32], 'big')
+        value = int.from_bytes(batch_entry_data[(j+1)*32:(j+2)*32], 'big')
+        if value > MAX_USER_VALUE:
+            value = value - MODULUS
+        trunk_inclusion_proof[coin] = str(value)
         j += 1
     trunk_inclusion_proof["random_number"] = str(batch_entry_data[len(batch_entry_data)-32:].hex())
     trunk_inclusion_proof["merkle_path"] = mk_branch(trunk_mtree, (UTS_FOR_TRUNK * (batch_index + 1) + UTS_FOR_TRUNK-2) * EXTENSION_FACTOR)
@@ -174,10 +177,13 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
         batch_inclusion_proof = {}
         batch_inclusion_proof["batch_mtree_root"] = batch_mtree[1]
         batch_inclusion_proof["user_id"] = str(user_entry_data[(coin_num+1)*32:(coin_num+2)*32].hex())
-        batch_inclusion_proof["total_value"] = int.from_bytes(user_entry_data[:32], 'big')
+        batch_inclusion_proof["total_value"] = str(int.from_bytes(user_entry_data[:32], 'big'))
         j = 0
         for coin in COINS:
-            batch_inclusion_proof[coin] = int.from_bytes(user_entry_data[(j+1)*32:(j+2)*32], 'big')
+            value = int.from_bytes(user_entry_data[(j+1)*32:(j+2)*32], 'big')
+            if value > MAX_USER_VALUE:
+                value = value - MODULUS
+            batch_inclusion_proof[coin] = str(value)
             j += 1
         batch_inclusion_proof["random_number"] = str(user_entry_data[len(user_entry_data)-32:].hex())
         batch_inclusion_proof["user_index"] = i
@@ -221,22 +227,24 @@ def verify_single_inclusion_proof(proof_file):
         user_index = batch_inclusion_proof["user_index"]
         uts = batch_inclusion_proof["uts"]
         user_leaf = verify_branch(bytes.fromhex(batch_inclusion_proof["batch_mtree_root"]), (uts * (user_index + 1) + uts-2) * EXTENSION_FACTOR, hex_array_to_bytes(batch_inclusion_proof["merkle_path"]))
-        user_entry = batch_inclusion_proof["total_value"].to_bytes(32, 'big')
+        user_entry = int(batch_inclusion_proof["total_value"]).to_bytes(32, 'big')
         j = 0
         temp = b''
         for coin in COINS:
-            temp = temp + batch_inclusion_proof[coin].to_bytes(32, 'big')
+            value = int(batch_inclusion_proof[coin]) % MODULUS
+            temp = temp + value.to_bytes(32, 'big')
             j += 1
         user_entry = user_entry + keccak_256(temp) + bytes.fromhex(batch_inclusion_proof["user_id"]) + bytes.fromhex(batch_inclusion_proof["random_number"])
         assert user_leaf == keccak_256(user_entry)
 
         trunk_inclusion_proof = inclusion_proof["trunk_inclusion_proof"]
         batch_leaf = verify_branch(bytes.fromhex(trunk_inclusion_proof["trunk_mtree_root"]), (UTS_FOR_TRUNK * (batch_index + 1) + UTS_FOR_TRUNK-2) * EXTENSION_FACTOR, hex_array_to_bytes(trunk_inclusion_proof["merkle_path"]))
-        batch_entry = trunk_inclusion_proof["total_value"].to_bytes(32, 'big')
+        batch_entry = int(trunk_inclusion_proof["total_value"]).to_bytes(32, 'big')
         j = 0
         temp = b''
         for coin in COINS:
-            temp = temp + trunk_inclusion_proof[coin].to_bytes(32, 'big')
+            value = int(trunk_inclusion_proof[coin]) % MODULUS
+            temp = temp + value.to_bytes(32, 'big')
             j += 1
         batch_entry = batch_entry + keccak_256(temp) + bytes.fromhex(trunk_inclusion_proof["batch_id"]) + bytes.fromhex(trunk_inclusion_proof["random_number"])
         assert batch_leaf == keccak_256(batch_entry)
