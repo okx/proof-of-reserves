@@ -233,6 +233,10 @@ func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator
 
 func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 	for _, v := range common.PorCoinDataMap {
+		// check coin black list
+		if _, exist := common.CheckBalanceCoinBlackList[v.Coin]; exist {
+			continue
+		}
 		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(v.Coin), v.Address, v.SnapshotHeight)
 		if err != nil {
 			log.Errorf("get address %s balance from blockchain failed, error: %v", v.Address, err)
