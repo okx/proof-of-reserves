@@ -105,7 +105,7 @@ func CoinAddressBalanceValidator(cmd *cobra.Command, args []string) {
 			return
 		}
 		// coin black list
-		if _, exist := common.CheckBalanceCoinBlackList[coin]; exist {
+		if common.IsCheckBalanceBannedCoin(coin) {
 			log.Errorf("check balance not support the coin %s, please set the correct one!", coin)
 			return
 		}
@@ -234,7 +234,7 @@ func VerifySingleCoinAllAddressBalance(validator *common.AddressBalanceValidator
 func VerifyAllCoinAddressBalance(validator *common.AddressBalanceValidator) {
 	for _, v := range common.PorCoinDataMap {
 		// check coin black list
-		if _, exist := common.CheckBalanceCoinBlackList[v.Coin]; exist {
+		if common.IsCheckBalanceBannedCoin(coin) {
 			continue
 		}
 		balance, err := validator.GetCoinAddressBalanceInfo(strings.ToLower(v.Coin), v.Address, v.SnapshotHeight)
@@ -355,7 +355,7 @@ func getDestCoinList(coin string) []string {
 		for k, v := range common.PorCoinUnitMap {
 			if v == destCoin {
 				// check coin black list
-				if _, exist := common.CheckBalanceCoinBlackList[k]; exist {
+				if common.IsCheckBalanceBannedCoin(k) {
 					log.Errorf("check balance not support the coin %s, ignore por total balance: %s", k, porCoinTotalBalance[k].String())
 					continue
 				}

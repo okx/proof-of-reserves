@@ -62,7 +62,7 @@ func handle(i int, line string) (string, bool) {
 		coinTotalBalance[totalCoin] = val
 	}
 
-	if coin == "EOS" || coin == "RIPPLE" {
+	if common.IsVerifyAddressBannedCoin(coin) {
 		return coin, true
 	}
 
@@ -146,10 +146,19 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 			continue
 		}
 		coin, ok := handle(count, strings.TrimSpace(temp))
-		// not stats EOS and RIPPLE
-		if coin == "EOS" || coin == "RIPPLE" {
+
+		if common.IsVerifyAddressBannedCoin(coin) {
 			continue
 		}
+
+		if _, exist := fail[coin]; !exist {
+			fail[coin] = 0
+		}
+
+		if _, exist := success[coin]; !exist {
+			success[coin] = 0
+		}
+
 		if !ok {
 			fail[coin]++
 		} else {

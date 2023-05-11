@@ -970,6 +970,32 @@
         "tokenAddress": "",
         "enabled": false
       }
+    },
+    {
+      "name": "usdt-okc20",
+      "coin": "okc",
+      "api": {
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "OKT",
+        "tokenAddress": "0x382bB369d343125BfB2117af9c149795C6C65C50",
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "*/*"
+        },
+        "enabled": true
+      },
+      "rpc": {
+        "endpoint": "",
+        "jsonPattern": "$.result",
+        "defaultUnit": "",
+        "customHeaders": {},
+        "authUser": "",
+        "authPassword": "",
+        "tokenAddress": "0x382bB369d343125BfB2117af9c149795C6C65C50",
+        "enabled": false
+      }
     }
   ]
 }

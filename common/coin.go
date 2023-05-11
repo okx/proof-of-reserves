@@ -8,6 +8,7 @@ const (
 
 	TrxCoinType  = "TRX"
 	BethCoinType = "BETH"
+	AlgoCoinType = "ALGO"
 
 	BtcMessageSignatureHeader  = "Bitcoin Signed Message:\n"
 	LtcMessageSignatureHeader  = "Litecoin Signed Message:\n"
@@ -53,6 +54,7 @@ var (
 		"USDT-AVAXC":     "ETH",
 		"USDT-ARBITRUM":  "ETH",
 		"USDT-OPTIMISM":  "ETH",
+		"USDT-OKC20":     "ETH",
 		"USDC":           "ETH",
 		"POLY-USDC":      "ETH",
 		"USDC-AVAXC":     "ETH",
@@ -103,6 +105,9 @@ var (
 		"APTOS":       "APTOS",
 		"TONCOIN-NEW": "TON",
 		"DOT":         "DOT",
+
+		// ALGO
+		"USDT-ALGO": "ALGO",
 	}
 
 	PorCoinTypeMap = map[string]string{
@@ -175,12 +180,16 @@ var (
 		"LINKK-OKC20":    EcdsaCoinType,
 		"TRXK-KIP20":     EcdsaCoinType,
 		"OKT":            EcdsaCoinType,
+		"USDT-OKC20":     EcdsaCoinType,
 
 		// ED25519
 		"SOL":         Ed25519CoinType,
 		"APTOS":       Ed25519CoinType,
 		"TONCOIN-NEW": Ed25519CoinType,
 		"DOT":         Ed25519CoinType,
+
+		// ALGO
+		"USDT-ALGO": AlgoCoinType,
 	}
 
 	PorCoinMessageSignatureHeaderMap = map[string]string{
@@ -253,12 +262,16 @@ var (
 		"LINKK-OKC20":    OKXMessageSignatureHeader,
 		"TRXK-KIP20":     OKXMessageSignatureHeader,
 		"OKT":            OKXMessageSignatureHeader,
+		"USDT-OKC20":     OKXMessageSignatureHeader,
 
 		// ED25519
 		"SOL":         OKXMessageSignatureHeader,
 		"APTOS":       OKXMessageSignatureHeader,
 		"TONCOIN-NEW": OKXMessageSignatureHeader,
 		"DOT":         OKXMessageSignatureHeader,
+
+		// ALGO
+		"USDT-ALGO": OKXMessageSignatureHeader,
 	}
 
 	PorCoinUnitMap = map[string]string{
@@ -288,6 +301,7 @@ var (
 		"USDT-AVAXC":     "USDT",
 		"USDT-ARBITRUM":  "USDT",
 		"USDT-OPTIMISM":  "USDT",
+		"USDT-OKC20":     "USDT",
 		"USDC":           "USDC",
 		"POLY-USDC":      "USDC",
 		"USDC-AVAXC":     "USDC",
@@ -342,6 +356,9 @@ var (
 		// EOS
 		"EOS":    "EOS",
 		"RIPPLE": "RIPPLE",
+
+		// ALGO
+		"USDT-ALGO": "USDT",
 	}
 
 	PorCoinBaseUnitPrecisionMap = map[string]int{
@@ -371,6 +388,7 @@ var (
 		"USDT-AVAXC":     6,
 		"USDT-ARBITRUM":  6,
 		"USDT-OPTIMISM":  6,
+		"USDT-OKC20":     18,
 		"USDC":           6,
 		"POLY-USDC":      6,
 		"USDC-AVAXC":     6,
@@ -425,6 +443,9 @@ var (
 		// EOS
 		"EOS":    4,
 		"RIPPLE": 6,
+
+		// ALGO
+		"USDT-ALGO": 6,
 	}
 
 	CheckBalanceCoinBlackList = map[string]bool{
@@ -448,5 +469,21 @@ var (
 
 		"EOS":    true,
 		"RIPPLE": true,
+
+		"USDT-ALGO": true,
+	}
+
+	VerifyAddressCoinBlackList = map[string]bool{
+		"EOS":       true,
+		"RIPPLE":    true,
+		"USDT-ALGO": true,
 	}
 )
+
+func IsCheckBalanceBannedCoin(coin string) bool {
+	return CheckBalanceCoinBlackList[coin]
+}
+
+func IsVerifyAddressBannedCoin(coin string) bool {
+	return VerifyAddressCoinBlackList[coin]
+}
