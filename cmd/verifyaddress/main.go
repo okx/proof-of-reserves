@@ -3,18 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/btcsuite/btcd/btcutil"
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/txscript"
 	"github.com/okx/proof-of-reserves/common"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"io"
-	"math/big"
 	"os"
 	"strings"
 )
 
-var cfgFile, csvFileName string
+var (
+	cfgFile, csvFileName string
+	coinTotalBalance     = make(map[string]decimal.Decimal)
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "AddressVerify",
@@ -22,9 +22,6 @@ var rootCmd = &cobra.Command{
 	Long:  ``,
 	Run:   AddressVerify,
 }
-var (
-	zero = big.NewInt(0)
-)
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -40,111 +37,71 @@ func init() {
 
 func initConfig() {}
 
-var (
-	coinMap = map[string]string{"USDT-ERC20": "ETH", "USDT-TRC20": "TRX", "USDT-OMNI": "BTC", "BTC": "BTC", "ETH": "ETH",
-		"USDT-POLY": "ETH", "USDT-AVAXC": "ETH", "USDT-ARBITRUM": "ETH", "ETH-ARBITRUM": "ETH", "ETH-OPTIMISM": "ETH", "USDT-OPTIMISM": "ETH"}
-)
-
-func divideInt(coin string, i *big.Int) *big.Int {
-	switch {
-	case strings.HasPrefix(coin, "ETH"):
-		return i.Div(i, big.NewInt(1e18))
-	case strings.HasPrefix(coin, "USDT"):
-		return i.Div(i, big.NewInt(1e6))
-	case coin == "BTC":
-		return i.Div(i, big.NewInt(1e8))
-	default:
-		panic("未知")
-
-	}
-}
-
-func handle(i int, line string) (string, *big.Int, bool) {
+func handle(i int, line string) (string, bool) {
 	if len(line) == 0 {
-		return "", zero, true
+		return "", true
 	}
 	as := strings.Split(line, ",")
-	coin, addr, balance, message, sign1, sign2, script := as[0], as[1], as[2], as[3], as[4], as[5], as[6]
-	v := big.NewInt(0)
-	val, ok := v.SetString(balance, 10)
-	if !ok {
+	coin, addr, balance, message, sign1, sign2, script := as[0], as[3], as[4], as[5], as[6], as[7], as[8]
+	val, err := decimal.NewFromString(balance)
+	if err != nil {
 		fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has invalid balance number.", i+1))
-		return coin, zero, false
+		return coin, false
 	}
-	switch coinMap[coin] {
-	case "ETH":
-		if err := common.VerifyETH(addr, message, sign1); err != nil {
-			fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-			return coin, zero, false
+
+	coin = strings.ToUpper(coin)
+	totalCoin, exist := common.PorCoinUnitMap[coin]
+	if !exist {
+		fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has invalid coin name, %s", i+1, coin))
+		return coin, false
+	}
+	_, exist = coinTotalBalance[totalCoin]
+	if exist {
+		coinTotalBalance[totalCoin] = coinTotalBalance[totalCoin].Add(val)
+	} else {
+		coinTotalBalance[totalCoin] = val
+	}
+
+	if coin == "EOS" || coin == "RIPPLE" {
+		return coin, true
+	}
+
+	switch common.PorCoinTypeMap[coin] {
+	case common.EvmCoinTye:
+		if err := common.VerifyEvmCoin(coin, addr, message, sign1); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
 		}
-	case "SOL":
-		if err := common.VerifySol(addr, message, sign1); err != nil {
-			fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-			return coin, zero, false
+	case common.EcdsaCoinType:
+		if err := common.VerifyEcdsaCoin(coin, addr, message, sign1); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
 		}
-	case "TRX":
+	case common.Ed25519CoinType:
+		if err := common.VerifyEd25519Coin(coin, addr, message, sign1, script); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
+		}
+	case common.TrxCoinType:
 		if err := common.VerifyTRX(addr, message, sign1); err != nil {
-			fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-			return coin, zero, false
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
 		}
-	case "BTC":
-		if len(sign2) == 0 || sign2 == "null" {
-			if err := common.VerifyBTC(addr, message, sign1); err != nil {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-		} else if strings.HasPrefix(addr, "bc1") {
-			if !common.VerifyBTCWitness(addr, message, script, sign1, sign2) {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error.", i+1))
-				return coin, zero, false
-			}
-		} else {
-			addrPub, err := btcutil.NewAddressScriptHash(common.MustDecode(script), &chaincfg.MainNetParams)
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			if addrPub.EncodeAddress() != addr {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			addr1, err := common.SigToAddrBTC(message, sign1)
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			addr2, err := common.SigToAddrBTC(message, sign2)
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			typ, addrs, _, err := txscript.ExtractPkScriptAddrs(common.MustDecode(script), &chaincfg.MainNetParams)
-			if typ != txscript.MultiSigTy {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			if err != nil {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has error:%s.", i+1, err))
-				return coin, zero, false
-			}
-			if len(addrs) != 3 {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has invalid address.", i+1))
-				return coin, zero, false
-			}
-			m := map[string]struct{}{addr1: {}, addr: {}, addr2: {}}
-			for _, v := range addrs {
-				delete(m, v.EncodeAddress())
-			}
-			if len(m) > 1 {
-				fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has invalid address.", i+1))
-				return coin, zero, false
-			}
+	case common.BethCoinType:
+		if err := common.VerifyBETH(addr, message, sign1); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
+		}
+	case common.UTXOCoinType:
+		if err := common.VerifyUtxoCoin(coin, addr, message, sign1, sign2, script); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
 		}
 	default:
-		fmt.Println("Fail to verify address signature,invalid coin type.")
-		return coin, zero, false
+		fmt.Println(fmt.Sprintf("Fail to verify address %s signature. Invaild coin type:%s", addr, coin))
+		return coin, false
 	}
-	return coin, val, true
+	return coin, true
 }
 
 func AddressVerify(cmd *cobra.Command, args []string) {
@@ -157,7 +114,6 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 		return
 	}
 	buf := bufio.NewReader(f)
-	btc, eth, usdt := big.NewInt(0), big.NewInt(0), big.NewInt(0)
 	count, lineSize, flag := 0, 0, 2
 	success, fail := make(map[string]uint64), make(map[string]uint64)
 	for {
@@ -180,7 +136,7 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 		}
 		as := strings.Split(temp, ",")
 		if flag > 1 {
-			fmt.Println(fmt.Sprintf("%s 's height is %s and total balance is %s.", as[0], as[1], as[2]))
+			fmt.Println(fmt.Sprintf("%s's total balance is %s.", as[0], as[1]))
 		}
 
 		if flag > 0 {
@@ -189,19 +145,15 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 			}
 			continue
 		}
-		coin, val, ok := handle(count, strings.TrimSpace(temp))
+		coin, ok := handle(count, strings.TrimSpace(temp))
+		// not stats EOS and RIPPLE
+		if coin == "EOS" || coin == "RIPPLE" {
+			continue
+		}
 		if !ok {
 			fail[coin]++
 		} else {
 			success[coin]++
-		}
-
-		if strings.HasPrefix(coin, "USDT") {
-			usdt = usdt.Add(usdt, val)
-		} else if strings.HasPrefix(coin, "ETH") {
-			eth = eth.Add(eth, val)
-		} else if coin == "BTC" {
-			btc = btc.Add(btc, val)
 		}
 		count++
 	}
@@ -211,7 +163,13 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	for k, v := range success {
 		fmt.Println(fmt.Sprintf("%s  %d accoounts, %d verified, %d failed", k, v+fail[k], v, fail[k]))
 	}
-	fmt.Println(fmt.Sprintf("Total balance :BTC %s,ETH(ALL) %s,USDT(ALL):%s", divideInt("BTC", btc).String(), divideInt("ETH", eth).String(), divideInt("USDT", usdt).String()))
+
+	coinTotalBalanceResult := make([]string, 0)
+	for coin, balance := range coinTotalBalance {
+		coinTotalBalanceResult = append(coinTotalBalanceResult, fmt.Sprintf("%s(%s)", coin, balance.Round(2).String()))
+	}
+	fmt.Printf("Total balance: [%s]\n", strings.Join(coinTotalBalanceResult, ","))
+
 	if len(fail) == 0 {
 		fmt.Println("Verify address signature end, all address passed")
 	}
