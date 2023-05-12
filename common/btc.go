@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	secp_ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
-	"regexp"
 	"strings"
 )
 
@@ -40,33 +39,8 @@ func CreateAddressDescriptor(addrType, redeemScript string, mSigns, nKeys int) (
 	return descriptor, nil
 }
 
-func GuessAddressType(address string) string {
-	match1, _ := regexp.MatchString("^[1-9A-Za-z]{26,35}$", address)
-	if match1 {
-		if address[0:1] == "1" {
-			return "P2PKH"
-		}
-		if address[0:1] == "3" {
-			return "P2SH"
-		}
-	}
-	if len(address) == 40 {
-		return "P2WPKH"
-	}
-
-	if len(address) == 64 {
-		return "P2WSH"
-	}
-	match2, _ := regexp.MatchString("^bc1[0-9a-zA-Z]{11,71}$", strings.ToLower(address))
-	if match2 {
-		return "P2WSH"
-	}
-
-	return ""
-}
-
 func RecoveryPubKeyFromSign(address, msg, sign string) (pubKey string) {
-	hash := HashBTCMsg(msg)
+	hash := HashUtxoCoinTypeMsg(BtcMessageSignatureHeader, msg)
 	b, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
 		return ""

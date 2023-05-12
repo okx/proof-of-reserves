@@ -3,7 +3,7 @@ logs/
 por_test.csv
 por_test_*.csv
 userPathJson-*
-okx_por_*.csv
+*_por_*.csv
 *_address_balance.csv
 venv/
 origin/
