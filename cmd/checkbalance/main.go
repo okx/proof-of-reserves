@@ -356,8 +356,10 @@ func getDestCoinList(coin string) []string {
 			if v == destCoin {
 				// check coin black list
 				if common.IsCheckBalanceBannedCoin(k) {
-					log.Errorf("check balance not support the coin %s, ignore por total balance: %s", k, porCoinTotalBalance[k].String())
-					continue
+					if _, exist := porCoinTotalBalance[k]; exist {
+						log.Errorf("check balance not support the coin %s, ignore por total balance: %s", k, porCoinTotalBalance[k].String())
+						continue
+					}
 				}
 				coinList = append(coinList, k)
 			}
