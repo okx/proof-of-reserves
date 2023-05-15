@@ -138,7 +138,7 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 	if pConf.RPC.Enabled {
 		// get address balance from white list
 		// the address in white list doesn't support node RPC query, if RPC config enable, return the balance in por data.
-		key := fmt.Sprintf("%s:%s", pConf.Name, address)
+		key := fmt.Sprintf("%s:%s", strings.ToUpper(pConf.Name), address)
 		if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
 			log.Infof("notice: the address %s in project %s doesn't support node rpc method to query, "+
 				"if rpc config enable, return the balance in por data.", address, r.confCoinAddressWhiteListMap[key].ProjectFullName)
@@ -339,7 +339,7 @@ func (r *AddressBalanceValidator) GetCoinAddressTotalBalance(coin, height string
 			for _, item := range items {
 				address := item.(string)
 				// ignore white list address
-				key := fmt.Sprintf("%s:%s", pConf.Name, address)
+				key := fmt.Sprintf("%s:%s", strings.ToUpper(pConf.Name), address)
 				if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
 					log.Infof("notice: the address %s in project %s doesn't support node rpc method to query, "+
 						"if rpc config enable, return the balance in por data", address, r.confCoinAddressWhiteListMap[key].ProjectFullName)
@@ -537,7 +537,7 @@ func (r *AddressBalanceValidator) generateAddressDescriptor(coin, address string
 		return result, err
 	}
 	var redeemScript string
-	if value, exist := PorCoinDataMap[fmt.Sprintf("%s:%s", coin, address)]; exist {
+	if value, exist := PorCoinDataMap[fmt.Sprintf("%s:%s", strings.ToUpper(coin), address)]; exist {
 		redeemScript = value.Script
 	} else {
 		err = errors.New(fmt.Sprintf("coin:%s, por data not support the address %s", coin, address))
