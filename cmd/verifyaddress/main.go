@@ -169,8 +169,12 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	if count == 0 {
 		fmt.Println("Verify address signature end.The file is empty.")
 	}
+	var allPass = true
 	for k, v := range success {
 		fmt.Println(fmt.Sprintf("%s  %d accoounts, %d verified, %d failed", k, v+fail[k], v, fail[k]))
+		if fail[k] != 0 {
+			allPass = false
+		}
 	}
 
 	coinTotalBalanceResult := make([]string, 0)
@@ -179,7 +183,7 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	}
 	fmt.Printf("Total balance: [%s]\n", strings.Join(coinTotalBalanceResult, ","))
 
-	if len(fail) == 0 {
+	if allPass {
 		fmt.Println("Verify address signature end, all address passed")
 	}
 }
