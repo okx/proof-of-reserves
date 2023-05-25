@@ -1,8 +1,8 @@
-# Verify OKCoin Wallet Reserve Address Balance
+# Verify OKX Wallet Reserve Address Balance
 
-You can verify OKCoin Wallet Reserve Address Balance with the following steps:
-1. Compare the address balance of a specific crypto chain at the snapshot height with the address balance in the snapshot file published by OKCoin to verify whether they are consistent.
-2. Compare the sum of address balances of a specific crypto chain at the snapshot height with the sum of address balances in the snapshot file published by OKCoin to verify whether they are consistent.
+You can verify OKX Wallet Reserve Address Balance with the following steps:
+1. Compare the address balance of a specific crypto chain at the snapshot height with the address balance in the snapshot file published by OKX to verify whether they are consistent.
+2. Compare the sum of address balances of a specific crypto chain at the snapshot height with the sum of address balances in the snapshot file published by OKX to verify whether they are consistent.
 
 When querying the address balance at the height of the snapshot, you can configure node rpc for balance query, or configure OKLink's open API for balance query. The following is a detailed step-by-step description.
 
@@ -21,8 +21,8 @@ There is an rpc.json configuration file in the binary zip and in the source code
     "jsonPattern": "$.result.total_amount",
     "defaultUnit": "BTC",                       // display unit
     "customHeaders": {},
-    "authUser": "OKCoin",                       // rpcuser
-    "authPassword": "OKCoinWallet",             // rpcpassword
+    "authUser": "OKX",                          // rpcuser
+    "authPassword": "OKXWallet",                // rpcpassword
     "tokenAddress": "",                         // token contract address
     "enabled": true                             // this configuration switch enables node queries
 }
@@ -75,10 +75,10 @@ Once you have obtained the executable and snapshot file and configured rpc.json,
 
 ```bash
 # Verify single address balance
-./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okcoin_por_20221122.csv
+./CheckBalance --mode="single_address" --coin_name="btc" --address="3A1JRKqfGGxoq2qSHLv85u4zn935VR9ToL" --por_csv_filename=okx_por_20221122.csv
 
 # Verify the total of all address balances
-./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okcoin_por_20221122.csv
+./CheckBalance --mode="single_coin_total_balance" --coin_name="btc" --por_csv_filename=okx_por_20221122.csv
 
 ```
 
@@ -88,20 +88,20 @@ Running the above command will output the balance data on the chain, and you can
 
 ### Prepare Bitcoin Core Node
 
-Install the Bitcoin Core client, synchronize to the latest height, and then roll back the block to the height of the OKCoin snapshot.
+Install the Bitcoin Core client, synchronize to the latest height, and then roll back the block to the height of the OKX snapshot.
 
 1. You can download Bitcoin Core here: <https://bitcoincore.org/en/download/> , Please download version 0.21 or later.
 2. You need to edit the configuration file of Bitcoin Core, in order to visit RPC node. Create ~/.bitcoin/bitcoin.conf file and open it with an editor or run the command of `vi ~/.bitcoin/bitcoin.conf`, edit
 
     ```bash
     server=1
-    rpcuser=OKCoin
-    rpcpassword=OKCoinWallet
+    rpcuser=OKX
+    rpcpassword=OKXWallet
     ```
 
 3. Enter the bin directory, run `./bitcoind` command, and start the node.
 4. Wait for the node to synchronize to the latest height, it will take about 12 hours.
-5. After synchronizing to the latest height, you need to roll back the node to the OKCoin snapshot height to query the balance of the snapshot height. The steps are as follows:
+5. After synchronizing to the latest height, you need to roll back the node to the OKX snapshot height to query the balance of the snapshot height. The steps are as follows:
     1. Go to the BTC browser to query the block hash of the next height of the snapshot height, copy this block hash and fill in the hash value part of the command below.
     2. Run `./bitcoin-cli invalidateblock 00000000000000000005829017993a7a21e4b7c731c95b9cb979c01294a7bd27` command.
     3. Wait for the node to roll back to the snapshot height, you can run `./bitcoin-cli getblockcount` command to check whether the roll back is complete, you can also view the node output log judgment.
