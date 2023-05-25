@@ -6,29 +6,31 @@ import json
 import time
 
 def test_full_process():
-    init_user_data(15, 0)
-    init_user_data(15, 1)
-    init_user_data(15, 2)
-    init_user_data(15, 3)
+    with open(CONFIG_PATH, "r") as ff:
+        config_json = json.load(ff)
+    init_user_data(15, 0, CONFIG_PATH)
+    init_user_data(15, 1, CONFIG_PATH)
+    init_user_data(15, 2, CONFIG_PATH)
+    init_user_data(15, 3, CONFIG_PATH)
     
-    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/")
-    mk_batch_proof(16, "./user_data/batch1.json", "./sum_proof_data/batches/a1/")
-    mk_batch_proof(16, "./user_data/batch2.json", "./sum_proof_data/batches/a2/")
-    mk_batch_proof(32, "./user_data/batch3.json", "./sum_proof_data/batches/b0/")
+    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/", CONFIG_PATH)
+    mk_batch_proof(16, "./user_data/batch1.json", "./sum_proof_data/batches/a1/", CONFIG_PATH)
+    mk_batch_proof(16, "./user_data/batch2.json", "./sum_proof_data/batches/a2/", CONFIG_PATH)
+    mk_batch_proof(32, "./user_data/batch3.json", "./sum_proof_data/batches/b0/", CONFIG_PATH)
     
-    mk_trunk_proof("./sum_proof_data/batches/", "./sum_proof_data/trunk/")
+    mk_trunk_proof("./sum_proof_data/batches/", "./sum_proof_data/trunk/", CONFIG_PATH)
     
-    verify_batch_proof("./sum_proof_data/batches/a0/")
-    verify_batch_proof("./sum_proof_data/batches/a1/")
-    verify_batch_proof("./sum_proof_data/batches/a2/")
-    verify_batch_proof("./sum_proof_data/batches/b0/")
+    verify_batch_proof("./sum_proof_data/batches/a0/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/a1/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/a2/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/b0/", config_json)
     
-    verify_trunk_proof("./sum_proof_data/trunk/")
+    verify_trunk_proof("./sum_proof_data/trunk/", config_json)
 
-    mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/")
-    mk_inclusion_proof(1, 16, "./sum_proof_data/batches/a1/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a1/")
-    mk_inclusion_proof(2, 16, "./sum_proof_data/batches/a2/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a2/")
-    mk_inclusion_proof(3, 32, "./sum_proof_data/batches/b0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/b0/")
+    mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/", CONFIG_PATH)
+    mk_inclusion_proof(1, 16, "./sum_proof_data/batches/a1/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a1/", CONFIG_PATH)
+    mk_inclusion_proof(2, 16, "./sum_proof_data/batches/a2/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a2/", CONFIG_PATH)
+    mk_inclusion_proof(3, 32, "./sum_proof_data/batches/b0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/b0/", CONFIG_PATH)
 
     verify_inclusion_proof("./inclusion_proof_data/a0/")
     verify_inclusion_proof("./inclusion_proof_data/a1/")
@@ -47,8 +49,11 @@ def test_try_invalid_sum_value():
         
     with open("./sum_proof_data/batches/a0/sum_values.json", "w") as ff:
         json.dump(sum_values_json, ff)
+        
+    with open(CONFIG_PATH, "r") as ff:
+        config_json = json.load(ff)
     try:
-        verify_batch_proof("./sum_proof_data/batches/a0/")
+        verify_batch_proof("./sum_proof_data/batches/a0/", config_json)
     except:
         print("Invalid Sum Value")
     
@@ -61,42 +66,49 @@ def test_negative_value_with_positive_net_value():
     
     with open("./user_data/batch0.json", "w") as ff:
         json.dump(user_data_json, ff)
+        
+    with open(CONFIG_PATH, "r") as ff:
+        config_json = json.load(ff)
     
-    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/")
+    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/", CONFIG_PATH)
 
-    verify_batch_proof("./sum_proof_data/batches/a0/")
+    verify_batch_proof("./sum_proof_data/batches/a0/", config_json)
     
     print("Negative Value with Positive Net Value Is Allowed")
 
-    init_user_data(15, 0)
+    init_user_data(15, 0, CONFIG_PATH)
 
     return
 
 def test_negative_net_value():
+    with open(CONFIG_PATH, "r") as ff:
+        config_json = json.load(ff)
+        coins = config_json["coins"]
+        
     with open("./user_data/batch0.json", "r") as ff:
         user_data_json = json.load(ff)
         data_copy = user_data_json
-        for coin in COINS:
+        for coin in coins:
             user_data_json[0][coin] = str(- int(user_data_json[0][coin]))
     
     with open("./user_data/batch0.json", "w") as ff:
         json.dump(user_data_json, ff)
     
-    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/")
+    mk_batch_proof(16, "./user_data/batch0.json", "./sum_proof_data/batches/a0/", CONFIG_PATH)
 
     try:
-        verify_batch_proof("./sum_proof_data/batches/a0/")
+        verify_batch_proof("./sum_proof_data/batches/a0/", config_json)
     except:
         print("Invalid Net Value")
     
-    init_user_data(15, 0)
+    init_user_data(15, 0, CONFIG_PATH)
         
     return
 
 def test_invalid_inclusion_proof():
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "r") as ff:
         inclusion_proof_json = json.load(ff)  
-        inclusion_proof_json["batch_inclusion_proof"]["total_value"] += 1
+        inclusion_proof_json["batch_inclusion_proof"]["total_value"] = str(int(inclusion_proof_json["batch_inclusion_proof"]["total_value"]) + 1)
         
     with open("./inclusion_proof_data/a0/user_0_inclusion_proof.json", "w") as ff:
         json.dump(inclusion_proof_json, ff)
@@ -106,7 +118,7 @@ def test_invalid_inclusion_proof():
     except:
         print("Invalid Inclusion Proof")
     
-    mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/")
+    mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/", "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/", CONFIG_PATH)
 
     return
 
@@ -118,6 +130,6 @@ if __name__ == '__main__':
     test_negative_net_value()   
     test_invalid_inclusion_proof()
     test_full_process()
-    verify_sum_proofs()
+    verify_sum_proofs(CONFIG_PATH)
     verify_all_inclusion_proof()
     print("all test finished in %d sec" %(time.time()-time0))

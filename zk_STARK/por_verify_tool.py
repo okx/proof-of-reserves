@@ -6,20 +6,23 @@ import sys
 import time
 import re
 
-def verify_sum_proofs():
+def verify_sum_proofs(config_path):
+    with open(config_path, "r") as ff:
+        config_json = json.load(ff)
+        coins = config_json["coins"]
     abs_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
     start_time = time.time()
     batches_proof_path = abs_dir + "/sum_proof_data/batches/"
-    sum_values = [0] * (len(COINS) + 1)
+    sum_values = [0] * (len(coins) + 1)
     for root, dirs, files in os.walk(batches_proof_path):
         for dir in dirs:
-            result = verify_batch_proof(batches_proof_path + dir + "/")
+            result = verify_batch_proof(batches_proof_path + dir + "/", config_json)
             for i in range(len(sum_values)):
                 sum_values[i] = (sum_values[i] + result[i]) % MODULUS
             print("Sum Proof of Batch %s Verified" %dir)
 
     trunk_proof_path = abs_dir + "/sum_proof_data/trunk/"
-    result = verify_trunk_proof(trunk_proof_path)
+    result = verify_trunk_proof(trunk_proof_path, config_json)
     for i in range(len(sum_values)):
         assert sum_values[i] == (result[i] % MODULUS)
     print("Sum Proof of Trunk Verified")
@@ -37,5 +40,5 @@ def verify_all_inclusion_proof():
     print("All Proofs Verified in %.4f secs!" %(time.time() - start_time))
 
 if __name__ == '__main__':
-    verify_sum_proofs()
+    verify_sum_proofs(CONFIG_PATH)
     verify_all_inclusion_proof()
