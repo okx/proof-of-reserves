@@ -88,6 +88,30 @@ func TestVerifyUtxoCoinSignature(t *testing.T) {
 			sign2:  "IFMFCCk781/sT/oHoUxL5oZpqQZlImQrhJ3odvkVWARcaK4EAl3XPEA/IVgxh6VaSLmMP/Wno1dxWdmxe2gcs3U=",
 			script: "522102f5c9ab0dd178eb44cd6baae7c1698ae23caec399d58da93a32509665113152742103729f817997a0442e6a39ee0c15f0cd3a17e55ef768ae6f055b2c323a1cba9eb121021e6568b58ef452791f56d0ba2f2ea1200c730f114ab88701833a0a2cf77ef09e53ae",
 		},
+		{
+			coin:   "LTC",
+			addr:   "MH7Qru4KFC6tLSiSq7bTWUDyiXERwzdqKp",
+			msg:    "I am an OKX address",
+			sign1:  "ID7R92j4VjjajZGAqRWyHVEAGLfbJZnIKD7uZVyMPYNqf3Cp0BxeFSuZ8c+weifZ8M3DBE8F2ftDV7s9XYTLPus=",
+			sign2:  "H2wcYS+Osohhi06wr78H4Gn8zsB9Oqw9aTRo7OEdTJNaWNGwoo+6zwsywdfUXk6IgxY7hreo0I/s8fIjHJceFdQ=",
+			script: "522103c4a04606ac7b32924f0fc0b8aadbf925c139738701a09138bc7c42cb9a3609da21034b8b29e6f460e6293423173863a9cca093bbbd865a611abd984fd674d2537e5b210350ade45e21816652e9812bb39f55e0e8cad02a0884c3c024ab642a43cd8094a353ae",
+		},
+		{
+			coin:   "LTC",
+			addr:   "ltc1qzvcgmntglcuv4smv3lzj6k8szcvsrmvk0phrr9wfq8w493r096ssm2fgsw",
+			msg:    "I am an OKX address",
+			sign1:  "IGLtPax4D8T/a5YIfTjqT4hoy8j71gG+yFeKPUhH4xKTcgEFxLXrJF+2ZLgPoqKGBt+QSNH6l7RK7bIZzVIvzBA=",
+			sign2:  "Hzs4gdaoFHT1hfVqyi2tvoIhGiUTP/vVETd2QPtg8Uu/eGzec6oK5DvVIK0oUMC8G0dfWgrEcJM4IE7MIHS4oBc=",
+			script: "5221024ae22b49865207865e57b5056abb1e9f6480a6621a246b7066ab84c3b7f9d2b5210255f79ad111076c25b3f6d5e2e99250b6150b1d1b6af10f860f41f63c68859704210247eb8b75b8e50a8a33a7d9ada81f3ecaa05228bfeec3274bc6520637f2eacbf553ae",
+		},
+		{
+			coin:   "LTC",
+			addr:   "LectSLekhkxEQBHofNFHa3pVHndnb4Z9fN",
+			msg:    "I am an OKX address",
+			sign1:  "ILEkfsIaFagDnMq0pY9qS4yIAjTFlpDknLCVm5dhMHbnZn0SXC+Op9jQfD4wbu+Rpxs1N5ut6c2349GEM8AFx0A=",
+			sign2:  "",
+			script: "",
+		},
 	}
 
 	for _, tt := range args {
@@ -122,7 +146,13 @@ func TestVerifyEvmCoinSignature(t *testing.T) {
 			coin: "ETH",
 			addr: "0x8c3cb9665833fd9f79eb14cba16d82bbab6f22d8",
 			msg:  "I am an OKX address",
-			sign: "0xa2412073bf6b489c58e4937a4c5cdb3f35aff31bd76e643f56b303b3a0109f1461fe7497c64a66b1baecd6605d866b4d51ddd9e62fa1472c3ddb89a0dc27c7ae1c",
+			sign: "0xc75173a3ca53bcfeb7b2bfc16aed036191436085fe1a5c846f7021ae2baf5f81646b5089822399b6ee076bb59974ec6bd425954ca97bff084a74efeca0c8c8c61c",
+		},
+		{
+			coin: "ETH",
+			addr: "0xa28062bd708ce49e9311d6293def7df63f2b0816",
+			msg:  "I am an Okcoin address",
+			sign: "0x462950c4dbbc0f2fb36002ba7e5c2a98dfae7d89203f4dbf152e03304edb444d670c8bbacb78072c4dc1184db245401c73ee1395715afbb8dd600ba6a63e3abc1b",
 		},
 	}
 	for _, tt := range args {
@@ -232,6 +262,18 @@ func TestVerifyEcdsaCoinSignature(t *testing.T) {
 			addr: "0x4ce08ffc090f5c54013c62efe30d62e6578e738d",
 			msg:  "I am an OKX address",
 			sign: "0xa181d622f9a1d1aac327c026a46d11c95a44fb8994a07d232a15b79c12d225a7059db547c0a79b67605f68930d8d0f93a9939589c4fc70041e66322efc61a2421b",
+		},
+		{
+			coin: "LTCK-OKC20",
+			addr: "0xeb196a61f9a1e35bf5053b65aaa57c5541dcba86",
+			msg:  "I am an OKX address",
+			sign: "0xe8df58ec46822f86a0a2fb547260ac55caeeb256916a8c2aabcc01cbdfc13ff264992f2127f3e1cc8e45bf936947c50c8ea097602712e6868526d7fccd9273bc1c",
+		},
+		{
+			coin: "LTCK-OKC20",
+			addr: "0x4a11078a99b118bbfee78a5c187d98d264360433",
+			msg:  "I am an OKX address",
+			sign: "0xee5e609b94842cca32b0f482351bbd2e76e6730dfb146337a077fd03dc6219b62ed1d4e4daf243cb2ba50a12ba47e5f76b8d22e91e8a9c7d228b22a2b236a0ad1b",
 		},
 	}
 	for _, tt := range args {

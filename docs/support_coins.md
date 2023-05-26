@@ -16,6 +16,7 @@
 | USDT     | Avalanche |
 | USDT     | Arbitrum  |
 | USDT     | Optimism  |
+| USDT     | OKC       |
 | USDC     | Ethereum  |
 | USDC     | OKC       |
 | USDC     | Polygon   |
@@ -50,6 +51,7 @@
 | USDT   | Avalanche        |
 | USDT   | Arbitrum         |
 | USDT   | Optimism         |
+| USDT   | OKC              |
 | USDC   | Ethereum         |
 | USDC   | OKC              |
 | USDC   | Tron             |
