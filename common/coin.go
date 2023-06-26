@@ -108,6 +108,9 @@ var (
 
 		// ALGO
 		"USDT-ALGO": "ALGO",
+
+		// FEVM
+		"FIL-EVM": "FIL",
 	}
 
 	PorCoinTypeMap = map[string]string{
@@ -152,6 +155,7 @@ var (
 		"PEOPLE":        EvmCoinTye,
 		"OKB":           EvmCoinTye,
 		"OPTIMISM":      EvmCoinTye,
+		"FIL-EVM":       EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -234,6 +238,7 @@ var (
 		"PEOPLE":        EthMessageSignatureHeader,
 		"OKB":           EthMessageSignatureHeader,
 		"OPTIMISM":      EthMessageSignatureHeader,
+		"FIL-EVM":       EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -359,6 +364,9 @@ var (
 
 		// ALGO
 		"USDT-ALGO": "USDT",
+
+		// FEVM
+		"FIL-EVM": "FIL",
 	}
 
 	PorCoinBaseUnitPrecisionMap = map[string]int{
@@ -446,6 +454,9 @@ var (
 
 		// ALGO
 		"USDT-ALGO": 6,
+
+		// FEVM
+		"FIL-EVM": 18,
 	}
 
 	CheckBalanceCoinBlackList = map[string]bool{
@@ -471,6 +482,7 @@ var (
 		"RIPPLE": true,
 
 		"USDT-ALGO": true,
+		"FIL-EVM":   true,
 	}
 
 	VerifyAddressCoinBlackList = map[string]bool{
