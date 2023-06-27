@@ -1,10 +1,15 @@
 package common
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/base32"
+	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"github.com/dchest/blake2b"
+	"github.com/filecoin-project/go-address"
+	builtintypes "github.com/filecoin-project/go-state-types/builtin"
 	"github.com/martinboehm/btcutil/base58"
 )
 
@@ -71,4 +76,24 @@ func checksum(input []byte) (cksum [4]byte) {
 	copy(cksum[:], h2[:4])
 
 	return
+}
+
+var maskedIDPrefix = [20 - 8]byte{0xff}
+
+func ConvertEthAddressToFilecoinAddress(ethHash []byte) (address.Address, error) {
+	address.CurrentNetwork = address.Mainnet
+	if bytes.HasPrefix(ethHash[:], maskedIDPrefix[:]) {
+		// This is a masked ID address.
+		id := binary.BigEndian.Uint64(ethHash[12:])
+		return address.NewIDAddress(id)
+	}
+
+	// Otherwise, translate the address into an address controlled by the
+	// Ethereum Address Manager.
+	addr, err := address.NewDelegatedAddress(builtintypes.EthereumAddressManagerActorID, ethHash[:])
+	if err != nil {
+		return address.Undef, fmt.Errorf("failed to translate supplied address (%s) into a "+
+			"Filecoin f4 address: %w", hex.EncodeToString(ethHash[:]), err)
+	}
+	return addr, nil
 }

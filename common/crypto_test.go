@@ -154,6 +154,18 @@ func TestVerifyEvmCoinSignature(t *testing.T) {
 			msg:  "I am an Okcoin address",
 			sign: "0x462950c4dbbc0f2fb36002ba7e5c2a98dfae7d89203f4dbf152e03304edb444d670c8bbacb78072c4dc1184db245401c73ee1395715afbb8dd600ba6a63e3abc1b",
 		},
+		{
+			coin: "FIL-EVM",
+			addr: "f410fa7sh5u6fvd7vt625dx2akhbu3jt7yvkhgdp55ki",
+			msg:  "hello world",
+			sign: "0x9c271461e5876fac4e5a02aee7a877831a91cee6a24b75cafd8650ac72b2a5e5147e2e90558d4e38d113ff54e734f041687f41268d55ff7850791e1e2833dc061b",
+		},
+		{
+			coin: "FIL-EVM",
+			addr: "f410f3py2r3kh22yh7ona3fyp2tyzhxo4p2okiwuqjza",
+			msg:  "I am an OKX address",
+			sign: "0x05168f6ede2213bebae69256ad78cfcf4f3a99d4b11bacd4a24ec2171becb34e2f690c515e3b1227a52e7e7c4dd99dd0f307c167f768b2201bd82b69af5a112b1c",
+		},
 	}
 	for _, tt := range args {
 		err := VerifyEvmCoin(tt.coin, tt.addr, tt.msg, tt.sign)
