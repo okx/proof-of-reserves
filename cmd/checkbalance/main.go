@@ -294,8 +294,8 @@ func VerifyCoinAddressTotalBalance(validator *common.AddressBalanceValidator, co
 			return
 		}
 		coinAmount, _ := decimal.NewFromString(amount)
-		// USDC-OKC20 precision is 18, convert to 6
-		if coinTemp == "USDC-OKC20" {
+		// USDC-OKC20/USDT-OKC20 precision is 18, convert to 6
+		if coinTemp == "USDC-OKC20" || coinTemp == "USDT-OKC20" {
 			coinAmountDecimal, _ := decimal.NewFromString(convertCoinBalanceToBaseUnit(coinTemp, coinAmount.String(), -1))
 			totalBalance = totalBalance.Add(coinAmountDecimal.Mul(decimal.NewFromInt(1000000)))
 		} else {
@@ -310,7 +310,8 @@ func VerifyCoinAddressTotalBalance(validator *common.AddressBalanceValidator, co
 	}
 
 	// convert coin balance to base unit
-	toalBalance := convertCoinBalanceToBaseUnit(coin, totalBalance.String(), -1)
+	dCoin := common.PorCoinUnitMap[strings.ToUpper(coin)]
+	toalBalance := convertCoinBalanceToBaseUnit(dCoin, totalBalance.String(), -1)
 	// compare
 	if isCoinBalanceEqual(toalBalance, totalPorBalance.String()) {
 		log.Infof("verify coin %s total address balance success, in chain balance: %s, in por balance: %s", coin, toalBalance, totalPorBalance.String())
