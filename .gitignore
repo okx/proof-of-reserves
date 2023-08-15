@@ -7,6 +7,8 @@ userPathJson-*
 *_address_balance.csv
 venv/
 origin/
+package.sh
+proof-of-reserves-*
 *.pyc
 venv
 zk_STARK/build/
