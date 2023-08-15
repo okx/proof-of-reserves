@@ -241,18 +241,34 @@ func VerifyEvmCoin(coin, addr, msg, sign string) error {
 	}
 	hash := HashEvmCoinTypeMsg(msgHeader, msg)
 	s := MustDecode(sign)
-	pub, err := SigToPub(hash, s)
+	pub, err := sigToPub(hash, s)
 	if err != nil {
 		return ErrInvalidAddr
 	}
 
-	recoverAddr := PubkeyToAddress(*pub).String()
-	if strings.ToLower(addr) != strings.ToLower(recoverAddr) {
-		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
+	pubToEcdsa := pub.ToECDSA()
+	recoverAddr := PubkeyToAddress(*pubToEcdsa).String()
+
+	addrType, exist := PorCoinAddressTypeMap[coin]
+	if !exist {
+		return fmt.Errorf("invalid coin type %s, addr:%s", coin, addr)
+	}
+	switch addrType {
+	case "FIL":
+		// convert eth address to fil address
+		filAddress, err := ConvertEthAddressToFilecoinAddress(PubkeyToAddress(*pubToEcdsa).Bytes())
+		if err != nil {
+			return fmt.Errorf("convert eth address to fil address failed, coin:%s, addr:%s, error:%v", coin, addr, err)
+		}
+		recoverAddr = filAddress.String()
+	case "ETH":
+		if !VerifySignAddr(HexToAddress(addr), hash, s) {
+			return ErrInvalidSign
+		}
 	}
 
-	if !VerifySignAddr(HexToAddress(addr), hash, s) {
-		return ErrInvalidSign
+	if strings.ToLower(addr) != strings.ToLower(recoverAddr) {
+		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
 	}
 
 	return nil
