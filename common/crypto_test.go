@@ -55,15 +55,6 @@ func TestVerifyUtxoCoinSignature(t *testing.T) {
 			sign2:  "H0FnZYEXYbmrnh8sreeUO7wL8BPPKKSPDyYvZbjn/tOCVpxnZLN3yL8lyyPHkl3NttL7WDHVx/jxG5HBLbR7T5k=",
 			script: "522102b514e7ccc2845d3f1ca7181dacab0d1ac277616e753547922f82cc0cdfb5c691210318c30ad87d44e7c8b940b47e6963aabfda0581a1e1aac59019b9b1589179aa7a2103d7a534927a03b195a0082d53ab15145bbac8964ffb09d54869da2e59ea1b100553ae",
 		},
-		/*{
-			coin: "BCH",
-			// 393maTY7rQScy4SmYE1XSXUSgK73byhgfA
-			addr:   "bitcoincash:ppgttg7kcfxv5tp83rlxwu69jxvu70kr3yyewl2ye4",
-			msg:    "hello world",
-			sign1:  "Hz+cZI5GfSzNSvBpna20diV47/rhlQMRQTNGZd9sI4UZQaWH4ZY3KJA4IlcP5bwuicO+myA4vLdiMkj7OU+rDpg=",
-			sign2:  "IDtG3XPLpiKOp4PjTzCo/ng8gm4MFTTyHeh/DaPC1XYsYaj5Jr4h8dnxmwuJtNkPkH40rEfnrrO8fgZKNOIF5iM=",
-			script: "5221027adce0bd3080066ab90c68199ff73128b3ff8c847d15d9e4c6e88fb4c6e6486b210273fa0df3ffceeda23b0074d9fe83d9ee3a209fad6e4546fdec5ede39abcbb70d2102a38ce748c5a1e1889f0d72ecd6f2130f5f73a11e01fff9f0d22796e40217571953ae",
-		},*/
 		{
 			coin:   "BSV",
 			addr:   "1Hgc1DnWHwfXFxruej4H5g3ThsCzUEwLdD",
@@ -198,18 +189,25 @@ func TestVerifyEd25519CoinSignature(t *testing.T) {
 			sign: "0x996528cea9ae0ef66a0c1782cf281726f3e167906e9eb61161558c482f5b92b5439e0662b2b72906cd2a155903fed4b739652a4ddd97689618793e90d8f2d608",
 		},
 		{
-			coin: "APT",
+			coin: "APTOS",
 			addr: "0x327dd297dfacf7c2d8207aaa23c0f0e8bcaf4c1612febbf63b9f7376810b8ec8",
 			pub:  "0x61f579fc779146304353027b425a216d8015889c5f3b715ad26135b862f3bf84",
 			msg:  "hello world",
 			sign: "0xe5eea05d4156e1aef7867739b86f560b3b6a14a9525b53b436b5ff16ce8ca9490d4e5586ddc469b43453cf9796d87a4c4d3ead5d8dd3a2e88026713ae866e30b",
 		},
 		{
-			coin: "TON",
+			coin: "TONCOIN-NEW",
 			addr: "EQA5rifVSCc8qQfpCXvq4zJGJPsA0EPCDoWdtg234INftsWj",
 			pub:  "0x3d2696e3d5cbc9047b338e6a56552db1d43ca6e063bc7aa667b18005984372d2",
 			msg:  "hello world",
 			sign: "0xaa406900fdf658e793850d7d47798fa501098db4a6697ac460c1d2800152f40174d2705f1ec87b1a0b34434647b0efed2b7b70569bc00e8bbc3561c372aacc0b",
+		},
+		{
+			coin: "APTOS",
+			addr: "0x4062a7375a1ab2bb8bc33d2c1cb2f6b0afa1cef98ea7a5afec7afc96675fe1d",
+			pub:  "0x04d1885cf7d4add68ebf2953c1e3406c5ee0e9b9d6c07782ec6bae9fa4bd9335",
+			msg:  "I am an OKX address",
+			sign: "0xc084c15b8fcfbbf7fcc6b3a8131c885e40eccebfd53472ade25c2ba3d57f2bc1f5089d5a29d68a812477013ea948d06ef77f5894040f7026f323ffd2cdc0640b",
 		},
 	}
 	for _, tt := range args {

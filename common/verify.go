@@ -14,6 +14,7 @@ import (
 	"github.com/martinboehm/btcutil/bech32"
 	"github.com/martinboehm/btcutil/chaincfg"
 	"golang.org/x/crypto/ripemd160"
+	"regexp"
 	"strings"
 
 	secp_ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
@@ -302,6 +303,10 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 	case "APTOS":
 		publicKey := append(pubkeyBytes, 0x0)
 		recoverAddr = "0x" + hex.EncodeToString(Sha256Hash(publicKey))
+		// Short address type: if address starts with 0x0, replace.
+		re, _ := regexp.Compile("^0x0*")
+		recoverAddr = re.ReplaceAllString(recoverAddr, "0x")
+
 	case "TONCOIN-NEW":
 		a, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.V3, tonWallet.DefaultSubwallet)
 		if err != nil {
