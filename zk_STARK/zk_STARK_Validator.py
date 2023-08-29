@@ -1,5 +1,6 @@
 from mk_and_verify_proofs import verify_batch_proof, verify_trunk_proof, verify_single_inclusion_proof
-from constants import MODULUS, COINS
+from constants import MODULUS
+import json
 import sys
 import re
 import os
@@ -16,15 +17,18 @@ def por_user_verify_proofs():
     abs_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
     for files in os.listdir(abs_dir):
         if (files == "sum_proof_data"):
+            with open(abs_dir + "/sum_proof_data/config.json", "r") as ff:
+                config_json = json.load(ff)
+                coins = config_json["coins"]
             batches_proof_path = abs_dir + "/sum_proof_data/batches/"
-            sum_values = [0] * (len(COINS) + 1)
-            result = [0] * (len(COINS) + 1)
+            sum_values = [0] * (len(coins) + 1)
+            result = [0] * (len(coins) + 1)
             success = True
             # verify batch proofs
             for root, dirs, subfiles in os.walk(batches_proof_path):
                 for dir in dirs:
                     try:
-                        result = verify_batch_proof(batches_proof_path + dir + "/")
+                        result = verify_batch_proof(batches_proof_path + dir + "/", config_json)
                     except:
                         success = False
                         break
@@ -35,7 +39,7 @@ def por_user_verify_proofs():
             if success:
                 trunk_proof_path = abs_dir + "/sum_proof_data/trunk/"
                 try:
-                    result = verify_trunk_proof(trunk_proof_path)
+                    result = verify_trunk_proof(trunk_proof_path, config_json)
                 except:
                     success = False
             

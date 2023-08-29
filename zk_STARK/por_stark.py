@@ -2,6 +2,10 @@
 # See https://vitalik.ca/general/2022/11/19/proof_of_solvency.html
 # It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value. 
 # This is a basic version of the solution.
+# Most of the modules used here including fft and fri etc. came from "../mimc_stark".
+
+# THIS IS EDUCATIONAL CODE, NOT PRODUCTION! HIRE A SECURITY AUDITOR
+# WHEN BUILDING SOMETHING FOR PRODUCTION USE.
 
 from permuted_tree import merkelize,keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
 from poly_utils import PrimeField
@@ -15,24 +19,24 @@ import gc
 f = PrimeField(MODULUS)
 
 # ids: array of user ids
-# coins: array of user values of all coins
+# values: array of user values of all coins
 # uts: user trace size, number of data rows for each user, for non-negative proof
 # data_path: user data path
-def mk_por_proof(ids, coins, uts, data_path):
+def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     start_time = time.time()
 
-    # tranform data into the field, -x => MODULUS -x
-    transform_into_field(coins, MODULUS)
+    # tranform data into the field, -1 => MODULUS -1
+    transform_into_field(values, MODULUS)
     assert is_a_power_of_2(uts) and uts <= MAX_UTS, "invalid uts"
 
     if not is_a_power_of_2(len(ids)+1):
-        ids, coins = pad(ids, coins, MAX_USER_NUM_FOR_ONE_BATCH)
+        ids, values = pad(ids, values, MAX_USER_NUM_FOR_ONE_BATCH)
     user_num = len(ids)+1
     steps = uts * user_num
     precision = steps * EXTENSION_FACTOR
 
-    ids, coins = extend_user_data(ids, coins, uts)
-    sum_trace, sum_values, coins = get_sum_trace(coins, uts, MODULUS)
+    ids, values = extend_user_data(ids, values, uts)
+    sum_trace, sum_values, values = get_sum_trace(values, uts, MODULUS)
 
     # get generators
     G2 = f.exp(NONRESIDUE, (MODULUS - 1) // precision)
@@ -49,8 +53,8 @@ def mk_por_proof(ids, coins, uts, data_path):
 
     # get poly and eval for values of each coin
     b_eval = []
-    for i in range(len(coins)):
-        b_poly = fft(coins[i], MODULUS, G1, inv=True)
+    for i in range(len(values)):
+        b_poly = fft(values[i], MODULUS, G1, inv=True)
         b_eval.append(fft(b_poly, MODULUS, G2))
     del b_poly
     gc.collect()
@@ -97,9 +101,9 @@ def mk_por_proof(ids, coins, uts, data_path):
     z_eval = f.multi_inv([f.eval_poly_at(z_poly, x) for x in xs])    
     tc_eval.append([f.mul(f.sub(t, i), z) % MODULUS for t, i, z in zip(t_eval, i_eval, z_eval)])
 
-    # coins constraints eval
+    # values constraints eval
     cc_eval = []
-    for i in range(MAIN_COINS_NUM):
+    for i in range(main_coins_num):
         # cc_constraint 1: Accumulation of each coin
         # b_eval[i][j + uts*EXTENSION_FACTOR] = b_eval[i][j + (uts-1)*EXTENSION_FACTOR] + b_eval[i][j], j mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，and j != last_step_position，
         # z(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - last_step_position)
@@ -178,12 +182,13 @@ def mk_por_proof(ids, coins, uts, data_path):
         mk_multi_branch(l_mtree, positions),
         prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)]
 
-    save_data(data_path, sum_proof, mtree, sum_values, COINS)
+    save_data(data_path, sum_proof, mtree, sum_values, coins)
+    # print("mk por proof in %.4f sec: " % (time.time() - start_time))
     return
 
 # sum_values: The sum values of each coin ant total coin that prover claimed
 # proof: The proof for the sum amounts
-def verify_por_proof(sum_values, proof):
+def verify_por_proof(sum_values, proof, main_coins_num):
     start_time = time.time()
     check_sum_values(sum_values, MODULUS)
     coins_num = len(sum_values) - 1
@@ -209,7 +214,7 @@ def verify_por_proof(sum_values, proof):
     last_step_position = f.exp(G2, (steps - 1) * skips)
  
     main_branch_leaves = verify_multi_branch(m_root, aug_positions, main_branches)
-    check_entry_hash(main_branch_leaves, mtree_entries_data, MAIN_COINS_NUM, MODULUS)
+    check_entry_hash(main_branch_leaves, mtree_entries_data, main_coins_num, MODULUS)
 
     linear_comb_branch_leaves = verify_multi_branch(l_root, positions, linear_comb_branches)
 
@@ -266,7 +271,7 @@ def verify_por_proof(sum_values, proof):
 
 
         # check coins constraint:
-        for i in range(MAIN_COINS_NUM):
+        for i in range(main_coins_num):
             # check cc_constraint 1: b_eval[i][j + uts*EXTENSION_FACTOR] = b_eval[i][j + (uts-1)*EXTENSION_FACTOR] + b_eval[i][j]
             # j mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，and j != last_step_position
             assert f.sub(f.sub(b_of_uts_skips_x[i], b_of_uts_sub_1_skips_x[i]), b_of_x[i]) == f.mul(cc_of_x[2*i], z3)
@@ -279,5 +284,7 @@ def verify_por_proof(sum_values, proof):
         # check correctness of the linear combination
         assert verify_l(k, x_to_the_steps, l_of_x, [t_of_x, b_of_x, id_of_x, tc_of_x[0], tc_of_x[2:], cc_of_x], tc_of_x[1], MODULUS)
 
+    # print('Verified %d consistency checks' % SPOT_CHECK_SECURITY_FACTOR)
+    # print('Verified sum proof in %.4f sec' % (time.time() - start_time))
     return True
 
