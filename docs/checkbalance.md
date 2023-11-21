@@ -131,7 +131,9 @@ Install the Bitcoin Core client, synchronize to the latest height, and then roll
 
 ### Usage
 
-**coin_name** Supported: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
+**coin_name** Supported: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI',
+'USDC','POLY-USDC','USDC-AVAXC','USDC-ARBITRUM','USDC-OPTIMISM','USDC-OKC20','OKB','OKB-OKC20','OKT','FILK-OKC20','SHIBK-KIP20','DOTK-OKC20','XRPK-KIP20','UNIK-OKC20',
+'LINKK-OKC20','TRXK-KIP20','SHIB','UNI','LINK','PEOPLE'
 
 **mode** Supported: 'single_address','single_coin_total_balance','single_coin','all_coin','all_coin_total_balance'
 

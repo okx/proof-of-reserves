@@ -138,7 +138,7 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 	if pConf.RPC.Enabled {
 		// get address balance from white list
 		// the address in white list doesn't support node RPC query, if RPC config enable, return the balance in por data.
-		key := fmt.Sprintf("%s:%s", pConf.Name, address)
+		key := fmt.Sprintf("%s:%s", strings.ToUpper(pConf.Name), address)
 		if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
 			log.Infof("notice: the address %s in project %s doesn't support node rpc method to query, "+
 				"if rpc config enable, return the balance in por data.", address, r.confCoinAddressWhiteListMap[key].ProjectFullName)
@@ -294,17 +294,11 @@ func (r *AddressBalanceValidator) GetCoinAddressBalanceInfoByJSONFormat(address,
 	balanceDecimal, _ := decimal.NewFromString(balanceStr)
 
 	if defaultUnit != "" {
-		coinNameList := strings.Split(pConf.Name, "-")
-		switch strings.ToLower(coinNameList[0]) {
-		case "btc":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 8))).String()
-		case "eth":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 18))).String()
-		case "usdt":
-			result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, 6))).String()
-		default:
+		coinBaseUnit, exist := PorCoinBaseUnitPrecisionMap[strings.ToUpper(pConf.Name)]
+		if !exist {
 			log.Errorf("unsupport coin name %s in rpc json file.", pConf.Name)
 		}
+		result = balanceDecimal.Mul(decimal.NewFromFloat(math.Pow(10, float64(coinBaseUnit)))).String()
 	} else {
 		result = balanceDecimal.String()
 	}
@@ -345,7 +339,7 @@ func (r *AddressBalanceValidator) GetCoinAddressTotalBalance(coin, height string
 			for _, item := range items {
 				address := item.(string)
 				// ignore white list address
-				key := fmt.Sprintf("%s:%s", pConf.Name, address)
+				key := fmt.Sprintf("%s:%s", strings.ToUpper(pConf.Name), address)
 				if _, exist := r.confCoinAddressWhiteListMap[key]; exist {
 					log.Infof("notice: the address %s in project %s doesn't support node rpc method to query, "+
 						"if rpc config enable, return the balance in por data", address, r.confCoinAddressWhiteListMap[key].ProjectFullName)
@@ -536,14 +530,14 @@ func (r *AddressBalanceValidator) DividedAddressList(addresses []interface{}, ch
 }
 
 func (r *AddressBalanceValidator) generateAddressDescriptor(coin, address string) (result string, err error) {
-	addrType := GuessAddressType(address)
+	addrType := GuessUtxoCoinAddressType(address)
 	if addrType == "" {
 		err = errors.New(fmt.Sprintf("coin:%s, invalid address %s", coin, address))
 		log.Error(err)
 		return result, err
 	}
 	var redeemScript string
-	if value, exist := PorCoinDataMap[fmt.Sprintf("%s:%s", coin, address)]; exist {
+	if value, exist := PorCoinDataMap[fmt.Sprintf("%s:%s", strings.ToUpper(coin), address)]; exist {
 		redeemScript = value.Script
 	} else {
 		err = errors.New(fmt.Sprintf("coin:%s, por data not support the address %s", coin, address))

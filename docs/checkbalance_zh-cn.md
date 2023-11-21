@@ -133,7 +133,9 @@ API、token合约地址等信息，以便我们的工具可以查询链上余额
 
 ### Usage
 
-**coin_name** 支持: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI'
+**coin_name** 支持: 'BTC','ETH','ETH-ARBITRUM','ETH-OPTIMISM','USDT','USDT-ERC20','USDT-TRC20','USDT-POLY','USDT-AVAXC','USDT-ARBITRUM','USDT-OPTIMISM','USDT-OMNI',
+'USDC','POLY-USDC','USDC-AVAXC','USDC-ARBITRUM','USDC-OPTIMISM','USDC-OKC20','OKB','OKB-OKC20','OKT','FILK-OKC20','SHIBK-KIP20','DOTK-OKC20','XRPK-KIP20','UNIK-OKC20',
+'LINKK-OKC20','TRXK-KIP20','SHIB','UNI','LINK','PEOPLE'
 
 **mode** 支持: 'single_address','single_coin_total_balance','single_coin','all_coin','all_coin_total_balance'
 
