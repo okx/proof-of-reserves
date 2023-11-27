@@ -1,13 +1,13 @@
-# This demo is based on Vitalik's proof of solvency proposal and implemented using the STARK proof system. 
+# This demo is based on Vitalik's proof of solvency proposal and implemented using the STARK proof system.
 # See https://vitalik.ca/general/2022/11/19/proof_of_solvency.html
-# It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value. 
+# It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value.
 # This is a basic version of the solution.
 # Most of the modules used here including fft and fri etc. came from "../mimc_stark".
 
 # THIS IS EDUCATIONAL CODE, NOT PRODUCTION! HIRE A SECURITY AUDITOR
 # WHEN BUILDING SOMETHING FOR PRODUCTION USE.
 
-from permuted_tree import merkelize,keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
+from permuted_tree import merkelize, keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
 from poly_utils import PrimeField
 from fft import fft
 from fri import prove_low_degree, verify_low_degree_proof
@@ -22,6 +22,8 @@ f = PrimeField(MODULUS)
 # values: array of user values of all coins
 # uts: user trace size, number of data rows for each user, for non-negative proof
 # data_path: user data path
+
+
 def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     start_time = time.time()
 
@@ -62,44 +64,86 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     # trace constraints evaluations
     tc_eval = []
     # constraint 1: The first row of each user's trace should be 0, to ensure the non-negativity of user's net assets value
-    # t[uts*EXTENSION_FACTOR*i] = 0, 0<=i<=user_num-1, 
-    # z1(x) = (x-xs[uts*EXTENSION_FACTOR*0])(x-xs[uts*EXTENSION_FACTOR*1])...(x-xs[uts*EXTENSION_FACTOR*(user_num-1)]) 
+    # t[uts*EXTENSION_FACTOR*i] = 0, 0<=i<=user_num-1,
+    # z1(x) = (x-xs[uts*EXTENSION_FACTOR*0])(x-xs[uts*EXTENSION_FACTOR*1])...(x-xs[uts*EXTENSION_FACTOR*(user_num-1)])
     # z1(x) = x^user_num - 1
     z_num_eval = [xs[(i * user_num) % precision] - 1 for i in range(precision)]
     z_eval = f.multi_inv(z_num_eval)
     tc_eval.append([tp * z % MODULUS for tp, z in zip(t_eval, z_eval)])
 
     # constraint 2:  row_value = next_row_value // 4, in case user's net assets value less than 4^(uts-2), the first row of each user's trace should be 0
-    # (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = 0, 
+    # (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = 0,
     # 0<=i<=steps-1 && (i mod uts*EXTENSION_FACTOR != {(uts-2)*EXTENSION_FACTOR,(uts-1)*EXTENSION_FACTOR}, i in range(precision)
     # z2(x) = (x^steps -1)/((x^user_num -  G2^((uts-2)*EXTENSION_FACTOR*user_num))(x^user_num - G2^((uts-1)*EXTENSION_FACTOR*user_num)))
-    c_num_eval = [f.mul(f.mul(f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]), 
-                                        (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 1)),
-                                (f.mul((f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 2),
-                                        (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 3)))) for i in range(precision)]
-    z_num_eval = [(xs[(i * steps) % precision] - 1) % MODULUS for i in range(precision)]
+    c_num_eval = [f.mul(f.mul(f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]),
+                              (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 1)),
+                        (f.mul((f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 2),
+                               (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 3)))) for i in range(precision)]
+    z_num_eval = [(xs[(i * steps) % precision] - 1) %
+                  MODULUS for i in range(precision)]
     z_num_inv = f.multi_inv(z_num_eval)
-    z_den_eval = [(f.mul(f.sub(xs[(i * user_num) % precision], xs[(uts-2) * EXTENSION_FACTOR * user_num]), 
-                                f.sub(xs[(i * user_num) % precision], xs[(uts-1) * EXTENSION_FACTOR * user_num]))) for i in range(precision)]
-    tc_eval.append([f.mul(f.mul(cn, zi), zd) for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
+    z_den_eval = [(f.mul(f.sub(xs[(i * user_num) % precision], xs[(uts-2) * EXTENSION_FACTOR * user_num]),
+                         f.sub(xs[(i * user_num) % precision], xs[(uts-1) * EXTENSION_FACTOR * user_num]))) for i in range(precision)]
+    tc_eval.append([f.mul(f.mul(cn, zi), zd)
+                   for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
     # constraint 3: User's net asset value accumulation
     # t(i + uts*EXTENSION_FACTOR) = t(i + (uts-1)*EXTENSION_FACTOR) + t(i), i mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR， and i != last_step_position，
     # z3(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - last_step_position)
-    c_num_eval = [f.sub(f.sub(t_eval[(i + uts*EXTENSION_FACTOR) % precision], t_eval[(i + (uts-1)*EXTENSION_FACTOR) % precision]), t_eval[i]) for i in range(precision)]
-    z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1) * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+    c_num_eval = [f.sub(f.sub(t_eval[(i + uts*EXTENSION_FACTOR) % precision], t_eval[(
+        i + (uts-1)*EXTENSION_FACTOR) % precision]), t_eval[i]) for i in range(precision)]
+    z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1)
+                        * EXTENSION_FACTOR * user_num]) for i in range(precision)]
     z_num_inv = f.multi_inv(z_num_eval)
     z_den_eval = [f.sub(xs[i], last_step_position) for i in range(precision)]
-    tc_eval.append([f.mul(f.mul(cn, zi), zd) for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
+    tc_eval.append([f.mul(f.mul(cn, zi), zd)
+                   for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
     # constraint 4: The initial accumulation should be 0, the last accumulation should total value of all assets of all users
     # t((uts-1)*EXTENSION_FACTOR) = 0， t(last_step_position) = sum_values[-1]
     # z4(x) = (x-xs[(uts-1)*EXTENSION_FACTOR])(x-last_step_position)
-    interpolant = f.lagrange_interp_2([xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[-1]])
+    interpolant = f.lagrange_interp_2(
+        [xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[-1]])
     i_eval = [f.eval_poly_at(interpolant, x) for x in xs]
-    z_poly = f.mul_polys([-xs[(uts-1)*EXTENSION_FACTOR], 1], [-last_step_position, 1])
-    z_eval = f.multi_inv([f.eval_poly_at(z_poly, x) for x in xs])    
-    tc_eval.append([f.mul(f.sub(t, i), z) % MODULUS for t, i, z in zip(t_eval, i_eval, z_eval)])
+    z_poly = f.mul_polys([-xs[(uts-1)*EXTENSION_FACTOR],
+                         1], [-last_step_position, 1])
+    z_eval = f.multi_inv([f.eval_poly_at(z_poly, x) for x in xs])
+    tc_eval.append([f.mul(f.sub(t, i), z) % MODULUS for t,
+                   i, z in zip(t_eval, i_eval, z_eval)])
+
+    # constraint 5: user's sum values of each coin should be the t_eval
+    #  t(i) - sum(b_eval[i][j] for j in range(len(b_eval))) = 0, i mod uts*EXTENSION_FACTOR == (uts-2)*EXTENSION_FACTOR
+    # z5(x) = (x^user_num - G2^((uts-2) * EXTENSION_FACTOR * user_num))
+    c_num_eval = [f.sub(t_eval[j], sum(b_eval[i][j]
+                                       for i in range(len(b_eval)))) for j in range(precision)]
+
+    z_num_eval5 = [f.sub(xs[(i * user_num) % precision], xs[(uts-2)
+                                                            * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+    z_num_inv = f.multi_inv(z_num_eval5)
+    tc_eval.append([f.mul(cn, zi) for cn, zi in zip(c_num_eval, z_num_inv)])
+    # for i in range(user_num):
+    #     print("i", i)
+    #     print("c_num_eval",
+    #           c_num_eval[i*uts*EXTENSION_FACTOR + (uts-2)*EXTENSION_FACTOR])
+    #     print("tc_eval[4]", tc_eval[4]
+    #           [i*uts*EXTENSION_FACTOR + (uts-2)*EXTENSION_FACTOR])
+    # print("tc_eval[4]", tc_eval[4])
+    # degree0 = f.get_poly_degree_exclude_multiples_of(c_num_eval, G2)
+    # degree4 = f.get_poly_degree_exclude_multiples_of(
+    #     tc_eval[4], G2, [EXTENSION_FACTOR, [0]])
+    # degree3 = f.get_poly_degree_exclude_multiples_of(
+    #     tc_eval[3], G2, [EXTENSION_FACTOR, [0]])
+    # degree2 = f.get_poly_degree_exclude_multiples_of(
+    #     tc_eval[2], G2, [EXTENSION_FACTOR, [0]])
+    # degree1 = f.get_poly_degree_exclude_multiples_of(
+    #     tc_eval[1], G2, [EXTENSION_FACTOR, [0]])
+    # degree0 = f.get_poly_degree_exclude_multiples_of(
+    #     tc_eval[0], G2, [EXTENSION_FACTOR, [0]])
+    # print("degree0", degree0)
+    # print("degree1", degree1)
+    # print("degree2", degree2)
+    # print("degree3", degree3)
+    # print("degree4", degree4)
 
     # values constraints eval
     cc_eval = []
@@ -107,80 +151,109 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
         # cc_constraint 1: Accumulation of each coin
         # b_eval[i][j + uts*EXTENSION_FACTOR] = b_eval[i][j + (uts-1)*EXTENSION_FACTOR] + b_eval[i][j], j mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，and j != last_step_position，
         # z(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - last_step_position)
-        c_num_eval = [f.sub(f.sub(b_eval[i][(j + uts*EXTENSION_FACTOR) % precision], b_eval[i][(j + (uts-1)*EXTENSION_FACTOR) % precision]), b_eval[i][j]) for j in range(precision)]
-        z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1) * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+        c_num_eval = [f.sub(f.sub(b_eval[i][(j + uts*EXTENSION_FACTOR) % precision], b_eval[i][(
+            j + (uts-1)*EXTENSION_FACTOR) % precision]), b_eval[i][j]) for j in range(precision)]
+        z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1)
+                            * EXTENSION_FACTOR * user_num]) for i in range(precision)]
         z_num_inv = f.multi_inv(z_num_eval)
-        z_den_eval = [f.sub(xs[i], last_step_position) for i in range(precision)]
-        cc_eval.append([f.mul(f.mul(cn, zi), zd) % MODULUS for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
+        z_den_eval = [f.sub(xs[i], last_step_position)
+                      for i in range(precision)]
+        cc_eval.append([f.mul(f.mul(cn, zi), zd) % MODULUS for cn,
+                       zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
         # cc_constraints 2: The initial accumulation should be 0, the last accumulation should total value of this coin of all users
         # b_eval[i](uts-1)*EXTENSION_FACTOR) = 0, b_eval[i](last_step_position) = sum_amount[i]
         # z(x) = (x-xs[(uts-1)*EXTENSION_FACTOR])(x-last_step_position)
-        interpolant = f.lagrange_interp_2([xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[i]])
+        interpolant = f.lagrange_interp_2(
+            [xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[i]])
         i_eval = [f.eval_poly_at(interpolant, x) for x in xs]
-        cc_eval.append([f.mul(f.sub(t, i), zi) for t, i, zi in zip(b_eval[i], i_eval, z_eval)])
+        cc_eval.append([f.mul(f.sub(t, i), zi)
+                       for t, i, zi in zip(b_eval[i], i_eval, z_eval)])
 
     del i_eval, interpolant, z_eval, c_num_eval, z_poly, z_den_eval, z_num_inv, z_num_eval
     gc.collect()
-    
-    user_random = [int.from_bytes(keccak_256(r),'big') for r in get_entries([tc_eval, cc_eval])]
+
+    b_eval[0][30] += 1000000000000
+    t_eval[30] += 1000000000000
+
+    user_random = [int.from_bytes(keccak_256(r), 'big')
+                   for r in get_entries([tc_eval, cc_eval])]
     id_eval = sum([[x] + [0]*(EXTENSION_FACTOR-1) for x in ids], [])
 
     user_entry_data = []
     for i in range(1, user_num):
         index = (i * uts + uts - 2) * EXTENSION_FACTOR
-        data = t_eval[index].to_bytes(32, 'big') + get_entry_data(b_eval, index) + id_eval[index].to_bytes(32, 'big') + user_random[index].to_bytes(32, 'big')
+        data = t_eval[index].to_bytes(32, 'big') + get_entry_data(b_eval, index) + \
+            id_eval[index].to_bytes(32, 'big') + \
+            user_random[index].to_bytes(32, 'big')
         user_entry_data.append(data)
     save_mtree_entries_data(data_path, user_entry_data)
-    del user_entry_data 
+    del user_entry_data
     gc.collect()
 
     mtree = merkelize(get_leaves([t_eval, b_eval, id_eval, user_random]))
-    
+
     pow_nonce = proof_of_work(mtree[1], POW_BITS)
 
     # linearly combination
-    G2_to_the_steps = f.exp(G2, 3 * steps)      
-    powers = [1]                            
+    G2_to_the_steps = f.exp(G2, 3 * steps)
+    powers = [1]
     for i in range(1, precision):
         powers.append(powers[-1] * G2_to_the_steps % MODULUS)
-    
-    l_eval = calculate_l(pow_nonce, powers, [t_eval, b_eval, id_eval, tc_eval[0], tc_eval[2:], cc_eval], MODULUS)
-    l_eval = [(l + c) % MODULUS for l ,c  in zip(l_eval, tc_eval[1])]
+
+    l_eval = calculate_l(pow_nonce, powers, [
+                         t_eval, b_eval, id_eval, tc_eval[0], tc_eval[2:], cc_eval], MODULUS)
+    l_eval = [(l + c) % MODULUS for l, c in zip(l_eval, tc_eval[1])]
     l_mtree = merkelize(l_eval)
-    
+
     # sampling
     positions = get_pseudorandom_indices(l_mtree[1], precision, SPOT_CHECK_SECURITY_FACTOR,
                                          exclude_multiples_of=EXTENSION_FACTOR)
-    aug_positions = sum([[x, (x + skips) % precision, (x + (uts-1)*skips) % precision, (x + uts*skips) % precision] for x in positions], [])
+    aug_positions = sum([[x, (x + skips) % precision, (x + (uts-1)*skips) %
+                        precision, (x + uts*skips) % precision] for x in positions], [])
+
+    # i = positions[0]
+    # print("t_eval", t_eval[i])
+    # print("b_eval", [b_eval[j][i] for j in range(len(b_eval))])
+    # print("t_eval - sum(b_eval)",
+    #       (t_eval[i] - sum([b_eval[j][i] for j in range(len(b_eval))])) % MODULUS)
+    # print("tc_eval", tc_eval[4][i])
+    # print("z5", z_num_eval5[i])
+    # print("tc_eval * z5", (tc_eval[4][i] * z_num_eval5[i]) % MODULUS)
 
     sampled_entries_data = []
     for i in range(SPOT_CHECK_SECURITY_FACTOR):
         sampled_entries_data = sampled_entries_data + [get_entry_data([t_eval, b_eval, id_eval, tc_eval, cc_eval], aug_positions[4*i]),
-                                 [t_eval[aug_positions[4*i+1]].to_bytes(32, 'big'), 
-                                  keccak_256(get_entry_data(b_eval, aug_positions[4*i+1])), 
-                                  id_eval[aug_positions[4*i+1]].to_bytes(32, 'big'), 
-                                  user_random[aug_positions[4*i+1]].to_bytes(32, 'big')],
-                                 [t_eval[aug_positions[4*i+2]].to_bytes(32, 'big'), 
-                                  get_entry_data(b_eval, aug_positions[4*i+2]), 
-                                  id_eval[aug_positions[4*i+2]].to_bytes(32, 'big'), 
-                                  user_random[aug_positions[4*i+2]].to_bytes(32, 'big')], 
-                                 [t_eval[aug_positions[4*i+3]].to_bytes(32, 'big'), 
-                                  get_entry_data(b_eval, aug_positions[4*i+3]), 
-                                  id_eval[aug_positions[4*i+3]].to_bytes(32, 'big'), 
-                                  user_random[aug_positions[4*i+3]].to_bytes(32, 'big')]] 
+                                                       [t_eval[aug_positions[4*i+1]].to_bytes(32, 'big'),
+                                                        keccak_256(get_entry_data(
+                                                            b_eval, aug_positions[4*i+1])),
+                                                        id_eval[aug_positions[4*i+1]
+                                                                ].to_bytes(32, 'big'),
+                                                        user_random[aug_positions[4*i+1]].to_bytes(32, 'big')],
+                                                       [t_eval[aug_positions[4*i+2]].to_bytes(32, 'big'),
+                                                        get_entry_data(
+                                                            b_eval, aug_positions[4*i+2]),
+                                                        id_eval[aug_positions[4*i+2]
+                                                                ].to_bytes(32, 'big'),
+                                                        user_random[aug_positions[4*i+2]].to_bytes(32, 'big')],
+                                                       [t_eval[aug_positions[4*i+3]].to_bytes(32, 'big'),
+                                                        get_entry_data(
+                                                            b_eval, aug_positions[4*i+3]),
+                                                        id_eval[aug_positions[4*i+3]
+                                                                ].to_bytes(32, 'big'),
+                                                        user_random[aug_positions[4*i+3]].to_bytes(32, 'big')]]
     del t_eval, b_eval, id_eval, tc_eval, cc_eval
     gc.collect()
     # return the merkle roots, the spot check merkle proofs, and low-degree proofs
     sum_proof = [steps,
-        uts,
-        mtree[1],
-        l_mtree[1],
-        pow_nonce,
-        mk_multi_branch(mtree, aug_positions),
-        sampled_entries_data,
-        mk_multi_branch(l_mtree, positions),
-        prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)]
+                 uts,
+                 mtree[1],
+                 l_mtree[1],
+                 pow_nonce,
+                 mk_multi_branch(mtree, aug_positions),
+                 sampled_entries_data,
+                 mk_multi_branch(l_mtree, positions),
+                 prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)]
 
     save_data(data_path, sum_proof, mtree, sum_values, coins)
     # print("mk por proof in %.4f sec: " % (time.time() - start_time))
@@ -188,6 +261,8 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
 
 # sum_values: The sum values of each coin ant total coin that prover claimed
 # proof: The proof for the sum amounts
+
+
 def verify_por_proof(sum_values, proof, main_coins_num):
     start_time = time.time()
     check_sum_values(sum_values, MODULUS)
@@ -195,7 +270,8 @@ def verify_por_proof(sum_values, proof, main_coins_num):
     steps, uts, m_root, l_root, pow_nonce, main_branches, mtree_entries_data, linear_comb_branches, fri_proof = proof
     assert steps <= 2**32 // EXTENSION_FACTOR, "invalid steps: too large"
     assert is_a_power_of_2(steps), "invalid steps: should be a power of 2"
-    assert int.from_bytes(keccak_256(m_root + pow_nonce), 'big') >> (256 - POW_BITS) == 0, "invalid proof of work"
+    assert int.from_bytes(keccak_256(m_root + pow_nonce),
+                          'big') >> (256 - POW_BITS) == 0, "invalid proof of work"
 
     precision = steps * EXTENSION_FACTOR
     user_num = steps // uts
@@ -203,20 +279,26 @@ def verify_por_proof(sum_values, proof, main_coins_num):
     G2 = f.exp(NONRESIDUE, (MODULUS-1)//precision)
     skips = precision // steps
     G1 = f.exp(G2, skips)
-    assert verify_low_degree_proof(l_root, G2, fri_proof, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)
-    
+    assert verify_low_degree_proof(
+        l_root, G2, fri_proof, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)
+
     # performs the spot checks
-    k = [int.from_bytes(keccak_256(pow_nonce +i.to_bytes(32,'big')), 'big') % MODULUS for i in range(6 * coins_num + 10)]
-    
+    k = [int.from_bytes(keccak_256(pow_nonce + i.to_bytes(32, 'big')),
+                        'big') % MODULUS for i in range(6 * coins_num + 12)]
+
     positions = get_pseudorandom_indices(l_root, precision, SPOT_CHECK_SECURITY_FACTOR,
                                          exclude_multiples_of=EXTENSION_FACTOR)
-    aug_positions = sum([[x, (x + skips) % precision, (x + (uts-1)*skips) % precision, (x + uts*skips) % precision] for x in positions], [])
+    aug_positions = sum([[x, (x + skips) % precision, (x + (uts-1)*skips) %
+                        precision, (x + uts*skips) % precision] for x in positions], [])
     last_step_position = f.exp(G2, (steps - 1) * skips)
- 
-    main_branch_leaves = verify_multi_branch(m_root, aug_positions, main_branches)
-    check_entry_hash(main_branch_leaves, mtree_entries_data, main_coins_num, MODULUS)
 
-    linear_comb_branch_leaves = verify_multi_branch(l_root, positions, linear_comb_branches)
+    main_branch_leaves = verify_multi_branch(
+        m_root, aug_positions, main_branches)
+    check_entry_hash(main_branch_leaves, mtree_entries_data,
+                     main_coins_num, MODULUS)
+
+    linear_comb_branch_leaves = verify_multi_branch(
+        l_root, positions, linear_comb_branches)
 
     for i, pos in enumerate(positions):
         x = f.exp(G2, pos)
@@ -229,62 +311,80 @@ def verify_por_proof(sum_values, proof, main_coins_num):
         l_of_x = int.from_bytes(linear_comb_branch_leaves[i], 'big')
 
         t_of_x = int.from_bytes(mbranch1[:32], 'big')
-        b_of_x = [int.from_bytes(mbranch1[32+32*i:64+32*i], 'big') for i in range(coins_num)]
-        id_of_x = int.from_bytes(mbranch1[32+32*coins_num:64+32*coins_num], 'big')
-        tc_of_x = [int.from_bytes(mbranch1[64+32*(coins_num+i):96+32*(coins_num+i)], 'big') for i in range(4)]
-        cc_of_x = [int.from_bytes(mbranch1[192+32*(coins_num+i):224+32*(coins_num+i)], 'big') for i in range(2*coins_num)]
+        b_of_x = [int.from_bytes(mbranch1[32+32*i:64+32*i], 'big')
+                  for i in range(coins_num)]
+        id_of_x = int.from_bytes(
+            mbranch1[32+32*coins_num:64+32*coins_num], 'big')
+        tc_of_x = [int.from_bytes(
+            mbranch1[64+32*(coins_num+i):96+32*(coins_num+i)], 'big') for i in range(5)]
+        cc_of_x = [int.from_bytes(
+            mbranch1[224+32*(coins_num+i):256+32*(coins_num+i)], 'big') for i in range(2*coins_num)]
 
         t_of_skips_x = int.from_bytes(mbranch2[0], 'big')
         t_of_uts_sub_1_skips_x = int.from_bytes(mbranch3[0], 'big')
         t_of_uts_skips_x = int.from_bytes(mbranch4[0], 'big')
 
-        b_of_uts_sub_1_skips_x = [int.from_bytes(mbranch3[1][32*i:32+32*i], 'big') for i in range(coins_num)]
-        b_of_uts_skips_x = [int.from_bytes(mbranch4[1][32*i:32+32*i], 'big') for i in range(coins_num)]
+        b_of_uts_sub_1_skips_x = [int.from_bytes(
+            mbranch3[1][32*i:32+32*i], 'big') for i in range(coins_num)]
+        b_of_uts_skips_x = [int.from_bytes(
+            mbranch4[1][32*i:32+32*i], 'big') for i in range(coins_num)]
 
         # check constraint 1: t[uts*EXTENSION_FACTOR*i] = 0, 0<=i<=user_num-1
         # t[i] = c1[i] * z1[i]
         z1 = f.exp(x, user_num) - 1
         assert t_of_x == f.mul(tc_of_x[0], z1)
 
-        # check constraint 2:  (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = 0, 
+        # check constraint 2:  (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = 0,
         # 0<=i<=steps-1 && (i mod uts*EXTENSION_FACTOR != {(uts-2)*EXTENSION_FACTOR,(uts-1)*EXTENSION_FACTOR}, i in range(precision)
         # (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = c2[i] * z2[i]
-        z2 = f.div(f.exp(x, steps) - 1, 
-                f.mul(f.sub(f.exp(x, user_num), f.exp(G2, (uts-2) * EXTENSION_FACTOR * user_num)),
-                     f.sub(f.exp(x, user_num), f.exp(G2, (uts-1) * EXTENSION_FACTOR * user_num))))
-        assert f.mul(f.mul(f.sub(t_of_skips_x, 4 * t_of_x), f.sub(t_of_skips_x, 4 * t_of_x + 1)), 
-                     f.mul(f.sub(t_of_skips_x, 4 * t_of_x + 2), f.sub(t_of_skips_x, 4 * t_of_x + 3))) ==  f.mul(tc_of_x[1], z2)
+        z2 = f.div(f.exp(x, steps) - 1,
+                   f.mul(f.sub(f.exp(x, user_num), f.exp(G2, (uts-2) * EXTENSION_FACTOR * user_num)),
+                         f.sub(f.exp(x, user_num), f.exp(G2, (uts-1) * EXTENSION_FACTOR * user_num))))
+        assert f.mul(f.mul(f.sub(t_of_skips_x, 4 * t_of_x), f.sub(t_of_skips_x, 4 * t_of_x + 1)),
+                     f.mul(f.sub(t_of_skips_x, 4 * t_of_x + 2), f.sub(t_of_skips_x, 4 * t_of_x + 3))) == f.mul(tc_of_x[1], z2)
 
         # check constraint 3: t(i + uts*EXTENSION_FACTOR) = t(i + (uts-1)*EXTENSION_FACTOR) + t(i),i mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，i != last_step_position
         # t(i + uts*EXTENSION_FACTOR) - t(i + (uts-1)*EXTENSION_FACTOR) - t(i) = c3[i] * z3
-        z3 = f.div(f.sub(f.exp(x, user_num), f.exp(G2, (uts-1) * EXTENSION_FACTOR * user_num)), 
-                    f.sub(x, last_step_position))
-        assert f.sub(f.sub(t_of_uts_skips_x, t_of_uts_sub_1_skips_x), t_of_x) == f.mul(tc_of_x[2], z3)
+        z3 = f.div(f.sub(f.exp(x, user_num), f.exp(G2, (uts-1) * EXTENSION_FACTOR * user_num)),
+                   f.sub(x, last_step_position))
+        assert f.sub(f.sub(t_of_uts_skips_x, t_of_uts_sub_1_skips_x),
+                     t_of_x) == f.mul(tc_of_x[2], z3)
 
         # check constraint 4: t((uts-1)*EXTENSION_FACTOR) = 0， t(last_step_position) = sum_values[-1]
         # t[i] - interpolant_value = c4[i] * z4[i]
-        interpolant = f.lagrange_interp_2([f.exp(G2, (uts-1)*EXTENSION_FACTOR), last_step_position], [0, sum_values[-1]])
+        interpolant = f.lagrange_interp_2(
+            [f.exp(G2, (uts-1)*EXTENSION_FACTOR), last_step_position], [0, sum_values[-1]])
         interpolant_value = f.eval_poly_at(interpolant, x)
-        z4_poly = f.mul_polys([-f.exp(G2, ((uts-1)*EXTENSION_FACTOR)), 1], [-last_step_position, 1])
+        z4_poly = f.mul_polys(
+            [-f.exp(G2, ((uts-1)*EXTENSION_FACTOR)), 1], [-last_step_position, 1])
         z4 = f.eval_poly_at(z4_poly, x)
-        assert f.sub(t_of_x, interpolant_value) ==f.mul(tc_of_x[3], z4)
+        assert f.sub(t_of_x, interpolant_value) == f.mul(tc_of_x[3], z4)
 
+        # check constraint 5:t(i) - sum(b_eval[i][j] for j in range(len(b_eval))) = 0, i mod uts*EXTENSION_FACTOR == (uts-2)*EXTENSION_FACTOR
+        # z5(x) = (x^user_num - G2^((uts-2) * EXTENSION_FACTOR * user_num))
+
+        z5 = f.sub(f.exp(x, user_num), f.exp(
+            G2, (uts-2) * EXTENSION_FACTOR * user_num))
+        assert f.sub(t_of_x, sum(b_of_x)) == f.mul(tc_of_x[4], z5)
 
         # check coins constraint:
         for i in range(main_coins_num):
             # check cc_constraint 1: b_eval[i][j + uts*EXTENSION_FACTOR] = b_eval[i][j + (uts-1)*EXTENSION_FACTOR] + b_eval[i][j]
             # j mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，and j != last_step_position
-            assert f.sub(f.sub(b_of_uts_skips_x[i], b_of_uts_sub_1_skips_x[i]), b_of_x[i]) == f.mul(cc_of_x[2*i], z3)
+            assert f.sub(f.sub(b_of_uts_skips_x[i], b_of_uts_sub_1_skips_x[i]), b_of_x[i]) == f.mul(
+                cc_of_x[2*i], z3)
 
             # check cc_constraints 2: b_eval[i](uts-1)*EXTENSION_FACTOR) = 0, b_eval[i](last_step_position) = 0
-            interpolant = f.lagrange_interp_2([f.exp(G2, (uts-1)*EXTENSION_FACTOR), last_step_position], [0, sum_values[i]])
+            interpolant = f.lagrange_interp_2(
+                [f.exp(G2, (uts-1)*EXTENSION_FACTOR), last_step_position], [0, sum_values[i]])
             interpolant_value = f.eval_poly_at(interpolant, x)
-            assert f.sub(b_of_x[i], interpolant_value) == f.mul(cc_of_x[2*i+1], z4)
+            assert f.sub(b_of_x[i], interpolant_value) == f.mul(
+                cc_of_x[2*i+1], z4)
 
         # check correctness of the linear combination
-        assert verify_l(k, x_to_the_steps, l_of_x, [t_of_x, b_of_x, id_of_x, tc_of_x[0], tc_of_x[2:], cc_of_x], tc_of_x[1], MODULUS)
+        assert verify_l(k, x_to_the_steps, l_of_x, [
+                        t_of_x, b_of_x, id_of_x, tc_of_x[0], tc_of_x[2:], cc_of_x], tc_of_x[1], MODULUS)
 
     # print('Verified %d consistency checks' % SPOT_CHECK_SECURITY_FACTOR)
     # print('Verified sum proof in %.4f sec' % (time.time() - start_time))
     return True
-
