@@ -1,11 +1,6 @@
 # This demo is based on Vitalik's proof of solvency proposal and implemented using the STARK proof system.
 # See https://vitalik.ca/general/2022/11/19/proof_of_solvency.html
 # It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value.
-# This is a basic version of the solution.
-# Most of the modules used here including fft and fri etc. came from "../mimc_stark".
-
-# THIS IS EDUCATIONAL CODE, NOT PRODUCTION! HIRE A SECURITY AUDITOR
-# WHEN BUILDING SOMETHING FOR PRODUCTION USE.
 
 from permuted_tree import merkelize, keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
 from poly_utils import PrimeField
@@ -121,29 +116,6 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
                                                             * EXTENSION_FACTOR * user_num]) for i in range(precision)]
     z_num_inv = f.multi_inv(z_num_eval5)
     tc_eval.append([f.mul(cn, zi) for cn, zi in zip(c_num_eval, z_num_inv)])
-    # for i in range(user_num):
-    #     print("i", i)
-    #     print("c_num_eval",
-    #           c_num_eval[i*uts*EXTENSION_FACTOR + (uts-2)*EXTENSION_FACTOR])
-    #     print("tc_eval[4]", tc_eval[4]
-    #           [i*uts*EXTENSION_FACTOR + (uts-2)*EXTENSION_FACTOR])
-    # print("tc_eval[4]", tc_eval[4])
-    # degree0 = f.get_poly_degree_exclude_multiples_of(c_num_eval, G2)
-    # degree4 = f.get_poly_degree_exclude_multiples_of(
-    #     tc_eval[4], G2, [EXTENSION_FACTOR, [0]])
-    # degree3 = f.get_poly_degree_exclude_multiples_of(
-    #     tc_eval[3], G2, [EXTENSION_FACTOR, [0]])
-    # degree2 = f.get_poly_degree_exclude_multiples_of(
-    #     tc_eval[2], G2, [EXTENSION_FACTOR, [0]])
-    # degree1 = f.get_poly_degree_exclude_multiples_of(
-    #     tc_eval[1], G2, [EXTENSION_FACTOR, [0]])
-    # degree0 = f.get_poly_degree_exclude_multiples_of(
-    #     tc_eval[0], G2, [EXTENSION_FACTOR, [0]])
-    # print("degree0", degree0)
-    # print("degree1", degree1)
-    # print("degree2", degree2)
-    # print("degree3", degree3)
-    # print("degree4", degree4)
 
     # values constraints eval
     cc_eval = []
@@ -172,9 +144,6 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
 
     del i_eval, interpolant, z_eval, c_num_eval, z_poly, z_den_eval, z_num_inv, z_num_eval
     gc.collect()
-
-    b_eval[0][30] += 1000000000000
-    t_eval[30] += 1000000000000
 
     user_random = [int.from_bytes(keccak_256(r), 'big')
                    for r in get_entries([tc_eval, cc_eval])]
@@ -211,15 +180,6 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
                                          exclude_multiples_of=EXTENSION_FACTOR)
     aug_positions = sum([[x, (x + skips) % precision, (x + (uts-1)*skips) %
                         precision, (x + uts*skips) % precision] for x in positions], [])
-
-    # i = positions[0]
-    # print("t_eval", t_eval[i])
-    # print("b_eval", [b_eval[j][i] for j in range(len(b_eval))])
-    # print("t_eval - sum(b_eval)",
-    #       (t_eval[i] - sum([b_eval[j][i] for j in range(len(b_eval))])) % MODULUS)
-    # print("tc_eval", tc_eval[4][i])
-    # print("z5", z_num_eval5[i])
-    # print("tc_eval * z5", (tc_eval[4][i] * z_num_eval5[i]) % MODULUS)
 
     sampled_entries_data = []
     for i in range(SPOT_CHECK_SECURITY_FACTOR):

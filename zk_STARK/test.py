@@ -11,42 +11,42 @@ def test_full_process():
     with open(CONFIG_PATH, "r") as ff:
         config_json = json.load(ff)
     init_user_data(15, 0, CONFIG_PATH)
-    # init_user_data(15, 1, CONFIG_PATH)
-    # init_user_data(15, 2, CONFIG_PATH)
-    # init_user_data(15, 3, CONFIG_PATH)
+    init_user_data(15, 1, CONFIG_PATH)
+    init_user_data(15, 2, CONFIG_PATH)
+    init_user_data(15, 3, CONFIG_PATH)
 
     mk_batch_proof(16, "./user_data/batch0.json",
                    "./sum_proof_data/batches/a0/", CONFIG_PATH)
-    # mk_batch_proof(16, "./user_data/batch1.json",
-    #                "./sum_proof_data/batches/a1/", CONFIG_PATH)
-    # mk_batch_proof(16, "./user_data/batch2.json",
-    #                "./sum_proof_data/batches/a2/", CONFIG_PATH)
-    # mk_batch_proof(32, "./user_data/batch3.json",
-    #                "./sum_proof_data/batches/b0/", CONFIG_PATH)
+    mk_batch_proof(16, "./user_data/batch1.json",
+                   "./sum_proof_data/batches/a1/", CONFIG_PATH)
+    mk_batch_proof(16, "./user_data/batch2.json",
+                   "./sum_proof_data/batches/a2/", CONFIG_PATH)
+    mk_batch_proof(32, "./user_data/batch3.json",
+                   "./sum_proof_data/batches/b0/", CONFIG_PATH)
 
-    # mk_trunk_proof("./sum_proof_data/batches/",
-    #                "./sum_proof_data/trunk/", CONFIG_PATH)
+    mk_trunk_proof("./sum_proof_data/batches/",
+                   "./sum_proof_data/trunk/", CONFIG_PATH)
 
     verify_batch_proof("./sum_proof_data/batches/a0/", config_json)
-    # verify_batch_proof("./sum_proof_data/batches/a1/", config_json)
-    # verify_batch_proof("./sum_proof_data/batches/a2/", config_json)
-    # verify_batch_proof("./sum_proof_data/batches/b0/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/a1/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/a2/", config_json)
+    verify_batch_proof("./sum_proof_data/batches/b0/", config_json)
 
-    # verify_trunk_proof("./sum_proof_data/trunk/", config_json)
+    verify_trunk_proof("./sum_proof_data/trunk/", config_json)
 
-    # mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/",
-    #                    "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/", CONFIG_PATH)
-    # mk_inclusion_proof(1, 16, "./sum_proof_data/batches/a1/",
-    #                    "./sum_proof_data/trunk/", "./inclusion_proof_data/a1/", CONFIG_PATH)
-    # mk_inclusion_proof(2, 16, "./sum_proof_data/batches/a2/",
-    #                    "./sum_proof_data/trunk/", "./inclusion_proof_data/a2/", CONFIG_PATH)
-    # mk_inclusion_proof(3, 32, "./sum_proof_data/batches/b0/",
-    #                    "./sum_proof_data/trunk/", "./inclusion_proof_data/b0/", CONFIG_PATH)
+    mk_inclusion_proof(0, 16, "./sum_proof_data/batches/a0/",
+                       "./sum_proof_data/trunk/", "./inclusion_proof_data/a0/", CONFIG_PATH)
+    mk_inclusion_proof(1, 16, "./sum_proof_data/batches/a1/",
+                       "./sum_proof_data/trunk/", "./inclusion_proof_data/a1/", CONFIG_PATH)
+    mk_inclusion_proof(2, 16, "./sum_proof_data/batches/a2/",
+                       "./sum_proof_data/trunk/", "./inclusion_proof_data/a2/", CONFIG_PATH)
+    mk_inclusion_proof(3, 32, "./sum_proof_data/batches/b0/",
+                       "./sum_proof_data/trunk/", "./inclusion_proof_data/b0/", CONFIG_PATH)
 
-    # verify_inclusion_proof("./inclusion_proof_data/a0/")
-    # verify_inclusion_proof("./inclusion_proof_data/a1/")
-    # verify_inclusion_proof("./inclusion_proof_data/a2/")
-    # verify_inclusion_proof("./inclusion_proof_data/b0/")
+    verify_inclusion_proof("./inclusion_proof_data/a0/")
+    verify_inclusion_proof("./inclusion_proof_data/a1/")
+    verify_inclusion_proof("./inclusion_proof_data/a2/")
+    verify_inclusion_proof("./inclusion_proof_data/b0/")
 
     # por_user_verify_proofs()
 
@@ -143,21 +143,14 @@ def test_invalid_inclusion_proof():
     return
 
 
-def test1():
-    a = [1, 2, 3, 4]
-    b = sum(a)
-    print(b)
-
-
 if __name__ == '__main__':
     time0 = time.time()
     test_full_process()
-    # test_try_invalid_sum_value()
-    # test_negative_value_with_positive_net_value()
-    # test_negative_net_value()
-    # test_invalid_inclusion_proof()
-    # test_full_process()
-    # verify_sum_proofs(CONFIG_PATH)
-    # verify_all_inclusion_proof()
-    # test1()
+    test_try_invalid_sum_value()
+    test_negative_value_with_positive_net_value()
+    test_negative_net_value()
+    test_invalid_inclusion_proof()
+    test_full_process()
+    verify_sum_proofs(CONFIG_PATH)
+    verify_all_inclusion_proof()
     print("all test finished in %d sec" % (time.time()-time0))
