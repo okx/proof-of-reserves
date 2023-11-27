@@ -85,6 +85,7 @@ var (
 		"OKT":            "ETH",
 		"OKB":            "ETH",
 		"OPTIMISM":       "ETH",
+		"ETH-LINEA":      "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -156,6 +157,7 @@ var (
 		"OKB":           EvmCoinTye,
 		"OPTIMISM":      EvmCoinTye,
 		"FIL-EVM":       EvmCoinTye,
+		"ETH-LINEA":     EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -239,6 +241,7 @@ var (
 		"OKB":           EthMessageSignatureHeader,
 		"OPTIMISM":      EthMessageSignatureHeader,
 		"FIL-EVM":       EthMessageSignatureHeader,
+		"ETH-LINEA":     EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -337,6 +340,7 @@ var (
 		"OKT":            "OKT",
 		"OKB":            "OKB",
 		"OPTIMISM":       "OPTIMISM",
+		"ETH-LINEA":      "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -427,6 +431,7 @@ var (
 		"OKT":            18,
 		"OKB":            18,
 		"OPTIMISM":       18,
+		"ETH-LINEA":      18,
 
 		// BETH
 		"BETH": 18,
@@ -483,6 +488,7 @@ var (
 
 		"USDT-ALGO": true,
 		"FIL-EVM":   true,
+		"ETH-LINEA": true,
 	}
 
 	VerifyAddressCoinBlackList = map[string]bool{
