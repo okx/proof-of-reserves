@@ -1,5 +1,5 @@
 from por_stark import mk_por_proof, verify_por_proof
-from permuted_tree import mk_branch, verify_branch, keccak_256
+from permuted_tree import mk_branch, verify_branch, hash
 from poly_utils import PrimeField
 from constants import *
 from utils import check_entry_hash, hex_array_to_bytes
@@ -21,7 +21,7 @@ def init_user_data(batch_size, batch_index, config_path):
     data = []
     coins_len = len(coins)
     for i in range(batch_size):
-        items = {"id": str(keccak_256(i.to_bytes(32, 'big')).hex())}
+        items = {"id": str(hash(i.to_bytes(32, 'big')).hex())}
         for coin in coins:
             items[coin] = str(random.randrange(4**(UTS16 - 2))//coins_len)
         data.append(items)
@@ -284,10 +284,10 @@ def verify_single_inclusion_proof(proof_file):
             check_sum_value -= value
             temp = temp + value.to_bytes(32, 'big')
             j += 1
-        user_entry = user_entry + keccak_256(temp) + bytes.fromhex(
+        user_entry = user_entry + hash(temp) + bytes.fromhex(
             batch_inclusion_proof["user_id"]) + bytes.fromhex(batch_inclusion_proof["random_number"])
         assert check_sum_value == 0
-        assert user_leaf == keccak_256(user_entry)
+        assert user_leaf == hash(user_entry)
 
         trunk_inclusion_proof = inclusion_proof["trunk_inclusion_proof"]
         batch_leaf = verify_branch(bytes.fromhex(trunk_inclusion_proof["trunk_mtree_root"]), (UTS_FOR_TRUNK * (
@@ -301,10 +301,10 @@ def verify_single_inclusion_proof(proof_file):
             check_sum_value -= value
             temp = temp + value.to_bytes(32, 'big')
             j += 1
-        batch_entry = batch_entry + keccak_256(temp) + bytes.fromhex(
+        batch_entry = batch_entry + hash(temp) + bytes.fromhex(
             trunk_inclusion_proof["batch_id"]) + bytes.fromhex(trunk_inclusion_proof["random_number"])
         assert check_sum_value == 0
-        assert batch_leaf == keccak_256(batch_entry)
+        assert batch_leaf == hash(batch_entry)
 
         assert trunk_inclusion_proof["batch_id"] == batch_inclusion_proof["batch_mtree_root"]
 

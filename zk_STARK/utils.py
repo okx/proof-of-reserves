@@ -1,4 +1,4 @@
-from keccak_merkle_tree import keccak_256
+from merkle_tree import hash
 import os
 import json
 
@@ -19,7 +19,7 @@ def get_pseudorandom_indices(seed, modulus, count, exclude_multiples_of=0):
     assert modulus < 2**24
     data = seed
     while len(data) < 4 * count:
-        data += keccak_256(data[-32:])
+        data += hash(data[-32:])
     if exclude_multiples_of == 0:
         return [int.from_bytes(data[i: i+4], 'big') % modulus for i in range(0, count * 4, 4)]
     else:
@@ -135,10 +135,10 @@ def get_leaves(array):
                 temp = b''
                 for k in range(len(array[j])):
                     temp = temp + array[j][k][i].to_bytes(32, 'big')
-                x = x + keccak_256(temp)
+                x = x + hash(temp)
             else:
                 x = x + array[j][i].to_bytes(32, 'big')
-        leaves.append(keccak_256(x))
+        leaves.append(hash(x))
     del x, leaves_len
     return leaves
 
@@ -152,7 +152,7 @@ def calculate_l(seed, powers, array, modulus):
             k_len += 2
         else:
             k_len += 2 * len(array[i])
-    k = [int.from_bytes(keccak_256(seed + i.to_bytes(32, 'big')),
+    k = [int.from_bytes(hash(seed + i.to_bytes(32, 'big')),
                         'big') % modulus for i in range(k_len)]
     index = 0
     for i in range(l_len):
@@ -196,16 +196,16 @@ def verify_l(k, power, l, array, extra, modulus):
 def check_entry_hash(main_branch_leaves, data, coins_num, modulus):
     data_length = len(data[0])
     for i in range(len(main_branch_leaves)//4):
-        user_random = keccak_256(data[4*i][data_length-2*coins_num*32-5*32:])
-        b_hash = keccak_256(data[4*i][32:data_length-2*coins_num*32-6*32])
-        assert main_branch_leaves[4*i] == keccak_256(data[4*i][:32] + b_hash + data[4*i]
-                                                     [data_length-2*coins_num*32-6*32:data_length-2*coins_num*32-5*32] + user_random)
-        assert main_branch_leaves[4*i+1] == keccak_256(
+        user_random = hash(data[4*i][data_length-2*coins_num*32-5*32:])
+        b_hash = hash(data[4*i][32:data_length-2*coins_num*32-6*32])
+        assert main_branch_leaves[4*i] == hash(data[4*i][:32] + b_hash + data[4*i]
+                                               [data_length-2*coins_num*32-6*32:data_length-2*coins_num*32-5*32] + user_random)
+        assert main_branch_leaves[4*i+1] == hash(
             data[4*i+1][0] + data[4*i+1][1] + data[4*i+1][2] + data[4*i+1][3])
-        assert main_branch_leaves[4*i+2] == keccak_256(
-            data[4*i+2][0] + keccak_256(data[4*i+2][1]) + data[4*i+2][2] + data[4*i+2][3])
-        assert main_branch_leaves[4*i+3] == keccak_256(
-            data[4*i+3][0] + keccak_256(data[4*i+3][1]) + data[4*i+3][2] + data[4*i+3][3])
+        assert main_branch_leaves[4*i+2] == hash(
+            data[4*i+2][0] + hash(data[4*i+2][1]) + data[4*i+2][2] + data[4*i+2][3])
+        assert main_branch_leaves[4*i+3] == hash(
+            data[4*i+3][0] + hash(data[4*i+3][1]) + data[4*i+3][2] + data[4*i+3][3])
     return
 
 
@@ -298,7 +298,7 @@ def hex_array_to_bytes(array):
 def proof_of_work(seed, pow_bits):
     nonce = int.from_bytes(seed, 'big')
     while True:
-        x = int.from_bytes(keccak_256(seed + nonce.to_bytes(32, 'big')), 'big')
+        x = int.from_bytes(hash(seed + nonce.to_bytes(32, 'big')), 'big')
         if x >> (256 - pow_bits) == 0:
             break
         nonce += 1

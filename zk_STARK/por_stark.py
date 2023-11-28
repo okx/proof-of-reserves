@@ -2,7 +2,7 @@
 # See https://vitalik.ca/general/2022/11/19/proof_of_solvency.html
 # It provides users with proofs that constrain the sum of all assets and the non-negativity of their net asset value.
 
-from permuted_tree import merkelize, keccak_256, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
+from permuted_tree import merkelize, hash, mk_multi_branch, verify_multi_branch, mk_branch, verify_branch
 from poly_utils import PrimeField
 from fft import fft
 from fri import prove_low_degree, verify_low_degree_proof
@@ -145,7 +145,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     del i_eval, interpolant, z_eval, c_num_eval, z_poly, z_den_eval, z_num_inv, z_num_eval
     gc.collect()
 
-    user_random = [int.from_bytes(keccak_256(r), 'big')
+    user_random = [int.from_bytes(hash(r), 'big')
                    for r in get_entries([tc_eval, cc_eval])]
     id_eval = sum([[x] + [0]*(EXTENSION_FACTOR-1) for x in ids], [])
 
@@ -185,7 +185,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     for i in range(SPOT_CHECK_SECURITY_FACTOR):
         sampled_entries_data = sampled_entries_data + [get_entry_data([t_eval, b_eval, id_eval, tc_eval, cc_eval], aug_positions[4*i]),
                                                        [t_eval[aug_positions[4*i+1]].to_bytes(32, 'big'),
-                                                        keccak_256(get_entry_data(
+                                                        hash(get_entry_data(
                                                             b_eval, aug_positions[4*i+1])),
                                                         id_eval[aug_positions[4*i+1]
                                                                 ].to_bytes(32, 'big'),
@@ -230,7 +230,7 @@ def verify_por_proof(sum_values, proof, main_coins_num):
     steps, uts, m_root, l_root, pow_nonce, main_branches, mtree_entries_data, linear_comb_branches, fri_proof = proof
     assert steps <= 2**32 // EXTENSION_FACTOR, "invalid steps: too large"
     assert is_a_power_of_2(steps), "invalid steps: should be a power of 2"
-    assert int.from_bytes(keccak_256(m_root + pow_nonce),
+    assert int.from_bytes(hash(m_root + pow_nonce),
                           'big') >> (256 - POW_BITS) == 0, "invalid proof of work"
 
     precision = steps * EXTENSION_FACTOR
@@ -243,7 +243,7 @@ def verify_por_proof(sum_values, proof, main_coins_num):
         l_root, G2, fri_proof, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)
 
     # performs the spot checks
-    k = [int.from_bytes(keccak_256(pow_nonce + i.to_bytes(32, 'big')),
+    k = [int.from_bytes(hash(pow_nonce + i.to_bytes(32, 'big')),
                         'big') % MODULUS for i in range(6 * coins_num + 12)]
 
     positions = get_pseudorandom_indices(l_root, precision, SPOT_CHECK_SECURITY_FACTOR,
