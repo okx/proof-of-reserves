@@ -107,6 +107,9 @@ def get_entry_data(entry_data, index):
     for j in range(len(entry_data)):
         if (type(entry_data[j][0]) == list):
             for k in range(len(entry_data[j])):
+                # print("index", index)
+                # print("j", j)
+                # print("k", k)
                 x = x + entry_data[j][k][index].to_bytes(32, 'big')
         else:
             x = x + entry_data[j][index].to_bytes(32, 'big')
@@ -114,13 +117,13 @@ def get_entry_data(entry_data, index):
 
 
 def get_entries(array):
+    print("len(array)", len(array))
     entries_len = len(array[0][0]) if type(
         array[0][0]) == list else len(array[0])
     entries = []
     for i in range(entries_len):
         x = get_entry_data(array, i)
         entries.append(x)
-    del x, entries_len
     return entries
 
 

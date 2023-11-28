@@ -44,7 +44,6 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     domain = get_power_cycle(G1, MODULUS)
     # get x coordinates for fft
     xs = get_power_cycle(G2, MODULUS)
-    domain_last_step_position = domain[steps - 1]
     last_step_position = xs[(steps - 1) * EXTENSION_FACTOR]
 
     # get poly and eval for sum_trace
@@ -64,81 +63,42 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     # trace constraints evaluations
     tc_eval = []
     # constraint 1: The first row of each user's trace should be 0, to ensure the non-negativity of user's net assets value
-    # t[uts*i] = 0, 0<=i<=user_num-1,
-    # z1(x) = (x-domain[uts*0])(x-domain[uts*1])...(x-domain[uts*(user_num-1)])
+    # t[uts*EXTENSION_FACTOR*i] = 0, 0<=i<=user_num-1,
+    # z1(x) = (x-xs[uts*EXTENSION_FACTOR*0])(x-xs[uts*EXTENSION_FACTOR*1])...(x-xs[uts*EXTENSION_FACTOR*(user_num-1)])
     # z1(x) = x^user_num - 1
-    z_eval = [domain[(i * user_num) % steps] - 1 for i in range(steps)]
-    # z_eval = f.multi_inv(z_num_eval)
-    # tc_eval.append([tp * z % MODULUS for tp, z in zip(t_eval, z_eval)])
+    z_num_eval = [xs[(i * user_num) % precision] - 1 for i in range(precision)]
+    z_eval = f.multi_inv(z_num_eval)
+    tc_eval.append([tp * z % MODULUS for tp, z in zip(t_eval, z_eval)])
 
-    zerofier_poly1 = f.fit(fft(z_eval, MODULUS, G1, inv=True))
-    quotient_poly1 = f.div_polys(t_poly, zerofier_poly1)
-    # d1 = f.get_poly_degree(t_poly)
-    # d2 = f.get_poly_degree(zerofier_poly1)
-    # d3 = f.get_poly_degree(quotient_poly1)
-
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-    tc_eval.append(fft(quotient_poly1, MODULUS, G2))
+    zerofier1 = fft(z_num_eval, MODULUS, G2, inv=True)
 
     # constraint 2:  row_value = next_row_value // 4, in case user's net assets value less than 4^(uts-2), the first row of each user's trace should be 0
-    # (t[i + 1] - 4*t[i])*(t[i + 1] - 4*t[i] - 1)*(t[i + 1] - 4*t[i] - 2)*(t[i + 1] - 4*t[i] - 3) = 0,
-    # 0<=i<=steps-1 && (i mod uts != {(uts-2),(uts-1)}, i in range(steps)
-    # z2(x) = (x^steps -1)/((x^user_num -  G1^((uts-2)*user_num))(x^user_num - G1^((uts-1)*user_num)))
+    # (t[i + EXTENSION_FACTOR] - 4*t[i])*(t[i + EXTENSION_FACTOR] - 4*t[i] - 1)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 2)*(t[i + EXTENSION_FACTOR] - 4*t[i] - 3) = 0,
+    # 0<=i<=steps-1 && (i mod uts*EXTENSION_FACTOR != {(uts-2)*EXTENSION_FACTOR,(uts-1)*EXTENSION_FACTOR}, i in range(precision)
+    # z2(x) = (x^steps -1)/((x^user_num -  G2^((uts-2)*EXTENSION_FACTOR*user_num))(x^user_num - G2^((uts-1)*EXTENSION_FACTOR*user_num)))
     c_num_eval = [f.mul(f.mul(f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]),
                               (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 1)),
                         (f.mul((f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 2),
                                (f.sub(t_eval[(i + EXTENSION_FACTOR) % precision], 4 * t_eval[i]) - 3)))) for i in range(precision)]
     z_num_eval = [(xs[(i * steps) % precision] - 1) %
                   MODULUS for i in range(precision)]
+    z_num_inv = f.multi_inv(z_num_eval)
     z_den_eval = [(f.mul(f.sub(xs[(i * user_num) % precision], xs[(uts-2) * EXTENSION_FACTOR * user_num]),
                          f.sub(xs[(i * user_num) % precision], xs[(uts-1) * EXTENSION_FACTOR * user_num]))) for i in range(precision)]
-    a = f.fit(fft(z_num_eval, MODULUS, G2, inv=True))
-    b = f.fit(fft(z_den_eval, MODULUS, G2, inv=True))
-    zerofier_poly2 = f.div_polys(a, b)
-    c_poly = f.fit(fft(c_num_eval, MODULUS, G2, inv=True))
-
-    quotient_poly2 = f.div_polys(c_poly, zerofier_poly2)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly2)
-    # d3 = f.get_poly_degree(quotient_poly2)
-
-    # print("a", a)
-    # print("b", b)
-    # print("zerofier_poly2", zerofier_poly2)
-    # print("quotient_poly2", quotient_poly2)
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-
-    tc_eval.append(fft(quotient_poly2, MODULUS, G2))
+    tc_eval.append([f.mul(f.mul(cn, zi), zd)
+                   for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
     # constraint 3: User's net asset value accumulation
-    # t(i + uts) = t(i + (uts-1)) + t(i), i mod uts == (uts-1) and i != domain_last_step_position
-    # z3(x) = (x^user_num - G1^((uts-1) * user_num))/(x - domain_last_step_position)
-    c_num_eval = [f.sub(f.sub(sum_trace[(i + uts) % steps], sum_trace[(
-        i + (uts-1)) % steps]), sum_trace[i]) for i in range(steps)]
-    z_num_eval = [f.sub(domain[(i * user_num) % steps], domain[(uts-1)
-                        * user_num]) for i in range(steps)]
-    z_den_eval = [f.sub(domain[i], domain_last_step_position)
-                  for i in range(steps)]
-
-    a = f.fit(fft(z_num_eval, MODULUS, G1, inv=True))
-    b = f.fit(fft(z_den_eval, MODULUS, G1, inv=True))
-    zerofier_poly3 = f.div_polys(a, b)
-    c_poly = f.fit(fft(c_num_eval, MODULUS, G1, inv=True))
-
-    quotient_poly3 = f.div_polys(c_poly, zerofier_poly3)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly3)
-    # d3 = f.get_poly_degree(quotient_poly3)
-
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-
-    tc_eval.append(fft(quotient_poly3, MODULUS, G2))
+    # t(i + uts*EXTENSION_FACTOR) = t(i + (uts-1)*EXTENSION_FACTOR) + t(i), i mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR， and i != last_step_position，
+    # z3(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - last_step_position)
+    c_num_eval = [f.sub(f.sub(t_eval[(i + uts*EXTENSION_FACTOR) % precision], t_eval[(
+        i + (uts-1)*EXTENSION_FACTOR) % precision]), t_eval[i]) for i in range(precision)]
+    z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1)
+                        * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+    z_num_inv = f.multi_inv(z_num_eval)
+    z_den_eval = [f.sub(xs[i], last_step_position) for i in range(precision)]
+    tc_eval.append([f.mul(f.mul(cn, zi), zd)
+                   for cn, zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
     # constraint 4: The initial accumulation should be 0, the last accumulation should total value of all assets of all users
     # t((uts-1)*EXTENSION_FACTOR) = 0， t(last_step_position) = sum_values[-1]
@@ -146,66 +106,49 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     interpolant = f.lagrange_interp_2(
         [xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[-1]])
     i_eval = [f.eval_poly_at(interpolant, x) for x in xs]
-    zerofier_poly4 = f.mul_polys([-xs[(uts-1)*EXTENSION_FACTOR],
-                                  1], [-last_step_position, 1])
-    z_eval = f.multi_inv([f.eval_poly_at(zerofier_poly4, x) for x in xs])
-
-    c_num_eval = [f.sub(t, i) % MODULUS for t,
-                  i in zip(t_eval, i_eval)]
-
-    c_poly = fft(c_num_eval, MODULUS, G2, inv=True)
-    quotient_poly4 = f.div_polys(c_poly, zerofier_poly4)
-    tc_eval.append(fft(quotient_poly4, MODULUS, G2))
+    z_poly = f.mul_polys([-xs[(uts-1)*EXTENSION_FACTOR],
+                         1], [-last_step_position, 1])
+    z_eval = f.multi_inv([f.eval_poly_at(z_poly, x) for x in xs])
+    tc_eval.append([f.mul(f.sub(t, i), z) % MODULUS for t,
+                   i, z in zip(t_eval, i_eval, z_eval)])
 
     # constraint 5: user's sum values of each coin should be the t_eval
-    #  t(i) - sum(b_eval[i][j] for j in range(len(b_eval))) = 0, i mod uts == (uts-2)
-    # z5(x) = (x^user_num - G1^((uts-2) * user_num))
+    #  t(i) - sum(b_eval[i][j] for j in range(len(b_eval))) = 0, i mod uts*EXTENSION_FACTOR == (uts-2)*EXTENSION_FACTOR
+    # z5(x) = (x^user_num - G2^((uts-2) * EXTENSION_FACTOR * user_num))
+    c_num_eval = [f.sub(t_eval[j], sum(b_eval[i][j]
+                                       for i in range(len(b_eval)))) for j in range(precision)]
 
-    c_num_eval = [f.sub(sum_trace[j], sum(values[i][j]
-                                          for i in range(len(values)))) for j in range(steps)]
-    c_poly = f.fit(fft(c_num_eval, MODULUS, G1, inv=True))
-    z_num_eval5 = [f.sub(domain[(i * user_num) % steps], domain[(uts-2)
-                                                                * user_num]) for i in range(steps)]
-    zerofier_poly5 = f.fit(fft(z_num_eval5, MODULUS, G1, inv=True))
-    # zerofier_poly5 = [-domain[(uts-2) * user_num]] + [0]*(user_num-1) + [1]
-    quotient_poly5 = f.div_polys(c_poly, zerofier_poly5)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly5)
-    # d3 = f.get_poly_degree(quotient_poly5)
+    z_num_eval5 = [f.sub(xs[(i * user_num) % precision], xs[(uts-2)
+                                                            * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+    z_num_inv = f.multi_inv(z_num_eval5)
+    tc_eval.append([f.mul(cn, zi) for cn, zi in zip(c_num_eval, z_num_inv)])
 
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-    tc_eval.append(fft(quotient_poly5, MODULUS, G2))
-
-# ==========================================================================
     # values constraints eval
     cc_eval = []
     for i in range(main_coins_num):
         # cc_constraint 1: Accumulation of each coin
-        # values[i][j + uts] = values[i][j + (uts-1)] + values[i][j], j mod uts == (uts-1) j != domain_last_step_position
-        # z(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - domain_last_step_position)
-        c_num_eval = [f.sub(f.sub(values[i][(j + uts) % steps], values[i][(
-            j + (uts-1)) % steps]), values[i][j]) for j in range(steps)]
-        c_poly = f.fit(fft(c_num_eval, MODULUS, G1, inv=True))
-        quotient_poly6 = f.div_polys(c_poly, zerofier_poly3)
-        cc_eval.append(fft(quotient_poly6, MODULUS, G2))
+        # b_eval[i][j + uts*EXTENSION_FACTOR] = b_eval[i][j + (uts-1)*EXTENSION_FACTOR] + b_eval[i][j], j mod uts*EXTENSION_FACTOR == (uts-1)*EXTENSION_FACTOR，and j != last_step_position，
+        # z(x) = (x^user_num - G2^((uts-1) * EXTENSION_FACTOR * user_num))/(x - last_step_position)
+        c_num_eval = [f.sub(f.sub(b_eval[i][(j + uts*EXTENSION_FACTOR) % precision], b_eval[i][(
+            j + (uts-1)*EXTENSION_FACTOR) % precision]), b_eval[i][j]) for j in range(precision)]
+        z_num_eval = [f.sub(xs[(i * user_num) % precision], xs[(uts-1)
+                            * EXTENSION_FACTOR * user_num]) for i in range(precision)]
+        z_num_inv = f.multi_inv(z_num_eval)
+        z_den_eval = [f.sub(xs[i], last_step_position)
+                      for i in range(precision)]
+        cc_eval.append([f.mul(f.mul(cn, zi), zd) % MODULUS for cn,
+                       zi, zd in zip(c_num_eval, z_num_inv, z_den_eval)])
 
         # cc_constraints 2: The initial accumulation should be 0, the last accumulation should total value of this coin of all users
-        # values[i](uts-1)) = 0, values[i](domain_last_step_position) = sum_amount[i]
+        # b_eval[i](uts-1)*EXTENSION_FACTOR) = 0, b_eval[i](last_step_position) = sum_amount[i]
         # z(x) = (x-xs[(uts-1)*EXTENSION_FACTOR])(x-last_step_position)
         interpolant = f.lagrange_interp_2(
             [xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[i]])
         i_eval = [f.eval_poly_at(interpolant, x) for x in xs]
+        cc_eval.append([f.mul(f.sub(t, i), zi)
+                       for t, i, zi in zip(b_eval[i], i_eval, z_eval)])
 
-        c_num_eval = [f.sub(t, i) % MODULUS for t,
-                      i in zip(b_eval[i], i_eval)]
-
-        c_poly = fft(c_num_eval, MODULUS, G2, inv=True)
-        quotient_poly7 = f.div_polys(c_poly, zerofier_poly4)
-        cc_eval.append(fft(quotient_poly7, MODULUS, G2))
-
-    del i_eval, interpolant, z_eval, c_num_eval, z_den_eval, z_num_eval
+    del i_eval, interpolant, z_eval, c_num_eval, z_poly, z_den_eval, z_num_inv, z_num_eval
     gc.collect()
 
     user_random = [int.from_bytes(hash(r), 'big')
