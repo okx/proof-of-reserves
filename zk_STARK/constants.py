@@ -15,3 +15,4 @@ UTS_FOR_TRUNK = 32
 MAX_UTS = 64
 USER_DATA_PATH = "./user_data/"
 CONFIG_PATH = "./sum_proof_data/config.json"
+PRECOMPUTED_PATH = "./precomputed_data/"

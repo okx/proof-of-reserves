@@ -1,7 +1,6 @@
 from permuted_tree import merkelize, mk_branch, verify_branch, mk_multi_branch, verify_multi_branch
 from utils import get_power_cycle, get_pseudorandom_indices
 from poly_utils import PrimeField
-from fft import fft
 
 
 # Generate an FRI proof that the polynomial that has the specified

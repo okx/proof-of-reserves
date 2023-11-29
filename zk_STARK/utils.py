@@ -107,9 +107,6 @@ def get_entry_data(entry_data, index):
     for j in range(len(entry_data)):
         if (type(entry_data[j][0]) == list):
             for k in range(len(entry_data[j])):
-                # print("index", index)
-                # print("j", j)
-                # print("k", k)
                 x = x + entry_data[j][k][index].to_bytes(32, 'big')
         else:
             x = x + entry_data[j][index].to_bytes(32, 'big')
