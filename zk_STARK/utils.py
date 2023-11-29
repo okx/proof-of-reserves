@@ -117,7 +117,6 @@ def get_entry_data(entry_data, index):
 
 
 def get_entries(array):
-    print("len(array)", len(array))
     entries_len = len(array[0][0]) if type(
         array[0][0]) == list else len(array[0])
     entries = []

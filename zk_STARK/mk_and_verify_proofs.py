@@ -191,18 +191,21 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
 
     trunk_inclusion_proof = {}
     trunk_inclusion_proof["trunk_mtree_root"] = trunk_mtree[1]
-    trunk_inclusion_proof["batch_id"] = str(
+    trunk_inclusion_proof["reduced_batch_id"] = str(
         batch_entry_data[(coin_num+1)*32:(coin_num+2)*32].hex())
     trunk_inclusion_proof["total_value"] = str(
         int.from_bytes(batch_entry_data[:32], 'big'))
     j = 0
     for coin in coins:
         value = int.from_bytes(batch_entry_data[(j+1)*32:(j+2)*32], 'big')
+        # value is actually negative if value > MAX_USER_VALUE
         if value > MAX_USER_VALUE:
             value = value - MODULUS
         trunk_inclusion_proof[coin] = str(value)
         j += 1
     trunk_inclusion_proof["random_number"] = str(
+        batch_entry_data[len(batch_entry_data)-64:len(batch_entry_data)-32].hex())
+    trunk_inclusion_proof["batch_id"] = str(
         batch_entry_data[len(batch_entry_data)-32:].hex())
     trunk_inclusion_proof["merkle_path"] = mk_branch(
         trunk_mtree, (UTS_FOR_TRUNK * (batch_index + 1) + UTS_FOR_TRUNK-2) * EXTENSION_FACTOR)
@@ -219,7 +222,7 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
 
         batch_inclusion_proof = {}
         batch_inclusion_proof["batch_mtree_root"] = batch_mtree[1]
-        batch_inclusion_proof["user_id"] = str(
+        batch_inclusion_proof["reduced_user_id"] = str(
             user_entry_data[(coin_num+1)*32:(coin_num+2)*32].hex())
         batch_inclusion_proof["total_value"] = str(
             int.from_bytes(user_entry_data[:32], 'big'))
@@ -231,6 +234,8 @@ def mk_inclusion_proof(batch_index, uts, input_batch_path, input_trunk_path, out
             batch_inclusion_proof[coin] = str(value)
             j += 1
         batch_inclusion_proof["random_number"] = str(
+            user_entry_data[len(user_entry_data)-64:len(user_entry_data)-32].hex())
+        batch_inclusion_proof["user_id"] = str(
             user_entry_data[len(user_entry_data)-32:].hex())
         batch_inclusion_proof["user_index"] = i
         batch_inclusion_proof["batch_index"] = batch_index
@@ -285,7 +290,9 @@ def verify_single_inclusion_proof(proof_file):
             temp = temp + value.to_bytes(32, 'big')
             j += 1
         user_entry = user_entry + hash(temp) + bytes.fromhex(
-            batch_inclusion_proof["user_id"]) + bytes.fromhex(batch_inclusion_proof["random_number"])
+            batch_inclusion_proof["reduced_user_id"]) + bytes.fromhex(batch_inclusion_proof["random_number"])
+        assert int(batch_inclusion_proof["reduced_user_id"], 16) == int(
+            batch_inclusion_proof["user_id"], 16) % MODULUS
         assert check_sum_value == 0
         assert user_leaf == hash(user_entry)
 
@@ -302,10 +309,13 @@ def verify_single_inclusion_proof(proof_file):
             temp = temp + value.to_bytes(32, 'big')
             j += 1
         batch_entry = batch_entry + hash(temp) + bytes.fromhex(
-            trunk_inclusion_proof["batch_id"]) + bytes.fromhex(trunk_inclusion_proof["random_number"])
+            trunk_inclusion_proof["reduced_batch_id"]) + bytes.fromhex(trunk_inclusion_proof["random_number"])
+        assert int(trunk_inclusion_proof["reduced_batch_id"], 16) == int(
+            trunk_inclusion_proof["batch_id"], 16) % MODULUS
         assert check_sum_value == 0
         assert batch_leaf == hash(batch_entry)
 
-        assert trunk_inclusion_proof["batch_id"] == batch_inclusion_proof["batch_mtree_root"]
+        assert int(trunk_inclusion_proof["reduced_batch_id"], 16) == int(
+            batch_inclusion_proof["batch_mtree_root"], 16) % MODULUS
 
     return

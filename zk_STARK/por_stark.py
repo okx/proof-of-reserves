@@ -20,7 +20,7 @@ f = PrimeField(MODULUS)
 
 
 def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
-    start_time = time.time()
+    # start_time = time.time()
 
     # tranform data into the field, -1 => MODULUS -1
     transform_into_field(values, MODULUS)
@@ -68,18 +68,8 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     # z1(x) = (x-domain[uts*0])(x-domain[uts*1])...(x-domain[uts*(user_num-1)])
     # z1(x) = x^user_num - 1
     z_eval = [domain[(i * user_num) % steps] - 1 for i in range(steps)]
-    # z_eval = f.multi_inv(z_num_eval)
-    # tc_eval.append([tp * z % MODULUS for tp, z in zip(t_eval, z_eval)])
-
     zerofier_poly1 = f.fit(fft(z_eval, MODULUS, G1, inv=True))
     quotient_poly1 = f.div_polys(t_poly, zerofier_poly1)
-    # d1 = f.get_poly_degree(t_poly)
-    # d2 = f.get_poly_degree(zerofier_poly1)
-    # d3 = f.get_poly_degree(quotient_poly1)
-
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
     tc_eval.append(fft(quotient_poly1, MODULUS, G2))
 
     # constraint 2:  row_value = next_row_value // 4, in case user's net assets value less than 4^(uts-2), the first row of each user's trace should be 0
@@ -98,20 +88,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     b = f.fit(fft(z_den_eval, MODULUS, G2, inv=True))
     zerofier_poly2 = f.div_polys(a, b)
     c_poly = f.fit(fft(c_num_eval, MODULUS, G2, inv=True))
-
     quotient_poly2 = f.div_polys(c_poly, zerofier_poly2)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly2)
-    # d3 = f.get_poly_degree(quotient_poly2)
-
-    # print("a", a)
-    # print("b", b)
-    # print("zerofier_poly2", zerofier_poly2)
-    # print("quotient_poly2", quotient_poly2)
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-
     tc_eval.append(fft(quotient_poly2, MODULUS, G2))
 
     # constraint 3: User's net asset value accumulation
@@ -123,21 +100,11 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
                         * user_num]) for i in range(steps)]
     z_den_eval = [f.sub(domain[i], domain_last_step_position)
                   for i in range(steps)]
-
     a = f.fit(fft(z_num_eval, MODULUS, G1, inv=True))
     b = f.fit(fft(z_den_eval, MODULUS, G1, inv=True))
     zerofier_poly3 = f.div_polys(a, b)
     c_poly = f.fit(fft(c_num_eval, MODULUS, G1, inv=True))
-
     quotient_poly3 = f.div_polys(c_poly, zerofier_poly3)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly3)
-    # d3 = f.get_poly_degree(quotient_poly3)
-
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
-
     tc_eval.append(fft(quotient_poly3, MODULUS, G2))
 
     # constraint 4: The initial accumulation should be 0, the last accumulation should total value of all assets of all users
@@ -149,10 +116,8 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     zerofier_poly4 = f.mul_polys([-xs[(uts-1)*EXTENSION_FACTOR],
                                   1], [-last_step_position, 1])
     z_eval = f.multi_inv([f.eval_poly_at(zerofier_poly4, x) for x in xs])
-
     c_num_eval = [f.sub(t, i) % MODULUS for t,
                   i in zip(t_eval, i_eval)]
-
     c_poly = fft(c_num_eval, MODULUS, G2, inv=True)
     quotient_poly4 = f.div_polys(c_poly, zerofier_poly4)
     tc_eval.append(fft(quotient_poly4, MODULUS, G2))
@@ -160,7 +125,6 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     # constraint 5: user's sum values of each coin should be the t_eval
     #  t(i) - sum(b_eval[i][j] for j in range(len(b_eval))) = 0, i mod uts == (uts-2)
     # z5(x) = (x^user_num - G1^((uts-2) * user_num))
-
     c_num_eval = [f.sub(sum_trace[j], sum(values[i][j]
                                           for i in range(len(values)))) for j in range(steps)]
     c_poly = f.fit(fft(c_num_eval, MODULUS, G1, inv=True))
@@ -169,16 +133,8 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
     zerofier_poly5 = f.fit(fft(z_num_eval5, MODULUS, G1, inv=True))
     # zerofier_poly5 = [-domain[(uts-2) * user_num]] + [0]*(user_num-1) + [1]
     quotient_poly5 = f.div_polys(c_poly, zerofier_poly5)
-    # d1 = f.get_poly_degree(c_poly)
-    # d2 = f.get_poly_degree(zerofier_poly5)
-    # d3 = f.get_poly_degree(quotient_poly5)
-
-    # print("d1: ", d1)
-    # print("d2: ", d2)
-    # print("d3: ", d3)
     tc_eval.append(fft(quotient_poly5, MODULUS, G2))
 
-# ==========================================================================
     # values constraints eval
     cc_eval = []
     for i in range(main_coins_num):
@@ -197,10 +153,8 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
         interpolant = f.lagrange_interp_2(
             [xs[(uts-1)*EXTENSION_FACTOR], last_step_position], [0, sum_values[i]])
         i_eval = [f.eval_poly_at(interpolant, x) for x in xs]
-
         c_num_eval = [f.sub(t, i) % MODULUS for t,
                       i in zip(b_eval[i], i_eval)]
-
         c_poly = fft(c_num_eval, MODULUS, G2, inv=True)
         quotient_poly7 = f.div_polys(c_poly, zerofier_poly4)
         cc_eval.append(fft(quotient_poly7, MODULUS, G2))
@@ -210,14 +164,16 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
 
     user_random = [int.from_bytes(hash(r), 'big')
                    for r in get_entries([tc_eval, cc_eval])]
-    id_eval = sum([[x] + [0]*(EXTENSION_FACTOR-1) for x in ids], [])
+    id_poly = fft(ids, MODULUS, G1, inv=True)
+    id_eval = fft(id_poly, MODULUS, G2)
 
     user_entry_data = []
     for i in range(1, user_num):
         index = (i * uts + uts - 2) * EXTENSION_FACTOR
         data = t_eval[index].to_bytes(32, 'big') + get_entry_data(b_eval, index) + \
             id_eval[index].to_bytes(32, 'big') + \
-            user_random[index].to_bytes(32, 'big')
+            user_random[index].to_bytes(32, 'big') + \
+            ids[i * uts + uts - 2].to_bytes(32, 'big')
         user_entry_data.append(data)
     save_mtree_entries_data(data_path, user_entry_data)
     del user_entry_data
@@ -235,6 +191,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
 
     l_eval = calculate_l(pow_nonce, powers, [
                          t_eval, b_eval, id_eval, tc_eval[0], tc_eval[2:], cc_eval], MODULUS)
+
     l_eval = [(l + c) % MODULUS for l, c in zip(l_eval, tc_eval[1])]
     l_mtree = merkelize(l_eval)
 
@@ -276,7 +233,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
                  mk_multi_branch(mtree, aug_positions),
                  sampled_entries_data,
                  mk_multi_branch(l_mtree, positions),
-                 prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)]
+                 prove_low_degree(l_eval, G2, 4*steps, MODULUS, exclude_multiples_of=0)]
 
     save_data(data_path, sum_proof, mtree, sum_values, coins)
     # print("mk por proof in %.4f sec: " % (time.time() - start_time))
@@ -287,7 +244,7 @@ def mk_por_proof(ids, values, uts, data_path, main_coins_num, coins):
 
 
 def verify_por_proof(sum_values, proof, main_coins_num):
-    start_time = time.time()
+    # start_time = time.time()
     check_sum_values(sum_values, MODULUS)
     coins_num = len(sum_values) - 1
     steps, uts, m_root, l_root, pow_nonce, main_branches, mtree_entries_data, linear_comb_branches, fri_proof = proof
@@ -303,7 +260,7 @@ def verify_por_proof(sum_values, proof, main_coins_num):
     skips = precision // steps
     G1 = f.exp(G2, skips)
     assert verify_low_degree_proof(
-        l_root, G2, fri_proof, 4*steps, MODULUS, exclude_multiples_of=EXTENSION_FACTOR)
+        l_root, G2, fri_proof, 4*steps, MODULUS, exclude_multiples_of=0)
 
     # performs the spot checks
     k = [int.from_bytes(hash(pow_nonce + i.to_bytes(32, 'big')),
