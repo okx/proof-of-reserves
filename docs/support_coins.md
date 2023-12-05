@@ -39,50 +39,51 @@
 
 ### VerifyAddress
 
-| coin    | network          |
-|---------|------------------|
-| BTC     | Bitcoin          |
-| ETH     | Ethereum         |
-| ETH     | Arbitrum         |
-| ETH     | Optimism         |
-| USDT    | Ethereum         |
-| USDT    | Tron             |
-| USDT    | Polygon          |
-| USDT    | Avalanche        |
-| USDT    | Arbitrum         |
-| USDT    | Optimism         |
-| USDT    | OKC              |
-| USDC    | Ethereum         |
-| USDC    | OKC              |
-| USDC    | Tron             |
-| USDC    | Polygon          |
-| USDC    | Avalanche        |
-| USDC    | Arbitrum         |
-| USDC    | Optimism         |
-| OKB     | Ethereum         |
-| OKB     | OKC              |
-| OKT     | OKC              |
-| FIL     | Fil              |
-| FIL     | OKC              |
-| DOT     | Polkadot         |
-| DOT     | OKC              |
-| ETC     | Ethereum Classic |
-| ETC     | OKC              |
-| XRP     | Ripple           |
-| XRP     | OKC              |
-| UNI     | Ethereum         |
-| UNI     | OKC              |
-| ELF     | Aelf             |
-| LINK    | Ethereum         |
-| LINK    | OKC              |
-| PEOPLE  | Ethereum         |
-| TON     | Toncoin          |
-| TRX     | Tron             |
-| APT     | Aptos            |
-| SOL     | Solana           |
-| DASH    | Dash             |
-| DOGE    | Doge             |
-| FIL-EVM | FEVM             |
+| coin      | network          |
+|-----------|------------------|
+| BTC       | Bitcoin          |
+| ETH       | Ethereum         |
+| ETH       | Arbitrum         |
+| ETH       | Optimism         |
+| USDT      | Ethereum         |
+| USDT      | Tron             |
+| USDT      | Polygon          |
+| USDT      | Avalanche        |
+| USDT      | Arbitrum         |
+| USDT      | Optimism         |
+| USDT      | OKC              |
+| USDC      | Ethereum         |
+| USDC      | OKC              |
+| USDC      | Tron             |
+| USDC      | Polygon          |
+| USDC      | Avalanche        |
+| USDC      | Arbitrum         |
+| USDC      | Optimism         |
+| OKB       | Ethereum         |
+| OKB       | OKC              |
+| OKT       | OKC              |
+| FIL       | Fil              |
+| FIL       | OKC              |
+| DOT       | Polkadot         |
+| DOT       | OKC              |
+| ETC       | Ethereum Classic |
+| ETC       | OKC              |
+| XRP       | Ripple           |
+| XRP       | OKC              |
+| UNI       | Ethereum         |
+| UNI       | OKC              |
+| ELF       | Aelf             |
+| LINK      | Ethereum         |
+| LINK      | OKC              |
+| PEOPLE    | Ethereum         |
+| TON       | Toncoin          |
+| TRX       | Tron             |
+| APT       | Aptos            |
+| SOL       | Solana           |
+| DASH      | Dash             |
+| DOGE      | Doge             |
+| FIL-EVM   | FEVM             |
+| ETH-LINEA | ETH_LINEA        |
 
 
 
