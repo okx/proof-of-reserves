@@ -103,6 +103,14 @@ func TestVerifyUtxoCoinSignature(t *testing.T) {
 			sign2:  "",
 			script: "",
 		},
+		{
+			coin:   "BCHN",
+			addr:   "3EniMkZiTiCcKsyKGxJbizi5zgPLkkpdYB",
+			msg:    "I am an OKX address",
+			sign1:  "Hzm4HO21jFamx/+AiVgH5+8MNbFLIpyYIgVUdEc/eDGBVaaNpOgmvigZjcFDikzw97BUMUTGLL00TT5PKSAX/0M=",
+			sign2:  "IDgJJKiWo38ujfYIeYx8yiHBmlmzCc7c2yIrUb6Xqep0FnnHMyBhySdnBan8rjs+csO9K6GkGsNNs4p6QY9iIg8=",
+			script: "52210318af2bec99f512a736c88fa30a5711c16652591510b9d388af553f3644372af121035bfe589cb7086355f9ab44655c8d700f8e7ba2d90116658682130587eb35b0b5210306913a183d6b4cb7c38a99fdcfd3be24fb171b50de065c8ed0e759ee09d7267453ae",
+		},
 	}
 
 	for _, tt := range args {
@@ -162,6 +170,12 @@ func TestVerifyEvmCoinSignature(t *testing.T) {
 			addr: "0xd3d7dbe73bbdd5a5c7a49ca322763c4d400fc240",
 			msg:  "I am an OKX address",
 			sign: "0x75f1d8203bef472f4f5f2627b186eb6d700544633690f4f368ea3d6d069040ac378b84765bf4fecfc4d62d807158817a0d6f5d2ac13121aba578ff0f6880067b1c",
+		},
+		{
+			coin: "BASE",
+			addr: "0xfd92f4e91d54b9ef91cc3f97c011a6af0c2a7eda",
+			msg:  "I am an OKX address",
+			sign: "0x20c683960499e200a78d0f3011f821aea901e6cb26371f0d4edd8b64fbf0efb80b147346a8acfb03e037a40ad83d2ef189af3ca9f32f07e99ba644aac1d951d71b",
 		},
 	}
 	for _, tt := range args {
