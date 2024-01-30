@@ -32,7 +32,7 @@ var (
 		// UTXO
 		"BTC":       "BTC",
 		"USDT-OMNI": "BTC",
-		"BCH":       "BCH",
+		"BCHN":      "BCHN",
 		"BCHA":      "BCHA",
 		"BSV":       "BTC",
 		"LTC":       "LTC",
@@ -86,6 +86,7 @@ var (
 		"OKB":            "ETH",
 		"OPTIMISM":       "ETH",
 		"ETH-LINEA":      "ETH",
+		"BASE":           "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -118,7 +119,7 @@ var (
 		// UTXO
 		"BTC":       UTXOCoinType,
 		"USDT-OMNI": UTXOCoinType,
-		"BCH":       UTXOCoinType,
+		"BCHN":      UTXOCoinType,
 		"BCHA":      UTXOCoinType,
 		"BSV":       UTXOCoinType,
 		"LTC":       UTXOCoinType,
@@ -158,6 +159,7 @@ var (
 		"OPTIMISM":      EvmCoinTye,
 		"FIL-EVM":       EvmCoinTye,
 		"ETH-LINEA":     EvmCoinTye,
+		"BASE":          EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -202,7 +204,7 @@ var (
 		// UTXO
 		"BTC":       BtcMessageSignatureHeader,
 		"USDT-OMNI": BtcMessageSignatureHeader,
-		"BCH":       BtcMessageSignatureHeader,
+		"BCHN":      BtcMessageSignatureHeader,
 		"BCHA":      BtcMessageSignatureHeader,
 		"BSV":       BtcMessageSignatureHeader,
 		"LTC":       LtcMessageSignatureHeader,
@@ -242,6 +244,7 @@ var (
 		"OPTIMISM":      EthMessageSignatureHeader,
 		"FIL-EVM":       EthMessageSignatureHeader,
 		"ETH-LINEA":     EthMessageSignatureHeader,
+		"BASE":          EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -286,7 +289,7 @@ var (
 		// UTXO
 		"BTC":       "BTC",
 		"USDT-OMNI": "USDT",
-		"BCH":       "BCH",
+		"BCHN":      "BCHN",
 		"BCHA":      "BCHA",
 		"BSV":       "BSV",
 		"LTC":       "LTC",
@@ -341,6 +344,7 @@ var (
 		"OKB":            "OKB",
 		"OPTIMISM":       "OPTIMISM",
 		"ETH-LINEA":      "ETH",
+		"BASE":           "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -377,7 +381,7 @@ var (
 		// UTXO
 		"BTC":       8,
 		"USDT-OMNI": 6,
-		"BCH":       8,
+		"BCHN":      8,
 		"BCHA":      8,
 		"BSV":       8,
 		"LTC":       8,
@@ -432,6 +436,7 @@ var (
 		"OKB":            18,
 		"OPTIMISM":       18,
 		"ETH-LINEA":      18,
+		"BASE":           18,
 
 		// BETH
 		"BETH": 18,
@@ -489,6 +494,7 @@ var (
 		"USDT-ALGO": true,
 		"FIL-EVM":   true,
 		"ETH-LINEA": true,
+		"BASE":      true,
 	}
 
 	VerifyAddressCoinBlackList = map[string]bool{

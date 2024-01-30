@@ -163,6 +163,12 @@ func TestVerifyEvmCoinSignature(t *testing.T) {
 			msg:  "I am an OKX address",
 			sign: "0x75f1d8203bef472f4f5f2627b186eb6d700544633690f4f368ea3d6d069040ac378b84765bf4fecfc4d62d807158817a0d6f5d2ac13121aba578ff0f6880067b1c",
 		},
+		{
+			coin: "BASE",
+			addr: "0xd3d7dbe73bbdd5a5c7a49ca322763c4d400fc240",
+			msg:  "I am an OKX address",
+			sign: "0x75f1d8203bef472f4f5f2627b186eb6d700544633690f4f368ea3d6d069040ac378b84765bf4fecfc4d62d807158817a0d6f5d2ac13121aba578ff0f6880067b1c",
+		},
 	}
 	for _, tt := range args {
 		err := VerifyEvmCoin(tt.coin, tt.addr, tt.msg, tt.sign)
