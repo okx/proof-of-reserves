@@ -84,6 +84,8 @@
 | DOGE      | Doge             |
 | FIL-EVM   | FEVM             |
 | ETH-LINEA | ETH_LINEA        |
+| BASE      | BASE             |
+| BCHN      | BCH              |
 
 
 
