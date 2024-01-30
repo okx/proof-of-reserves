@@ -32,7 +32,7 @@ var (
 		// UTXO
 		"BTC":       "BTC",
 		"USDT-OMNI": "BTC",
-		"BCHN":      "BCHN",
+		"BCH":       "BCH",
 		"BCHA":      "BCHA",
 		"BSV":       "BTC",
 		"LTC":       "LTC",
@@ -472,6 +472,7 @@ var (
 	CheckBalanceCoinBlackList = map[string]bool{
 		"DASH": true,
 		"DOGE": true,
+		"BCHN": true,
 
 		"TRX":      true,
 		"USDC-TRC": true,
