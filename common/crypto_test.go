@@ -103,6 +103,14 @@ func TestVerifyUtxoCoinSignature(t *testing.T) {
 			sign2:  "",
 			script: "",
 		},
+		{
+			coin:   "BCHN",
+			addr:   "3EniMkZiTiCcKsyKGxJbizi5zgPLkkpdYB",
+			msg:    "I am an OKX address",
+			sign1:  "Hzm4HO21jFamx/+AiVgH5+8MNbFLIpyYIgVUdEc/eDGBVaaNpOgmvigZjcFDikzw97BUMUTGLL00TT5PKSAX/0M=",
+			sign2:  "IDgJJKiWo38ujfYIeYx8yiHBmlmzCc7c2yIrUb6Xqep0FnnHMyBhySdnBan8rjs+csO9K6GkGsNNs4p6QY9iIg8=",
+			script: "52210318af2bec99f512a736c88fa30a5711c16652591510b9d388af553f3644372af121035bfe589cb7086355f9ab44655c8d700f8e7ba2d90116658682130587eb35b0b5210306913a183d6b4cb7c38a99fdcfd3be24fb171b50de065c8ed0e759ee09d7267453ae",
+		},
 	}
 
 	for _, tt := range args {
