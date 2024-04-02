@@ -171,7 +171,7 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	}
 	var allPass = true
 	for k, v := range success {
-		fmt.Println(fmt.Sprintf("%s  %d accoounts, %d verified, %d failed", k, v+fail[k], v, fail[k]))
+		fmt.Println(fmt.Sprintf("%s  %d accounts, %d verified, %d failed", k, v+fail[k], v, fail[k]))
 		if fail[k] != 0 {
 			allPass = false
 		}
