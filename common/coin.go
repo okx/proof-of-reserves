@@ -87,6 +87,10 @@ var (
 		"OPTIMISM":       "ETH",
 		"ETH-LINEA":      "ETH",
 		"BASE":           "ETH",
+		"OKB-X1":         "ETH",
+		"OKB-X1-ETH":     "ETH",
+		"OKB-X1-USDT":    "ETH",
+		"OKB-X1-USDC":    "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -160,6 +164,10 @@ var (
 		"FIL-EVM":       EvmCoinTye,
 		"ETH-LINEA":     EvmCoinTye,
 		"BASE":          EvmCoinTye,
+		"OKB-X1":        EvmCoinTye,
+		"OKB-X1-ETH":    EvmCoinTye,
+		"OKB-X1-USDT":   EvmCoinTye,
+		"OKB-X1-USDC":   EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -245,6 +253,10 @@ var (
 		"FIL-EVM":       EthMessageSignatureHeader,
 		"ETH-LINEA":     EthMessageSignatureHeader,
 		"BASE":          EthMessageSignatureHeader,
+		"OKB-X1":        EthMessageSignatureHeader,
+		"OKB-X1-ETH":    EthMessageSignatureHeader,
+		"OKB-X1-USDT":   EthMessageSignatureHeader,
+		"OKB-X1-USDC":   EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -345,6 +357,10 @@ var (
 		"OPTIMISM":       "OPTIMISM",
 		"ETH-LINEA":      "ETH",
 		"BASE":           "ETH",
+		"OKB-X1":         "ETH",
+		"OKB-X1-ETH":     "ETH",
+		"OKB-X1-USDT":    "ETH",
+		"OKB-X1-USDC":    "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -496,6 +512,11 @@ var (
 		"FIL-EVM":   true,
 		"ETH-LINEA": true,
 		"BASE":      true,
+
+		"OKB-X1":      true,
+		"OKB-X1-ETH":  true,
+		"OKB-X1-USDT": true,
+		"OKB-X1-USDC": true,
 	}
 
 	VerifyAddressCoinBlackList = map[string]bool{
