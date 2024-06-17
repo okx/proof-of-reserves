@@ -286,8 +286,13 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 	if ok := ed25519.Verify(pubkeyBytes, hash, res); !ok {
 		return ErrInvalidSign
 	}
+
+	addrType, exist := PorCoinAddressTypeMap[coin]
+	if !exist {
+		return fmt.Errorf("invalid coin type %s, addr:%s", coin, addr)
+	}
 	var recoverAddr string
-	switch coin {
+	switch addrType {
 	case "SOL":
 		out := [32]byte{}
 		byteCount := len(pubkeyBytes)
@@ -307,7 +312,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		re, _ := regexp.Compile("^0x0*")
 		recoverAddr = re.ReplaceAllString(recoverAddr, "0x")
 
-	case "TONCOIN-NEW":
+	case "TON":
 		a, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.V3, tonWallet.DefaultSubwallet)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
