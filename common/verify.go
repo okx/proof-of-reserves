@@ -56,7 +56,19 @@ func VerifyBETH(addr, msg, sign string) error {
 }
 
 func VerifyTRX(addr, msg, sign string) error {
-	hash := HashTrxMsg(msg)
+	hashFuncs := []func(string) []byte{HashTrxMsg, HashTrxMsgV2}
+
+	for _, hashFunc := range hashFuncs {
+		if verifyTRX(addr, msg, sign, hashFunc) == nil {
+			return nil
+		}
+	}
+
+	return ErrInvalidSign
+}
+
+func verifyTRX(addr, msg, sign string, hashFunc func(string) []byte) error {
+	hash := hashFunc(msg)
 	s := MustDecode(sign)
 	pub, err := sigToPub(hash, s)
 	if err != nil {
