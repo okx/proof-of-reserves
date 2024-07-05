@@ -35,7 +35,7 @@ func TestUtxoCoinSigToPubKey(t *testing.T) {
 			want: "02b514e7ccc2845d3f1ca7181dacab0d1ac277616e753547922f82cc0cdfb5c691",
 		},
 		{
-			coin: "BCHN",
+			coin: "BCH",
 			addr: "393maTY7rQScy4SmYE1XSXUSgK73byhgfA",
 			msg:  "hello world",
 			sign: "Hz+cZI5GfSzNSvBpna20diV47/rhlQMRQTNGZd9sI4UZQaWH4ZY3KJA4IlcP5bwuicO+myA4vLdiMkj7OU+rDpg=",
