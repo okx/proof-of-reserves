@@ -303,7 +303,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 	if !exist {
 		return fmt.Errorf("invalid coin type %s, addr:%s", coin, addr)
 	}
-	var recoverAddr string
+	var recoverAddrs []string
 	switch addrType {
 	case "SOL":
 		out := [32]byte{}
@@ -316,31 +316,40 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 			max = byteCount
 		}
 		copy(out[:], pubkeyBytes[0:max])
-		recoverAddr = base58.Encode(out[:])
+		recoverAddrs = append(recoverAddrs, base58.Encode(out[:]))
 	case "APTOS":
 		publicKey := append(pubkeyBytes, 0x0)
-		recoverAddr = "0x" + hex.EncodeToString(Sha256Hash(publicKey))
+		rAddr := "0x" + hex.EncodeToString(Sha256Hash(publicKey))
 		// Short address type: if address starts with 0x0, replace.
 		re, _ := regexp.Compile("^0x0*")
-		recoverAddr = re.ReplaceAllString(recoverAddr, "0x")
-
+		recoverAddrs = append(recoverAddrs, re.ReplaceAllString(rAddr, "0x"))
 	case "TON":
-		a, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.V3, tonWallet.DefaultSubwallet)
+		walletV3, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.V3, tonWallet.DefaultSubwallet)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
-		recoverAddr = a.String()
+		recoverAddrs = append(recoverAddrs, walletV3.String())
+
+		walletHighload, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.ConfigHighloadV3{MessageTTL: 60 * 60 * 12}, 4269)
+		if err != nil {
+			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
+		}
+		recoverAddrs = append(recoverAddrs, walletHighload.String())
 	case "DOT":
 		rAddr, err := GetDotAddressFromPublicKey(pubkey)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
-		recoverAddr = rAddr
+		recoverAddrs = append(recoverAddrs, rAddr)
 	}
-	if strings.ToLower(recoverAddr) != strings.ToLower(addr) {
-		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
+
+	for _, recoverAddr := range recoverAddrs {
+		if strings.ToLower(recoverAddr) == strings.ToLower(addr) {
+			return nil
+		}
 	}
-	return nil
+
+	return fmt.Errorf("recovery address not match, coin:%s, recoverAddrs:%v, addr:%s", coin, recoverAddrs, addr)
 }
 
 func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
