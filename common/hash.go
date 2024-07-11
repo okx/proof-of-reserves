@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 )
@@ -46,6 +47,18 @@ func HashTrxMsg(msg string) []byte {
 	b := Keccak256([]byte(msg))
 	buf.Write([]byte(TronMessageSignatureHeader))
 	buf.Write(b)
+	expectedMessageHash := Keccak256(buf.Bytes())
+	return expectedMessageHash
+}
+
+func HashTrxMsgV2(msg string) []byte {
+	length := fmt.Sprintf("%d", len(msg))
+
+	var buf bytes.Buffer
+	buf.WriteString(TronMessageV2SignatureHeader)
+	buf.WriteString(length)
+	buf.WriteString(msg)
+
 	expectedMessageHash := Keccak256(buf.Bytes())
 	return expectedMessageHash
 }

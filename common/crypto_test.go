@@ -20,6 +20,11 @@ func TestTRXVerifySignature(t *testing.T) {
 	if err := VerifyTRX(addr, msg, sign); err != nil {
 		t.Errorf(err.Error())
 	}
+
+	sign = "0xaddfb6bc248de8de0051d3ea225496091af596a5fffed3ee19a93c827687974d3305f869a86208e03886ec9d1423bb264405b6ef0813b3751080f82bd7a906451c"
+	if err := VerifyTRX(addr, msg, sign); err != nil {
+		t.Errorf(err.Error())
+	}
 }
 
 func TestVerifyUtxoCoinSignature(t *testing.T) {
