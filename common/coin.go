@@ -21,8 +21,9 @@ const (
 	RvnMessageSignatureHeader  = "Raven Signed Message:\n"
 	ZecMessageSignatureHeader  = "Zcash Signed Message:\n"
 
-	EthMessageSignatureHeader  = "\x19Ethereum Signed Message:\n32"
-	TronMessageSignatureHeader = "\x19TRON Signed Message:\n32"
+	EthMessageSignatureHeader    = "\x19Ethereum Signed Message:\n32"
+	TronMessageSignatureHeader   = "\x19TRON Signed Message:\n32"
+	TronMessageV2SignatureHeader = "\x19TRON Signed Message:\n"
 
 	OKXMessageSignatureHeader = "OKX Signed Message:\n"
 )
