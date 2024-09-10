@@ -58,6 +58,7 @@
 | USDC        | Avalanche        |
 | USDC        | Arbitrum         |
 | USDC        | Optimism         |
+| USDC        | Base             |
 | OKB         | Ethereum         |
 | OKB         | OKC              |
 | OKT         | OKC              |

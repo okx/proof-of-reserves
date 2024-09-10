@@ -95,6 +95,7 @@ var (
 		"POLY-USDC-3359":       "ETH",
 		"USDC-OPTIMISM-FF85":   "ETH",
 		"USDC-ARBITRUM-NATIVE": "ETH",
+		"USDC-BASE":            "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -176,6 +177,7 @@ var (
 		"POLY-USDC-3359":       EvmCoinTye,
 		"USDC-OPTIMISM-FF85":   EvmCoinTye,
 		"USDC-ARBITRUM-NATIVE": EvmCoinTye,
+		"USDC-BASE":            EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -269,6 +271,7 @@ var (
 		"POLY-USDC-3359":       EthMessageSignatureHeader,
 		"USDC-OPTIMISM-FF85":   EthMessageSignatureHeader,
 		"USDC-ARBITRUM-NATIVE": EthMessageSignatureHeader,
+		"USDC-BASE":            EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -377,6 +380,7 @@ var (
 		"POLY-USDC-3359":       "USDC",
 		"USDC-OPTIMISM-FF85":   "USDC",
 		"USDC-ARBITRUM-NATIVE": "USDC",
+		"USDC-BASE":            "USDC",
 
 		// BETH
 		"BETH": "BETH",
@@ -477,6 +481,7 @@ var (
 		"POLY-USDC-3359":       6,
 		"USDC-OPTIMISM-FF85":   6,
 		"USDC-ARBITRUM-NATIVE": 6,
+		"USDC-BASE":            6,
 
 		// BETH
 		"BETH": 18,
