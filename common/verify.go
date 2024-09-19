@@ -233,9 +233,6 @@ func VerifyUtxoCoinSig(coin, addr, script string, pub1, pub2 []byte) error {
 		if err != nil {
 			return fmt.Errorf("script ExtractPkScriptAddrs failed, coin:%s, addr:%s, error: %v", coin, addr, err)
 		}
-		if len(pubs) != 3 {
-			return fmt.Errorf("script address pubs num not match, coin:%s, addr:%s, srcNum: %d, num: %d", coin, addr, 3, len(pubs))
-		}
 		m := map[string]struct{}{addr1: {}, addr: {}, addr2: {}}
 		for _, v := range pubs {
 			delete(m, v.EncodeAddress())
