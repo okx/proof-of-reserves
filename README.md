@@ -93,10 +93,23 @@ Query the snapshot height balance on the chain
 
 OKX's PoR uses Merkle tree technology to allow each user to independently review OKX's digital asset reserve on the
 basis of protecting user
-privacy. [Details here](https://www.okx.com/support/hc/en-us/articles/15165477403917)
+privacy. 
 
-### zk-STARK Validator(From 04/27)
-**Currently, zk-STARK PoR has been released. The following is the operation flow of the zk-STARK version.**
+### zk-STARK Validator V2 (From 09/27/2024)
+**Currently, zk-STARK PoR V2 has been released. It is added as a repo's submodule**
+**The following is the operation flow of the zk-STARK version V2, almost identical to V1.**
+Verify the inclusion, total balance and non-negative constraints together
+
+1. Navigate to ["Audits"](https://www.okx.com/balance/audit) and click **Details** to access your audit data.
+2. Get the data you need for verification by clicking **Copy data** and pasting the JSON string as a file in a new folder. The file name must end with "inclusion_proof.json" in a new folder. 
+3. Under ["Audit files"](https://www.okx.com/proof-of-reserves/download?tab=liabilities), download the zk-STARK file from the "Liability report" tab.
+4. Unzip the file to reveal a "sum_proof_data.json" file.
+5. Download [zk-STARKValidator](https://github.com/okx/proof-of-reserves/releases/tag/v3.1.0), the OKX open-source verification tool, and save it to the same folder containing the JSON file. 
+6. Open zk-STARKValidator to auto-run the JSON file you saved to check whether the constraints are satisfied. 
+
+### zk-STARK Validator (From 04/27/2023 to 08/08/2024)
+**The following is the operation flow of the zk-STARK version. [Details here](https://www.okx.com/support/hc/en-us/articles/15165477403917)**
+
 Verify the inclusion constraint
 
 1. To verify if your asset balance has been included as a Merkle leaf, navigate to ["Audits"](https://www.okx.com/balance/audit) and click **Details** to access your audit data.
@@ -112,7 +125,7 @@ Verify the total balance and non-negative constraints
 
 
 
-### MerkleValidator(From 11/22/2022 to 03/16)
+### MerkleValidator(From 11/22/2022 to 03/16/2023)
 
 **On 03/21, version v2 was released, which is compatible with v1. The following is the operation flow of the two versions**
 

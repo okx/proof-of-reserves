@@ -1,0 +1,4 @@
+[submodule "zk_STARK_V2"]
+	path = zk_STARK_V2
+	url = git@github.com:okx/proof-of-reserves-v2.git
+	branch = main
