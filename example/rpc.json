@@ -4,12 +4,16 @@
       "name": "btc",
       "coin": "btc",
       "api": {
-        "endpoint": "",
-        "jsonPattern": "",
-        "defaultUnit": "",
+        "endpoint": "https://www.oklink.com/api/v5/explorer/block/address-balance-history",
+        "jsonPattern": "$.data[0].balance",
+        "defaultUnit": "BTC",
         "tokenAddress": "",
-        "customHeaders": {},
-        "enabled": false
+        "customHeaders": {
+          "Ok-Access-Key": "e1fae3b0-07c3-4a5a-a29f-8cd55181fff3",
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "*/*"
+        },
+        "enabled": true
       },
       "rpc": {
         "endpoint": "http://47.52.109.182:8832/",
@@ -18,7 +22,7 @@
         "customHeaders": {},
         "authUser": "por",
         "authPassword": "por",
-        "enabled": true
+        "enabled": false
       }
     },
     {
