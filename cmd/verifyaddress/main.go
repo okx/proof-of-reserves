@@ -37,11 +37,44 @@ func init() {
 
 func initConfig() {}
 
+func parseLine(line string) []string {
+	var result []string
+	var part string
+	inBrackets := false
+
+	for i := 0; i < len(line); i++ {
+		char := line[i]
+
+		switch char {
+		case '[':
+			inBrackets = true
+			part += string(char)
+		case ']':
+			inBrackets = false
+			part += string(char)
+		case ',':
+			if inBrackets {
+				part += string(char)
+			} else {
+				result = append(result, part)
+				part = ""
+			}
+		default:
+			part += string(char)
+		}
+	}
+	if part != "" {
+		result = append(result, part)
+	}
+
+	return result
+}
+
 func handle(i int, line string) (string, bool) {
 	if len(line) == 0 {
 		return "", true
 	}
-	as := strings.Split(line, ",")
+	as := parseLine(line)
 	coin, addr, balance, message, sign1, sign2, script := as[0], as[3], as[4], as[5], as[6], as[7], as[8]
 	var eoa1, eoa2 string
 	if len(as) > 10 {
@@ -70,6 +103,11 @@ func handle(i int, line string) (string, bool) {
 
 	if common.IsVerifyAddressBannedCoin(coin) {
 		return coin, true
+	}
+
+	if addr == "" || message == "" || sign1 == "" {
+		fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d is missing some parameters. coin:%s, addr: %s", i+1, coin, addr))
+		return coin, false
 	}
 
 	switch common.PorCoinTypeMap[coin] {
@@ -122,6 +160,11 @@ func handle(i int, line string) (string, bool) {
 		}
 	case common.UTXOCoinType:
 		if err := common.VerifyUtxoCoin(coin, addr, message, sign1, sign2, script); err != nil {
+			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+			return coin, false
+		}
+	case common.StarkCoinType:
+		if err := common.VerifyStarkCoin(coin, addr, message, sign1, script); err != nil {
 			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
 			return coin, false
 		}

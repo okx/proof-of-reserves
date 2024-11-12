@@ -40,6 +40,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-multihash v0.2.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae // indirect
+	github.com/okx/go-wallet-sdk/coins/starknet v0.0.0-20241112025950-be50d8cc4851 // indirect
 	github.com/openweb3/go-rpc-provider v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -74,5 +75,5 @@ require (
 require (
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/schollz/progressbar/v3 v3.13.1
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 )
