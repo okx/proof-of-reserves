@@ -5,6 +5,7 @@ const (
 	EvmCoinTye      = "EVM"
 	EcdsaCoinType   = "ECDSA"
 	Ed25519CoinType = "ED25519"
+	StarkCoinType   = "STARK"
 
 	TrxCoinType  = "TRX"
 	BethCoinType = "BETH"
@@ -96,6 +97,8 @@ var (
 		"USDC-OPTIMISM-FF85":   "ETH",
 		"USDC-ARBITRUM-NATIVE": "ETH",
 		"USDC-BASE":            "ETH",
+		"ZKSYNC2":              "ETH",
+		"ETHK-OKC20":           "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -114,8 +117,10 @@ var (
 		// ED25519
 		"SOL":         "SOL",
 		"USDC-SPL":    "SOL",
+		"USDT-SPL":    "SOL",
 		"APTOS":       "APTOS",
 		"TONCOIN-NEW": "TON",
+		"USDT-TON":    "TON",
 		"DOT":         "DOT",
 
 		// ALGO
@@ -178,6 +183,7 @@ var (
 		"USDC-OPTIMISM-FF85":   EvmCoinTye,
 		"USDC-ARBITRUM-NATIVE": EvmCoinTye,
 		"USDC-BASE":            EvmCoinTye,
+		"ZKSYNC2":              EvmCoinTye,
 
 		// BETH
 		"BETH": BethCoinType,
@@ -207,16 +213,22 @@ var (
 		"TRXK-KIP20":     EcdsaCoinType,
 		"OKT":            EcdsaCoinType,
 		"USDT-OKC20":     EcdsaCoinType,
+		"ETHK-OKC20":     EcdsaCoinType,
 
 		// ED25519
 		"SOL":         Ed25519CoinType,
 		"USDC-SPL":    Ed25519CoinType,
+		"USDT-SPL":    Ed25519CoinType,
 		"APTOS":       Ed25519CoinType,
 		"TONCOIN-NEW": Ed25519CoinType,
+		"USDT-TON":    Ed25519CoinType,
 		"DOT":         Ed25519CoinType,
 
 		// ALGO
 		"USDT-ALGO": AlgoCoinType,
+
+		// STARKNET
+		"STARKNET-ETH": StarkCoinType,
 	}
 
 	PorCoinMessageSignatureHeaderMap = map[string]string{
@@ -272,6 +284,7 @@ var (
 		"USDC-OPTIMISM-FF85":   EthMessageSignatureHeader,
 		"USDC-ARBITRUM-NATIVE": EthMessageSignatureHeader,
 		"USDC-BASE":            EthMessageSignatureHeader,
+		"ZKSYNC2":              EthMessageSignatureHeader,
 
 		// BETH
 		"BETH": EthMessageSignatureHeader,
@@ -301,12 +314,15 @@ var (
 		"TRXK-KIP20":     OKXMessageSignatureHeader,
 		"OKT":            OKXMessageSignatureHeader,
 		"USDT-OKC20":     OKXMessageSignatureHeader,
+		"ETHK-OKC20":     OKXMessageSignatureHeader,
 
 		// ED25519
 		"SOL":         OKXMessageSignatureHeader,
 		"USDC-SPL":    OKXMessageSignatureHeader,
+		"USDT-SPL":    OKXMessageSignatureHeader,
 		"APTOS":       OKXMessageSignatureHeader,
 		"TONCOIN-NEW": OKXMessageSignatureHeader,
+		"USDT-TON":    OKXMessageSignatureHeader,
 		"DOT":         OKXMessageSignatureHeader,
 
 		// ALGO
@@ -381,6 +397,9 @@ var (
 		"USDC-OPTIMISM-FF85":   "USDC",
 		"USDC-ARBITRUM-NATIVE": "USDC",
 		"USDC-BASE":            "USDC",
+		"ZKSYNC2":              "ETH",
+		"ETHK-OKC20":           "ETH",
+		"STARKNET-ETH":         "ETH",
 
 		// BETH
 		"BETH": "BETH",
@@ -399,8 +418,10 @@ var (
 		// ED25519
 		"SOL":         "SOL",
 		"USDC-SPL":    "USDC",
+		"USDT-SPL":    "USDT",
 		"APTOS":       "APTOS",
 		"TONCOIN-NEW": "TONCOIN-NEW",
+		"USDT-TON":    "USDT",
 		"DOT":         "DOT",
 
 		// EOS
@@ -482,6 +503,8 @@ var (
 		"USDC-OPTIMISM-FF85":   6,
 		"USDC-ARBITRUM-NATIVE": 6,
 		"USDC-BASE":            6,
+		"ZKSYNC2":              18,
+		"STARKNET-ETH":         18,
 
 		// BETH
 		"BETH": 18,
@@ -500,8 +523,10 @@ var (
 		// ED25519
 		"SOL":         9,
 		"USDC-SPL":    6,
+		"USDT-SPL":    6,
 		"APTOS":       8,
 		"TONCOIN-NEW": 9,
+		"USDT-TON":    6,
 		"DOT":         10,
 
 		// EOS

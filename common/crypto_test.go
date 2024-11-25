@@ -372,3 +372,27 @@ func TestGuessUtxoCoinAddressType(t *testing.T) {
 		}
 	}
 }
+
+func TestVerifyStarkCoinSignature(t *testing.T) {
+	args := []struct {
+		coin string
+		addr string
+		msg  string
+		sign string
+		pub  string
+	}{
+		{
+			coin: "STARKNET",
+			addr: "0x0668a58aec3151bdf0f6f9360ea89453733d5c65f45cafe2d1591d8cddbd2395",
+			msg:  "hello world",
+			sign: "07abc5982853352d98763940726e0ab31f8c25fa6f1fc9951edad49cbfab6297018d6b42f497cefdcdb70aab45604612f03598a085bf984778fa413c7fab1b75",
+			pub:  "0x346262ffa4ec2f40feb9ae81e416af7cca9fcfa8871f1f9169e6dccd63aa667",
+		},
+	}
+	for _, tt := range args {
+		err := VerifyStarkCoin(tt.coin, tt.addr, tt.msg, tt.sign, tt.pub)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+	}
+}

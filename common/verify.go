@@ -13,6 +13,7 @@ import (
 	"github.com/martinboehm/btcutil/base58"
 	"github.com/martinboehm/btcutil/bech32"
 	"github.com/martinboehm/btcutil/chaincfg"
+	"github.com/okx/go-wallet-sdk/coins/starknet"
 	"golang.org/x/crypto/ripemd160"
 	"regexp"
 	"strings"
@@ -193,9 +194,6 @@ func VerifyUtxoCoinSig(coin, addr, script string, pub1, pub2 []byte) error {
 		}
 		if err != nil {
 			return fmt.Errorf("script ExtractPkScriptAddrs failed, coin:%s, addr:%s, error: %v", coin, addr, err)
-		}
-		if len(pubs) != 3 {
-			return fmt.Errorf("script address pubs num not match, coin:%s, addr:%s, srcNum: %d, num: %d", coin, addr, 3, len(pubs))
 		}
 		m := map[string]struct{}{addr1: {}, addr: {}, addr2: {}}
 		for _, v := range pubs {
@@ -412,4 +410,53 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 	}
 
 	return nil
+}
+
+func VerifyStarkCoin(coin, addr, msg, sign, publicKey string) error {
+	const EIP712_TEMPLATE = `{
+    "accountAddress": "%s",
+    "typedData": {
+        "types": {
+            "StarkNetDomain": [
+                {
+                    "name": "name",
+                    "type": "felt"
+                },
+                {
+                    "name": "version",
+                    "type": "felt"
+                },
+                {
+                    "name": "chainId",
+                    "type": "felt"
+                }
+            ],
+            "Message": [
+                {
+                    "name": "contents",
+                    "type": "felt"
+                }
+            ]
+        },
+        "primaryType": "Message",
+        "domain": {
+            "name": "OKX POR MESSAGE",
+            "version": "1",
+            "chainId": "0x534e5f4d41494e"
+        },
+        "message": {
+            "contents": "%s"
+        }
+    }
+}`
+	hash, err := starknet.GetMessageHashWithJson(fmt.Sprintf(EIP712_TEMPLATE, addr, msg))
+	if err != nil {
+		return fmt.Errorf("calculate hash error")
+	}
+
+	if VerifyMessage(hash, publicKey, sign) {
+		return nil
+	}
+
+	return fmt.Errorf("recovery address not match, coin:%s, addr:%s", coin, addr)
 }
