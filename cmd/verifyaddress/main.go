@@ -63,9 +63,8 @@ func parseLine(line string) []string {
 			part += string(char)
 		}
 	}
-	if part != "" {
-		result = append(result, part)
-	}
+
+	result = append(result, part)
 
 	return result
 }
