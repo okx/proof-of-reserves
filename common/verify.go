@@ -324,12 +324,14 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
 		recoverAddrs = append(recoverAddrs, walletV3.String())
+		recoverAddrs = append(recoverAddrs, walletV3.Bounce(false).String())
 
 		walletHighload, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.ConfigHighloadV3{MessageTTL: 60 * 60 * 12}, 4269)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
 		recoverAddrs = append(recoverAddrs, walletHighload.String())
+		recoverAddrs = append(recoverAddrs, walletHighload.Bounce(false).String())
 	case "DOT":
 		rAddr, err := GetDotAddressFromPublicKey(pubkey)
 		if err != nil {
