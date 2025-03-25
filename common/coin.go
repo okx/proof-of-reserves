@@ -429,7 +429,7 @@ var (
 		"USDC-SPL":    "USDC",
 		"USDT-SPL":    "USDT",
 		"APTOS":       "APTOS",
-		"USDT-APTOS":  "USDC",
+		"USDT-APTOS":  "USDT",
 		"SUI":         "SUI",
 		"USDC-SUI":    "USDC",
 		"TONCOIN-NEW": "TONCOIN-NEW",
