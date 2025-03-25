@@ -1,6 +1,8 @@
 # Creates an object that includes convenience operations for numbers
 # and polynomials in some prime field
 from utils import get_power_cycle
+
+
 class PrimeField():
     def __init__(self, modulus):
         assert pow(2, modulus, modulus) == 2
@@ -52,7 +54,7 @@ class PrimeField():
             y += power_of_x * p_coeff
             power_of_x = (power_of_x * x) % self.modulus
         return y % self.modulus
-        
+
     # Arithmetic for polynomials
     def add_polys(self, a, b):
         return [((a[i] if i < len(a) else 0) + (b[i] if i < len(b) else 0))
@@ -61,17 +63,27 @@ class PrimeField():
     def sub_polys(self, a, b):
         return [((a[i] if i < len(a) else 0) - (b[i] if i < len(b) else 0))
                 % self.modulus for i in range(max(len(a), len(b)))]
-    
+
     def mul_by_const(self, a, c):
         return [(x*c) % self.modulus for x in a]
-    
+
     def mul_polys(self, a, b):
         o = [0] * (len(a) + len(b) - 1)
         for i, aval in enumerate(a):
             for j, bval in enumerate(b):
                 o[i+j] += a[i] * b[j]
         return [x % self.modulus for x in o]
-    
+
+    def fit(self, a):
+        pos = len(a) - 1
+        if pos <= 0:
+            return a
+        while a[pos] == 0:
+            if pos < 1:
+                return a
+            pos -= 1
+        return a[:pos+1]
+
     def div_polys(self, a, b):
         assert len(a) >= len(b)
         a = [x for x in a]
@@ -80,7 +92,11 @@ class PrimeField():
         bpos = len(b) - 1
         diff = apos - bpos
         while diff >= 0:
+            # print("diff", diff)
+            # print("a[apos]", a[apos])
+            # print("b[bpos]", b[bpos])
             quot = self.div(a[apos], b[bpos])
+            # print("quot", quot)
             o.insert(0, quot)
             for i in range(bpos, -1, -1):
                 a[diff+i] -= b[i] * quot
@@ -106,7 +122,7 @@ class PrimeField():
             for j in range(len(root)-1):
                 root[j] -= root[j+1] * x
         return [x % self.modulus for x in root]
-    
+
     def zpoly_de_dup(self, xs):
         print("len(xs1)", len(xs))
         _xs = list(set(xs))
@@ -118,7 +134,7 @@ class PrimeField():
             for j in range(len(root)-1):
                 root[j] -= root[j+1] * x
         return [x % self.modulus for x in root]
-    
+
     # Given p+1 y values and x values with no errors, recovers the original
     # p+1 degree polynomial.
     # Lagrange interpolation works roughly in the following way.
@@ -126,7 +142,7 @@ class PrimeField():
     # 2. For each x, generate a polynomial which equals its corresponding
     #    y coordinate at that point and 0 at all other points provided.
     # 3. Add these polynomials together.
-    
+
     def lagrange_interp(self, xs, ys):
         # Generate master numerator polynomial, eg. (x - x1) * (x - x2) * ... * (x - xn)
         root = self.zpoly(xs)
@@ -158,7 +174,8 @@ class PrimeField():
     # Optimized version of the above restricted to deg-4 polynomials
     def lagrange_interp_4(self, xs, ys):
         x01, x02, x03, x12, x13, x23 = \
-            xs[0] * xs[1], xs[0] * xs[2], xs[0] * xs[3], xs[1] * xs[2], xs[1] * xs[3], xs[2] * xs[3]
+            xs[0] * xs[1], xs[0] * xs[2], xs[0] * \
+            xs[3], xs[1] * xs[2], xs[1] * xs[3], xs[2] * xs[3]
         m = self.modulus
         eq0 = [-x12 * xs[3] % m, (x12 + x13 + x23), -xs[1]-xs[2]-xs[3], 1]
         eq1 = [-x02 * xs[3] % m, (x02 + x03 + x23), -xs[0]-xs[2]-xs[3], 1]
@@ -176,7 +193,7 @@ class PrimeField():
         inv_y2 = ys[2] * invall * e01 * e3 % m
         inv_y3 = ys[3] * invall * e01 * e2 % m
         return [(eq0[i] * inv_y0 + eq1[i] * inv_y1 + eq2[i] * inv_y2 + eq3[i] * inv_y3) % m for i in range(4)]
-    
+
     # Optimized version of the above restricted to deg-2 polynomials
     def lagrange_interp_2(self, xs, ys):
         m = self.modulus
@@ -185,7 +202,7 @@ class PrimeField():
         e0 = self.eval_poly_at(eq0, xs[0])  # e0 = x0 - x1
         e1 = self.eval_poly_at(eq1, xs[1])  # e1 = x1 - x0
         invall = self.inv(e0 * e1)  # invall = 1/((x0 - x1)(x1 - x0))
-        inv_y0 = ys[0] * invall * e1    
+        inv_y0 = ys[0] * invall * e1
         inv_y1 = ys[1] * invall * e0
         return [(eq0[i] * inv_y0 + eq1[i] * inv_y1) % m for i in range(2)]
 
@@ -195,19 +212,22 @@ class PrimeField():
         invtargets = []
         for xs, ys in zip(xsets, ysets):
             x01, x02, x03, x12, x13, x23 = \
-                xs[0] * xs[1], xs[0] * xs[2], xs[0] * xs[3], xs[1] * xs[2], xs[1] * xs[3], xs[2] * xs[3]
+                xs[0] * xs[1], xs[0] * xs[2], xs[0] * \
+                xs[3], xs[1] * xs[2], xs[1] * xs[3], xs[2] * xs[3]
             m = self.modulus
-            eq0 = [-x12 * xs[3] % m, (x12 + x13 + x23), -xs[1]-xs[2]-xs[3], 1]  # eq0 = x^3 + (-x1-x2-x3)*x^2 + (x1*x2 + x1*x3 + x2*x3)*x + (-x1*x2 + x3)
+            # eq0 = x^3 + (-x1-x2-x3)*x^2 + (x1*x2 + x1*x3 + x2*x3)*x + (-x1*x2 + x3)
+            eq0 = [-x12 * xs[3] % m, (x12 + x13 + x23), -xs[1]-xs[2]-xs[3], 1]
             eq1 = [-x02 * xs[3] % m, (x02 + x03 + x23), -xs[0]-xs[2]-xs[3], 1]
             eq2 = [-x01 * xs[3] % m, (x01 + x03 + x13), -xs[0]-xs[1]-xs[3], 1]
             eq3 = [-x01 * xs[2] % m, (x01 + x02 + x12), -xs[0]-xs[1]-xs[2], 1]
-            e0 = self.eval_quartic(eq0, xs[0])  # e0 = x0^3 + (-x1-x2-x3)*x0^2 + (x1*x2 + x1*x3 + x2*x3)*x0 + (-x1*x2 + x3) = （x0 - x1）(x0 - x2)(x0 - x3)
+            # e0 = x0^3 + (-x1-x2-x3)*x0^2 + (x1*x2 + x1*x3 + x2*x3)*x0 + (-x1*x2 + x3) = （x0 - x1）(x0 - x2)(x0 - x3)
+            e0 = self.eval_quartic(eq0, xs[0])
             e1 = self.eval_quartic(eq1, xs[1])
             e2 = self.eval_quartic(eq2, xs[2])
             e3 = self.eval_quartic(eq3, xs[3])
-            data.append([ys, eq0, eq1, eq2, eq3])   
-            invtargets.extend([e0, e1, e2, e3]) 
-        invalls = self.multi_inv(invtargets)   
+            data.append([ys, eq0, eq1, eq2, eq3])
+            invtargets.extend([e0, e1, e2, e3])
+        invalls = self.multi_inv(invtargets)
         o = []
         for (i, (ys, eq0, eq1, eq2, eq3)) in enumerate(data):
             invallz = invalls[i*4:i*4+4]
@@ -215,32 +235,34 @@ class PrimeField():
             inv_y1 = ys[1] * invallz[1] % m
             inv_y2 = ys[2] * invallz[2] % m
             inv_y3 = ys[3] * invallz[3] % m
-            o.append([(eq0[i] * inv_y0 + eq1[i] * inv_y1 + eq2[i] * inv_y2 + eq3[i] * inv_y3) % m for i in range(4)])
+            o.append([(eq0[i] * inv_y0 + eq1[i] * inv_y1 + eq2[i] *
+                     inv_y2 + eq3[i] * inv_y3) % m for i in range(4)])
         # assert o == [self.lagrange_interp_4(xs, ys) for xs, ys in zip(xsets, ysets)]
         return o
 
     def get_poly_degree(self, poly):
-        degree = len(poly) -1
+        degree = len(poly) - 1
         for i in range(len(poly)):
-            if poly[len(poly)-1-i] == 0 :
-                degree = degree -1
-            else :
+            if poly[len(poly)-1-i] == 0:
+                degree = degree - 1
+            else:
                 break
 
         return degree
-    
+
     def get_poly_degree_exclude_multiples_of(self, values, root_of_unity, exclude_multiples_of=[0]):
         powers = get_power_cycle(root_of_unity, self.modulus)
         if exclude_multiples_of[0]:
-            pts = [x for x in range(len(values)) if self.not_match(x, exclude_multiples_of[0], exclude_multiples_of[1])]
+            pts = [x for x in range(len(values)) if self.not_match(
+                x, exclude_multiples_of[0], exclude_multiples_of[1])]
         else:
             pts = [x for x in range(len(values))]
         poly = self.lagrange_interp([powers[x] for x in pts],
-                            [values[x] for x in pts])
+                                    [values[x] for x in pts])
         return self.get_poly_degree(poly)
-    
-    def not_match(self, x , p, remainders):
+
+    def not_match(self, x, p, remainders):
         for i in range(len(remainders)):
-            if x % p == remainders[i]: 
+            if x % p == remainders[i]:
                 return False
         return True
