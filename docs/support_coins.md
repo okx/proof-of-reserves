@@ -79,6 +79,9 @@
 | TON         | Toncoin          |
 | TRX         | Tron             |
 | APT         | Aptos            |
+| USDT        | Aptos            |
+| SUI         | SUI              |
+| USDC        | SUI              |
 | SOL         | Solana           |
 | DASH        | Dash             |
 | DOGE        | Doge             |

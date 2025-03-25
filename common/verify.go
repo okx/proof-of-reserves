@@ -14,6 +14,7 @@ import (
 	"github.com/martinboehm/btcutil/bech32"
 	"github.com/martinboehm/btcutil/chaincfg"
 	"github.com/okx/go-wallet-sdk/coins/starknet"
+	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/ripemd160"
 	"regexp"
 	"strings"
@@ -318,6 +319,18 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		// Short address type: if address starts with 0x0, replace.
 		re, _ := regexp.Compile("^0x0*")
 		recoverAddrs = append(recoverAddrs, re.ReplaceAllString(rAddr, "0x"))
+		recoverAddrs = append(recoverAddrs, rAddr)
+	case "SUI":
+		k := make([]byte, 33)
+		copy(k[1:], pubkeyBytes)
+		publicKeyHash, err := blake2b.New256(nil)
+		if err != nil {
+			return fmt.Errorf("invalid publicKey, coin:%s, recoverAddrs:%v, addr:%s", coin, recoverAddrs, addr)
+		}
+		publicKeyHash.Write(k)
+		h := publicKeyHash.Sum(nil)
+		address := "0x" + hex.EncodeToString(h)[0:64]
+		recoverAddrs = append(recoverAddrs, address)
 	case "TON":
 		walletV3, err := tonWallet.AddressFromPubKey(pubkeyBytes, tonWallet.V3, tonWallet.DefaultSubwallet)
 		if err != nil {
