@@ -119,7 +119,9 @@ var (
 		"USDC-SPL":    "SOL",
 		"USDT-SPL":    "SOL",
 		"APTOS":       "APTOS",
+		"APTOS-FA":    "APTOS",
 		"USDT-APTOS":  "APTOS",
+		"USDC-APTOS":  "APTOS",
 		"SUI":         "SUI",
 		"USDC-SUI":    "SUI",
 		"TONCOIN-NEW": "TON",
@@ -223,7 +225,9 @@ var (
 		"USDC-SPL":    Ed25519CoinType,
 		"USDT-SPL":    Ed25519CoinType,
 		"APTOS":       Ed25519CoinType,
+		"APTOS-FA":    Ed25519CoinType,
 		"USDT-APTOS":  Ed25519CoinType,
+		"USDC-APTOS":  Ed25519CoinType,
 		"SUI":         Ed25519CoinType,
 		"USDC-SUI":    Ed25519CoinType,
 		"TONCOIN-NEW": Ed25519CoinType,
@@ -327,7 +331,9 @@ var (
 		"USDC-SPL":    OKXMessageSignatureHeader,
 		"USDT-SPL":    OKXMessageSignatureHeader,
 		"APTOS":       OKXMessageSignatureHeader,
+		"APTOS-FA":    OKXMessageSignatureHeader,
 		"USDT-APTOS":  OKXMessageSignatureHeader,
+		"USDC-APTOS":  OKXMessageSignatureHeader,
 		"SUI":         OKXMessageSignatureHeader,
 		"USDC-SUI":    OKXMessageSignatureHeader,
 		"TONCOIN-NEW": OKXMessageSignatureHeader,
@@ -429,7 +435,9 @@ var (
 		"USDC-SPL":    "USDC",
 		"USDT-SPL":    "USDT",
 		"APTOS":       "APTOS",
+		"APTOS-FA":    "APTOS",
 		"USDT-APTOS":  "USDT",
+		"USDC-APTOS":  "USDC",
 		"SUI":         "SUI",
 		"USDC-SUI":    "USDC",
 		"TONCOIN-NEW": "TONCOIN-NEW",
@@ -438,6 +446,7 @@ var (
 
 		// EOS
 		"EOS":    "EOS",
+		"A":      "A",
 		"RIPPLE": "RIPPLE",
 
 		// ALGO
@@ -537,7 +546,9 @@ var (
 		"USDC-SPL":    6,
 		"USDT-SPL":    6,
 		"APTOS":       8,
+		"APTOS-FA":    8,
 		"USDT-APTOS":  6,
+		"USDC-APTOS":  6,
 		"SUI":         9,
 		"USDC-SUI":    6,
 		"TONCOIN-NEW": 9,
@@ -546,6 +557,7 @@ var (
 
 		// EOS
 		"EOS":    4,
+		"A":      4,
 		"RIPPLE": 6,
 
 		// ALGO
@@ -592,6 +604,7 @@ var (
 
 	VerifyAddressCoinBlackList = map[string]bool{
 		"EOS":       true,
+		"A":         true,
 		"RIPPLE":    true,
 		"USDT-ALGO": true,
 	}
