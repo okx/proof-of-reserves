@@ -120,6 +120,11 @@ func handle(i int, line string) (string, bool) {
 				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
 				return coin, false
 			}
+		} else if eoa1 != "" {
+			if err := common.VerifyEvmCoin(coin, eoa1, message, sign1); err != nil {
+				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", eoa1, i+1, err))
+				return coin, false
+			}
 		} else {
 			if err := common.VerifyEvmCoin(coin, addr, message, sign1); err != nil {
 				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
@@ -133,6 +138,11 @@ func handle(i int, line string) (string, bool) {
 				return coin, false
 			}
 			if err := common.VerifyEcdsaCoin(coin, eoa2, message, sign2); err != nil {
+				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+				return coin, false
+			}
+		} else if eoa1 != "" {
+			if err := common.VerifyEcdsaCoin(coin, eoa1, message, sign1); err != nil {
 				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
 				return coin, false
 			}
