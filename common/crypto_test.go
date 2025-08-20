@@ -403,3 +403,191 @@ func TestVerifyStarkCoinSignature(t *testing.T) {
 		}
 	}
 }
+
+func TestVerifyTemplate(t *testing.T) {
+	cases := []struct {
+		verifyType string
+		coin       string
+		addr       string
+		msg        string
+		sign       string
+		pubKey     string
+		// only for utxo
+		sign1  string
+		sign2  string
+		script string
+	}{
+		{
+			verifyType: "evm",
+			coin:       "ETH",
+			addr:       "0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0xe2d351cd4617fea1cf3ad6b907f7897384b6a01cdd7db3fb23c1967bc40cae527e95690bebf9527e0882ffad3bac76e3424c91378a019997d970cd63935200861c",
+		},
+		{
+			verifyType: "trx",
+			coin:       "TRX",
+			addr:       "TEjxQjU3CxkFrSDcPfHwZXSuPpCpdQ27NJ",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0xb52562f78a945b7a1fcfbbc4bc19c3dc80f0ed10ba633f37266ad25dbe9100910e1a5712f2c90e61b05d10ba7c43d0fbba2a06c48d9b7425b8229c3ea617ffa31b",
+		},
+		{
+			verifyType: "ecdsa",
+			coin:       "OKT",
+			addr:       "0x07e47ed3c5a8ff59fb5d1df4051c34da67fc5547",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x7a819fef9e4383bf165b3173da04e0b3fde7eb501f8711f29bc9a14d90a37ba337e394f9544d4d90ee65d19cfbd437b038be4d2a4aadf9da3973f9eacbc6b2001c",
+		},
+		{
+			verifyType: "ecdsa",
+			coin:       "FIL",
+			addr:       "f1lzszobfjwres2otlbitgpbeo6ha72sujwsdjy5i",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0xbc7cbd93ae5231a94f5289cef2d161d134994a2fc626ab1863ec5a10ec89dc902f0cf695fd99308e402185d4184fc5a002074d6a31b6666b09634c0df85220b31c",
+		},
+		{
+			verifyType: "ecdsa",
+			coin:       "CFX",
+			addr:       "cfx:aameksd3gwvmtduc861ym2uzkfaawu9566k0jnte55",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x3201f07c8762b1336c58c13f586ce329a53bf59c493c80cde5854d02dda16b4109aa7e4437671d53f72bf6e8340b9370fa863cd505f845a0c964eda7e8696fed1b",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "SUI",
+			addr:       "0x4c6072a97c304be864d9e187ded3ea33e83e447672054dd69cc1e2de7914b250",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x870faf27df65e6b0a8f397b1461374d4b1843f53c0e71407316f8b0bba3e065a57742fc59924caec8f0f30be0d95a2051a73c8f0e54ba21ec1a4b8e7b7fa6e02",
+			pubKey:     "0xd035239ebfe6e6192249a8c028cdc845aed0a469f119e200c7e2f306e5067094",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "APTOS",
+			addr:       "0x327dd297dfacf7c2d8207aaa23c0f0e8bcaf4c1612febbf63b9f7376810b8ec8",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0xe4d968ddf33366e3e085294bf80077fdb2e89243f4e4f41779e531640504ae1e3b52f5d3e1a1c8fd838a4ce07bad511d7d9438ea7515fe9629d6ec81124cce01",
+			pubKey:     "0x61f579fc779146304353027b425a216d8015889c5f3b715ad26135b862f3bf84",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "SOL",
+			addr:       "7bzoTJhZmpU1vQVjN63fQ3iVYmWCVgQh1sYSqsjuapU9",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x81c709d6f44647a7e34c318e63c4f7e34617fa0420c9b58b071adfac3f7fb3e2ed7da6fe0b59dc7318cf471bbbe0abc873362b7cce2f269ef1f7e9ecd5716704",
+			pubKey:     "0x621d398b19304995ee140c21afc544d62382d387b5c08dfd096b475a304339ea",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "TONCOIN-NEW",
+			addr:       "EQA5rifVSCc8qQfpCXvq4zJGJPsA0EPCDoWdtg234INftsWj",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x48d46ee1557c4850dff0622cb3b960a667e72df10868c905df1c17bd1dc8ebc42691bb8df2814c56933cdfc67a6ba7626ae5faf4ee6190c4a030a43179e0c502",
+			pubKey:     "0x3d2696e3d5cbc9047b338e6a56552db1d43ca6e063bc7aa667b18005984372d2",
+		},
+		{
+			verifyType: "ecdsaPub",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x3a7c6d3f6e6885c07d21bb9eeb266cdf1400ab5c1379664ca9c74c6eaf4dcbdd03895a64253f7c5da9da504548dc87bc634e571042bc74bcfb18a005d3c592531b",
+			pubKey:     "0243eb3f77eac97882ca3a6c038830e199f1b02cbab4f8664fd08c54911b0a05e6",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "PI",
+			addr:       "GDMA3OUZHWTQ4RZBYEXR4VEZ7YGQNXOAMRSYRHDM5GSXH3UZQF5VGPXN",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x71e6adb98dce49b523594f3bc0f96ab7eda84c00ef3ddc7e1eff8d18c5dd537ae409f6cc7c0f9d2f98d2bcfeb2885c5f3856bdf867ee9b68a5e16c12be7be50d",
+			pubKey:     "0xd80dba993da70e4721c12f1e5499fe0d06ddc06465889c6ce9a573ee99817b53",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "ADA",
+			addr:       "addr1vykqe7mmq83jsfxu0relg46vasd5d4gr4yg5pchg5v8tuvck0jkfn",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0xefb9a223ad794dac0a791caa29909603cca6c780a0e184c69e1a13a9a4c1c0b60ae83671de4178ab7ba83131bda9210d84ffe2a4556d1891add02fdcd7181a06",
+			pubKey:     "0x7afe9bac605a184fe32d9dfb582b9d837841f5ff99916b73dd3f705d19bbba50",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "DOT",
+			addr:       "15WXogcgXnHsZ1FeuNc6cg34i8R6JCXgWrDLNLERLLesJ7bf",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x2d6149f4facd2966a3e8c229e2fad837ad35fe017d1a64c53464c325fd0fcb9726bef8f21004b689cd884f3749ce07ef08f4dceff02fd9aa96d48bd466985400",
+			pubKey:     "0xc776bfbeeeb0b1ddd1ce6cccf55ce795f5306bf63de37d72e5af50b3be23ce49",
+		},
+		{
+			verifyType: "edd25519",
+			coin:       "NEAR",
+			addr:       "b1e2af21d50c8940aaebe9650bd3e09eb49f3945c6ec2d917de0d64cdfaf3fba",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x0583df7d07e242e1240a97b6322bfa1df7203a09d10e8a219442ebb17064ae978024df47a58551f61afd9b10774688c0c217aa319eddeb9285b252006edb3c07",
+			pubKey:     "0xb1e2af21d50c8940aaebe9650bd3e09eb49f3945c6ec2d917de0d64cdfaf3fba",
+		},
+		{
+			verifyType: "ecdsaPub",
+			coin:       "AVAX-X",
+			addr:       "X-avax1v88xtvkfmas5467c0zcdhsdxv42nm8d0gjmp5q",
+			msg:        "OKC_DTT_AUP2025",
+			sign:       "0x80c84e2a993899f12882d4319061b8ce1d7319742e4939cc3d93caca349f3b0247f2a3d5f9bc5063a62d2cb168ca43d1cb788e5d7f7e1770fb04d71f7649ed501b",
+			pubKey:     "022e6cb3bc597b11f64aa46b40a6c6aa4853557ef66b53c6a49a9540b25e0afe1b",
+		},
+		{
+			verifyType: "utxo",
+			coin:       "BTC",
+			addr:       "393maTY7rQScy4SmYE1XSXUSgK73byhgfA",
+			msg:        "OKC_DTT_AUP2025",
+			sign1:      "IDRyTg89A1N6quCCnj3jLht3Dboar6rSh/7YlhxbVN1RfVOYti0fyRcWXplLQjbPgDChthLssytrbDFVDcLA750=",
+			sign2:      "IJ+Wf/va772DV2ETAGxN7mo2VECUM9kQBMpUNvAJBnrgM8/o2C3+ID7Z6E5QZTS+VLCZ8Bgtym0rxcLfFLl0B+s=",
+			script:     "5221027adce0bd3080066ab90c68199ff73128b3ff8c847d15d9e4c6e88fb4c6e6486b210273fa0df3ffceeda23b0074d9fe83d9ee3a209fad6e4546fdec5ede39abcbb70d2102a38ce748c5a1e1889f0d72ecd6f2130f5f73a11e01fff9f0d22796e40217571953ae",
+		},
+		{
+			verifyType: "utxo",
+			coin:       "BSV",
+			addr:       "1Hgc1DnWHwfXFxruej4H5g3ThsCzUEwLdD",
+			msg:        "OKC_DTT_AUP2025",
+			sign1:      "IJ+Wf/va772DV2ETAGxN7mo2VECUM9kQBMpUNvAJBnrgM8/o2C3+ID7Z6E5QZTS+VLCZ8Bgtym0rxcLfFLl0B+s=",
+			sign2:      "",
+			script:     "76a914b6ff746a94f1ed230af7c891bc68a8dcc45bdf4f88ac",
+		},
+		{
+			verifyType: "utxo",
+			coin:       "DOGE",
+			addr:       "9yo2KJc1vUKWsRpExMfwgf6pNtV5gG3vqW",
+			msg:        "OKC_DTT_AUP2025",
+			sign1:      "H7UaLfjDn/VCq9dXpaQ7c5bwvrLi3D+3+wh1xBu7jKkrInQosKZC6c0oaR9Kl01T0WIm70h9rA2KkyivTZB4fFw=",
+			sign2:      "IBRzablLv1KsJCyZnGE1DZLUP+o2gghRspnZbzmE56egf64Od0MmvFdBtfqajGyLoZwhkXjp62nm+I5U4LtJg5w=",
+			script:     "5221027adce0bd3080066ab90c68199ff73128b3ff8c847d15d9e4c6e88fb4c6e6486b210273fa0df3ffceeda23b0074d9fe83d9ee3a209fad6e4546fdec5ede39abcbb70d2102a38ce748c5a1e1889f0d72ecd6f2130f5f73a11e01fff9f0d22796e40217571953ae",
+		},
+		{
+			verifyType: "utxo",
+			coin:       "LTC",
+			addr:       "MFFutLx5oXJ3mZife6zsGAir11hVbmUF99",
+			msg:        "OKC_DTT_AUP2025",
+			sign1:      "HzQdk7Jt9N4J6xQxFQSF1Ts/m5cNLVIgYgv75eg8KjZ9fyxQgpS3f8Aywp8yd5g/IpAe36eMgBNadSbQkjATnmI=",
+			sign2:      "H1Ni/G3cPbjLTzn5Bmm1WDu5wPKLwCmzKzXVzwzz3EJCOREBWusePO3ZYvAoVALuVBurKHhWSLTdO6sZw5A43oM=",
+			script:     "5221027adce0bd3080066ab90c68199ff73128b3ff8c847d15d9e4c6e88fb4c6e6486b210273fa0df3ffceeda23b0074d9fe83d9ee3a209fad6e4546fdec5ede39abcbb70d2102a38ce748c5a1e1889f0d72ecd6f2130f5f73a11e01fff9f0d22796e40217571953ae",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.coin, func(t *testing.T) {
+			var err error
+			switch tt.verifyType {
+			case "evm":
+				err = VerifyEvmCoin(tt.coin, tt.addr, tt.msg, tt.sign)
+			case "ecdsa":
+				err = VerifyEcdsaCoin(tt.coin, tt.addr, tt.msg, tt.sign)
+			case "trx":
+				err = VerifyTRX(tt.addr, tt.msg, tt.sign)
+			case "edd25519":
+				err = VerifyEd25519Coin(tt.coin, tt.addr, tt.msg, tt.sign, tt.pubKey)
+			case "ecdsaPub":
+				err = VerifyEcdsaCoinWithPub(tt.msg, tt.sign, tt.pubKey)
+			case "utxo":
+				err = VerifyUtxoCoin(tt.coin, tt.addr, tt.msg, tt.sign1, tt.sign2, tt.script)
+			}
+			if err != nil {
+				t.Errorf("%s verify failed: %v", tt.coin, err)
+			}
+		})
+	}
+}
