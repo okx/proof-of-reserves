@@ -7,6 +7,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/Conflux-Chain/go-conflux-sdk/types/cfxaddress"
 	"github.com/martinboehm/btcd/txscript"
 	"github.com/martinboehm/btcutil"
@@ -16,8 +19,8 @@ import (
 	"github.com/okx/go-wallet-sdk/coins/starknet"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/ripemd160"
-	"regexp"
-	"strings"
+
+	"bytes"
 
 	secp_ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
 	tonWallet "github.com/xssnick/tonutils-go/ton/wallet"
@@ -351,6 +354,37 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
 		recoverAddrs = append(recoverAddrs, rAddr)
+	case "XLM":
+	case "PI":
+		// XLM addresses are base32 encoded and start with 'G'
+		// The address is derived from the public key using SHA256 and then RIPEMD160
+		// followed by base32 encoding with checksum
+		rAddr, err := GetXlmAddressFromPublicKey(pubkey)
+		if err != nil {
+			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
+		}
+		recoverAddrs = append(recoverAddrs, rAddr)
+	case "ADA":
+		// ADA addresses use ed25519 + Blake2b-224 + Bech32 encoding
+		rAddr, err := GetAdaAddressFromPublicKey(pubkey)
+		if err != nil {
+			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
+		}
+		recoverAddrs = append(recoverAddrs, rAddr)
+	case "NEAR":
+		// NEAR addresses are just the public key hex (without 0x prefix)
+		rAddr, err := GetNearAddressFromPublicKey(pubkey)
+		if err != nil {
+			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
+		}
+		recoverAddrs = append(recoverAddrs, rAddr)
+	case "HBAR":
+		// HBAR addresses are just the public key hex string (with 0x prefix)
+		rAddr, err := GetHbarAddressFromPublicKey(pubkey)
+		if err != nil {
+			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
+		}
+		recoverAddrs = append(recoverAddrs, rAddr)
 	}
 
 	for _, recoverAddr := range recoverAddrs {
@@ -474,4 +508,29 @@ func VerifyStarkCoin(coin, addr, msg, sign, publicKey string) error {
 	}
 
 	return fmt.Errorf("recovery address not match, coin:%s, addr:%s", coin, addr)
+}
+
+func VerifyEcdsaCoinWithPub(msg, sign, publicKey string) error {
+	hash := HashEcdsaMsg(OKXMessageSignatureHeader, msg)
+	s := MustDecode(sign)
+	pub, err := sigToPub(hash, s)
+	if err != nil {
+		return ErrInvalidSign
+	}
+
+	// Convert the recovered public key to uncompressed format for comparison
+	recoveredPubKey := pub.SerializeCompressed()
+
+	// Decode the provided public key
+	providedPubKey, err := Decode(publicKey)
+	if err != nil {
+		return fmt.Errorf("invalid public key format: %v", err)
+	}
+
+	// Compare the public keys directly
+	if !bytes.Equal(recoveredPubKey, providedPubKey) {
+		return fmt.Errorf("public key mismatch: recovered %x, provided %x", recoveredPubKey, providedPubKey)
+	}
+
+	return nil
 }

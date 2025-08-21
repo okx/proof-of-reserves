@@ -133,6 +133,12 @@ var (
 
 		// FEVM
 		"FIL-EVM": "FIL",
+
+		"XLM":  "XLM",
+		"PI":   "PI",
+		"ADA":  "ADA",
+		"NEAR": "NEAR",
+		"HBAR": "HBAR",
 	}
 
 	PorCoinTypeMap = map[string]string{
@@ -233,6 +239,11 @@ var (
 		"TONCOIN-NEW": Ed25519CoinType,
 		"USDT-TON":    Ed25519CoinType,
 		"DOT":         Ed25519CoinType,
+		"XLM":         Ed25519CoinType,
+		"PI":          Ed25519CoinType,
+		"ADA":         Ed25519CoinType,
+		"NEAR":        Ed25519CoinType,
+		"HBAR":        Ed25519CoinType,
 
 		// ALGO
 		"USDT-ALGO": AlgoCoinType,
@@ -339,6 +350,11 @@ var (
 		"TONCOIN-NEW": OKXMessageSignatureHeader,
 		"USDT-TON":    OKXMessageSignatureHeader,
 		"DOT":         OKXMessageSignatureHeader,
+		"XLM":         OKXMessageSignatureHeader,
+		"PI":          OKXMessageSignatureHeader,
+		"ADA":         OKXMessageSignatureHeader,
+		"NEAR":        OKXMessageSignatureHeader,
+		"HBAR":        OKXMessageSignatureHeader,
 
 		// ALGO
 		"USDT-ALGO": OKXMessageSignatureHeader,
@@ -443,6 +459,11 @@ var (
 		"TONCOIN-NEW": "TONCOIN-NEW",
 		"USDT-TON":    "USDT",
 		"DOT":         "DOT",
+		"XLM":         "XLM",
+		"PI":          "PI",
+		"ADA":         "ADA",
+		"NEAR":        "NEAR",
+		"HBAR":        "HBAR",
 
 		// EOS
 		"EOS":    "EOS",
@@ -587,6 +608,8 @@ var (
 		"APTOS":       true,
 		"TONCOIN-NEW": true,
 		"DOT":         true,
+		"NEAR":        true,
+		"HBAR":        true,
 
 		"EOS":    true,
 		"RIPPLE": true,
