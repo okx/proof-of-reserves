@@ -23,194 +23,194 @@ func GetBTCMainNetParams() *chaincfg.Params {
 
 // GetBCHMainNetParams BCH
 func GetBCHMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xe8f3e1e3
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xe8f3e1e3
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{0} // base58 prefix: 1
-	MainNetParams.ScriptHashAddrID = []byte{5} // base58 prefix: 3
+	localParams.PubKeyHashAddrID = []byte{0} // base58 prefix: 1
+	localParams.ScriptHashAddrID = []byte{5} // base58 prefix: 3
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetECASHMainNetParams ECASH
 func GetECASHMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xe8f3e1e3
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xe8f3e1e3
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{0} // base58 prefix: 1
-	MainNetParams.ScriptHashAddrID = []byte{5} // base58 prefix: 3
+	localParams.PubKeyHashAddrID = []byte{0} // base58 prefix: 1
+	localParams.ScriptHashAddrID = []byte{5} // base58 prefix: 3
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetLTCMainNetParams LTC
 func GetLTCMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xdbb6c0fb
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xdbb6c0fb
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{48} // base58 prefix: L
-	MainNetParams.ScriptHashAddrID = []byte{50} // base58 prefix: M
-	MainNetParams.Bech32HRPSegwit = "ltc"
+	localParams.PubKeyHashAddrID = []byte{48} // base58 prefix: L
+	localParams.ScriptHashAddrID = []byte{50} // base58 prefix: M
+	localParams.Bech32HRPSegwit = "ltc"
 
 	if !chaincfg.IsRegistered(&chaincfg.MainNetParams) {
 		chaincfg.RegisterBitcoinParams()
 	}
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetBTGMainNetParams BTG
 func GetBTGMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0x446d47e1
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0x446d47e1
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{38} // base58 prefix: G
-	MainNetParams.ScriptHashAddrID = []byte{23} // base58 prefix: A
+	localParams.PubKeyHashAddrID = []byte{38} // base58 prefix: G
+	localParams.ScriptHashAddrID = []byte{23} // base58 prefix: A
 
 	// Human-readable part for Bech32 encoded segwit addresses, as defined in
 	// BIP 173.
 	// see https://github.com/satoshilabs/slips/blob/master/slip-0173.md
-	MainNetParams.Bech32HRPSegwit = "btg"
+	localParams.Bech32HRPSegwit = "btg"
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetDASHMainNetParams DASH
 func GetDASHMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xbd6b0cbf
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xbd6b0cbf
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{76} // base58 prefix: X
-	MainNetParams.ScriptHashAddrID = []byte{16} // base58 prefix: 7
+	localParams.PubKeyHashAddrID = []byte{76} // base58 prefix: X
+	localParams.ScriptHashAddrID = []byte{16} // base58 prefix: 7
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetDGBMainNetParams DGB
 func GetDGBMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xdab6c3fa
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xdab6c3fa
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{30} // base58 prefix: D
-	MainNetParams.ScriptHashAddrID = []byte{63} // base58 prefix: 3
-	MainNetParams.Bech32HRPSegwit = "dgb"
+	localParams.PubKeyHashAddrID = []byte{30} // base58 prefix: D
+	localParams.ScriptHashAddrID = []byte{63} // base58 prefix: 3
+	localParams.Bech32HRPSegwit = "dgb"
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetDOGEMainNetParams DOGE
 func GetDOGEMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xc0c0c0c0
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xc0c0c0c0
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{30} // base58 prefix: D
-	MainNetParams.ScriptHashAddrID = []byte{22} // base58 prefix: 9
+	localParams.PubKeyHashAddrID = []byte{30} // base58 prefix: D
+	localParams.ScriptHashAddrID = []byte{22} // base58 prefix: 9
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetQTUMMainNetParams QTUM
 func GetQTUMMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0xf1cfa6d3
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0xf1cfa6d3
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{58} // base58 prefix: Q
-	MainNetParams.ScriptHashAddrID = []byte{50} // base58 prefix: P
-	MainNetParams.Bech32HRPSegwit = "qc"
+	localParams.PubKeyHashAddrID = []byte{58} // base58 prefix: Q
+	localParams.ScriptHashAddrID = []byte{50} // base58 prefix: P
+	localParams.Bech32HRPSegwit = "qc"
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetRVNMainNetParams RVN
 func GetRVNMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0x4e564152
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0x4e564152
 
 	// Address encoding magics
-	MainNetParams.PubKeyHashAddrID = []byte{60}  // base58 prefix: R
-	MainNetParams.ScriptHashAddrID = []byte{122} // base58 prefix: r
+	localParams.PubKeyHashAddrID = []byte{60}  // base58 prefix: R
+	localParams.ScriptHashAddrID = []byte{122} // base58 prefix: r
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 // GetZECMainNetParams ZEC
 func GetZECMainNetParams() *chaincfg.Params {
-	MainNetParams = chaincfg.MainNetParams
-	MainNetParams.Net = 0x6427e924
+	localParams := chaincfg.MainNetParams
+	localParams.Net = 0x6427e924
 
 	// Address encoding magics
-	MainNetParams.AddressMagicLen = 2
-	MainNetParams.PubKeyHashAddrID = []byte{0x1C, 0xB8} // base58 prefix: t1
-	MainNetParams.ScriptHashAddrID = []byte{0x1C, 0xBD} // base58 prefix: t3
+	localParams.AddressMagicLen = 2
+	localParams.PubKeyHashAddrID = []byte{0x1C, 0xB8} // base58 prefix: t1
+	localParams.ScriptHashAddrID = []byte{0x1C, 0xBD} // base58 prefix: t3
 
-	if !chaincfg.IsRegistered(&MainNetParams) {
-		err := chaincfg.Register(&MainNetParams)
+	if !chaincfg.IsRegistered(&localParams) {
+		err := chaincfg.Register(&localParams)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return &MainNetParams
+	return &localParams
 }
 
 func GuessUtxoCoinAddressType(address string) string {

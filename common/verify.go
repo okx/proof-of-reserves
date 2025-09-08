@@ -16,7 +16,6 @@ import (
 	"github.com/martinboehm/btcutil/base58"
 	"github.com/martinboehm/btcutil/bech32"
 	"github.com/martinboehm/btcutil/chaincfg"
-	"github.com/okx/go-wallet-sdk/coins/starknet"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/ripemd160"
 
@@ -47,11 +46,11 @@ func VerifyBETH(addr, msg, sign string) error {
 	copy(h[:], hash[:])
 	var pub Pubkey
 	if err := pub.Deserialize(&p); err != nil {
-		return errors.New(fmt.Sprintf("unexpected failure, failed to deserialize pubkey (%x): %v", p[:], err))
+		return fmt.Errorf("unexpected failure, failed to deserialize pubkey (%x): %v", p[:], err)
 	}
 	var sig Signature
 	if err := sig.Deserialize(&s); err != nil {
-		return errors.New(fmt.Sprintf("unexpected failure, failed to deserialize signature (%x): %v", s[:], err))
+		return fmt.Errorf("unexpected failure, failed to deserialize signature (%x): %v", s[:], err)
 	}
 	res := Verify(&pub, h[:], &sig)
 	if !res {
@@ -77,7 +76,7 @@ func verifyTRX(addr, msg, sign string, hashFunc func(string) []byte) error {
 	s := MustDecode(sign)
 	pub, err := sigToPub(hash, s)
 	if err != nil {
-		return ErrInvalidSign
+		return fmt.Errorf("failed to recover public key from TRX signature, error:%v", err)
 	}
 	pubKey := pub.SerializeUncompressed()
 	h := sha3.NewLegacyKeccak256()
@@ -85,7 +84,7 @@ func verifyTRX(addr, msg, sign string, hashFunc func(string) []byte) error {
 	newHash := h.Sum(nil)[12:]
 	newAddr := base58.CheckEncode(newHash, GetNetWork(), base58.Sha256D)
 	if addr != newAddr {
-		return ErrInvalidSign
+		return fmt.Errorf("TRX address mismatch, expected:%s, recovered:%s", addr, newAddr)
 	}
 	return nil
 }
@@ -98,11 +97,11 @@ func UtxoCoinSigToPubKey(coin, msg, sign string) ([]byte, error) {
 	hash := HashUtxoCoinTypeMsg(msgHeader, msg)
 	b, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
-		return nil, ErrInvalidSign
+		return nil, fmt.Errorf("failed to decode UTXO signature, coin:%s, error:%v", coin, err)
 	}
 	pub, ok, err := secp_ecdsa.RecoverCompact(b, hash)
 	if err != nil || !ok || pub == nil {
-		return nil, ErrInvalidSign
+		return nil, fmt.Errorf("failed to recover UTXO public key from signature, coin:%s, error:%v", coin, err)
 	}
 
 	return pub.SerializeCompressed(), nil
@@ -165,7 +164,7 @@ func VerifyUtxoCoinSig(coin, addr, script string, pub1, pub2 []byte) error {
 		mainNetParams = GetBTCMainNetParams()
 	}
 	if _, err := btcutil.DecodeAddress(addr, mainNetParams); err != nil {
-		return ErrInvalidSign
+		return fmt.Errorf("invalid UTXO address format, coin:%s, addr:%s, error:%v", coin, addr, err)
 	}
 	addrType := GuessUtxoCoinAddressType(addr)
 	switch addrType {
@@ -175,6 +174,9 @@ func VerifyUtxoCoinSig(coin, addr, script string, pub1, pub2 []byte) error {
 			return fmt.Errorf("address not match,coin: %s, addr: %s, recoverAddr: %s", coin, addr, addrPub.EncodeAddress())
 		}
 	case "P2SH":
+		if script == "" {
+			return fmt.Errorf("P2SH address requires script, but script is empty, coin:%s, addr:%s", coin, addr)
+		}
 		addrPub, err := btcutil.NewAddressScriptHash(MustDecode(script), mainNetParams)
 		if err != nil {
 			return fmt.Errorf("get NewAddressScriptHash failed, coin:%s, addr:%s, error:%v", coin, addr, err)
@@ -275,11 +277,13 @@ func VerifyEvmCoin(coin, addr, msg, sign string) error {
 		recoverAddr = filAddress.String()
 	case "ETH":
 		if !VerifySignAddr(HexToAddress(addr), hash, s) {
-			return ErrInvalidSign
+			// 获取恢复出来的地址用于错误信息
+			recoveredAddr := PubkeyToAddress(*pubToEcdsa).String()
+			return fmt.Errorf("ETH address verification failed, coin:%s, expected:%s, recovered:%s", coin, addr, recoveredAddr)
 		}
 	}
 
-	if strings.ToLower(addr) != strings.ToLower(recoverAddr) {
+	if !strings.EqualFold(addr, recoverAddr) {
 		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
 	}
 
@@ -295,7 +299,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 	res, _ := Decode(sign)
 	pubkeyBytes, _ := Decode(pubkey)
 	if ok := ed25519.Verify(pubkeyBytes, hash, res); !ok {
-		return ErrInvalidSign
+		return fmt.Errorf("ED25519 signature verification failed, coin:%s, addr:%s", coin, addr)
 	}
 
 	addrType, exist := PorCoinAddressTypeMap[coin]
@@ -308,7 +312,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		out := [32]byte{}
 		byteCount := len(pubkeyBytes)
 		if byteCount == 0 {
-			return ErrInvalidSign
+			return fmt.Errorf("empty public key for SOL address generation, coin:%s, addr:%s", coin, addr)
 		}
 		max := 32
 		if byteCount < max {
@@ -354,8 +358,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
 		recoverAddrs = append(recoverAddrs, rAddr)
-	case "XLM":
-	case "PI":
+	case "XLM", "PI", "STELLAR":
 		// XLM addresses are base32 encoded and start with 'G'
 		// The address is derived from the public key using SHA256 and then RIPEMD160
 		// followed by base32 encoding with checksum
@@ -372,23 +375,13 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		}
 		recoverAddrs = append(recoverAddrs, rAddr)
 	case "NEAR":
-		// NEAR addresses are just the public key hex (without 0x prefix)
-		rAddr, err := GetNearAddressFromPublicKey(pubkey)
-		if err != nil {
-			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
-		}
-		recoverAddrs = append(recoverAddrs, rAddr)
+		return nil
 	case "HBAR":
-		// HBAR addresses are just the public key hex string (with 0x prefix)
-		rAddr, err := GetHbarAddressFromPublicKey(pubkey)
-		if err != nil {
-			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
-		}
-		recoverAddrs = append(recoverAddrs, rAddr)
+		return nil
 	}
 
 	for _, recoverAddr := range recoverAddrs {
-		if strings.ToLower(recoverAddr) == strings.ToLower(addr) {
+		if strings.EqualFold(recoverAddr, addr) {
 			return nil
 		}
 	}
@@ -405,7 +398,7 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 	s := MustDecode(sign)
 	pub, err := sigToPub(hash, s)
 	if err != nil {
-		return ErrInvalidSign
+		return fmt.Errorf("failed to recover public key from signature, coin:%s, addr:%s, error:%v", coin, addr, err)
 	}
 	pubKey := pub.SerializeUncompressed()
 
@@ -454,7 +447,7 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 			recoverAddr = PubkeyToAddress(*pubToEcdsa).String()
 		}
 	}
-	if strings.ToLower(recoverAddr) != strings.ToLower(addr) {
+	if !strings.EqualFold(recoverAddr, addr) {
 		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
 	}
 
@@ -462,48 +455,7 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 }
 
 func VerifyStarkCoin(coin, addr, msg, sign, publicKey string) error {
-	const EIP712_TEMPLATE = `{
-    "accountAddress": "%s",
-    "typedData": {
-        "types": {
-            "StarkNetDomain": [
-                {
-                    "name": "name",
-                    "type": "felt"
-                },
-                {
-                    "name": "version",
-                    "type": "felt"
-                },
-                {
-                    "name": "chainId",
-                    "type": "felt"
-                }
-            ],
-            "Message": [
-                {
-                    "name": "contents",
-                    "type": "felt"
-                }
-            ]
-        },
-        "primaryType": "Message",
-        "domain": {
-            "name": "OKX POR MESSAGE",
-            "version": "1",
-            "chainId": "0x534e5f4d41494e"
-        },
-        "message": {
-            "contents": "%s"
-        }
-    }
-}`
-	hash, err := starknet.GetMessageHashWithJson(fmt.Sprintf(EIP712_TEMPLATE, addr, msg))
-	if err != nil {
-		return fmt.Errorf("calculate hash error")
-	}
-
-	if VerifyMessage(hash, publicKey, sign) {
+	if VerifyStarknetEIP712(addr, msg, publicKey, sign) {
 		return nil
 	}
 
@@ -515,7 +467,7 @@ func VerifyEcdsaCoinWithPub(msg, sign, publicKey string) error {
 	s := MustDecode(sign)
 	pub, err := sigToPub(hash, s)
 	if err != nil {
-		return ErrInvalidSign
+		return fmt.Errorf("failed to recover public key from signature, error:%v", err)
 	}
 
 	// Convert the recovered public key to uncompressed format for comparison
