@@ -2,7 +2,9 @@ package common
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 )
@@ -31,6 +33,15 @@ func HashEcdsaMsg(msgHeader, msg string) []byte {
 	wire.WriteVarString(&buf, 0, msgHeader)
 	wire.WriteVarString(&buf, 0, msg)
 	return Keccak256(buf.Bytes())
+}
+
+func HashEosMsg(msgHeader, msg string) []byte {
+	var buf bytes.Buffer
+	wire.WriteVarString(&buf, 0, msgHeader)
+	wire.WriteVarString(&buf, 0, msg)
+
+	hash := sha256.Sum256(buf.Bytes())
+	return hash[:]
 }
 
 func HashEvmCoinTypeMsg(msgHeader, msg string) []byte {

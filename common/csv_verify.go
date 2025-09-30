@@ -18,12 +18,6 @@ func verifyCSVLineStarknetOnly(coin, addr, msg, sign1, sign2, publicKey, digital
 
 // Verify single line data (multithreaded version, skip StarkNet)
 func verifyCSVLineMultithread(coin, addr, msg, sign1, sign2, publicKey, owner1, owner2, digitalAsset string, lineNumber int, t *testing.T) (bool, string, string) {
-	// Skip verification for Vaulta temporarily
-	if coin == "Vaulta" {
-		t.Logf("Line %d: Coin %s temporarily skipped for verification", lineNumber, coin)
-		return true, coin, ""
-	}
-
 	// Check if it's StarkNet coin, skip multithreaded verification if yes
 	coinType, exists := PorCoinTypeMap[coin]
 	if exists && coinType == StarkCoinType {
@@ -117,6 +111,13 @@ func verifyCSVLineInternal(coin, addr, msg, sign1, sign2, publicKey, owner1, own
 			return false, coin, errorMsg
 		}
 		err = VerifyStarkCoin(coin, addr, msg, sign1, publicKey)
+	case EOSCoinType:
+		if publicKey == "" || publicKey == "null" {
+			errorMsg := fmt.Sprintf("EOS coin %s missing public key (digitalAsset:%s)", coin, digitalAsset)
+			t.Logf("Line %d: %s", lineNumber, errorMsg)
+			return false, coin, errorMsg
+		}
+		err = VerifyEOSCoin(coin, addr, msg, sign1, publicKey)
 	default:
 		errorMsg := fmt.Sprintf("Unsupported coin type %s (digitalAsset:%s, network:%s)", coinType, digitalAsset, coin)
 		t.Logf("Line %d: %s", lineNumber, errorMsg)

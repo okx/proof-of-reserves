@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/base64"
@@ -18,8 +19,6 @@ import (
 	"github.com/martinboehm/btcutil/chaincfg"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/ripemd160"
-
-	"bytes"
 
 	secp_ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
 	tonWallet "github.com/xssnick/tonutils-go/ton/wallet"
@@ -485,4 +484,133 @@ func VerifyEcdsaCoinWithPub(msg, sign, publicKey string) error {
 	}
 
 	return nil
+}
+
+func VerifyEOSCoin(coin, addr, msg, sign, publicKey string) error {
+	if publicKey == "" || publicKey == "null" {
+		return fmt.Errorf("EOS coin %s missing public key", coin)
+	}
+
+	// Convert EOS signature to normal ECDSA format
+	normalSig, err := convertEOSSignatureToECDSA(sign)
+	fmt.Println(hex.EncodeToString(normalSig))
+	if err != nil {
+		return fmt.Errorf("failed to convert EOS signature to ECDSA format, coin:%s, addr:%s, error:%v", coin, addr, err)
+	}
+
+	// Hash the message using ECDSA format (same as OKX)
+	hash := HashEosMsg(OKXMessageSignatureHeader, msg)
+
+	// Recover public key using normal ECDSA
+	recoveredPub, err := sigToPub(hash, normalSig)
+	if err != nil {
+		return fmt.Errorf("failed to recover public key from ECDSA signature, coin:%s, addr:%s, error:%v", coin, addr, err)
+	}
+
+	// Convert EOS public key to normal hex format
+	expectedPubKeyHex, err := eosPublicKeyToHex(publicKey)
+	if err != nil {
+		return fmt.Errorf("failed to convert EOS public key to hex, coin:%s, addr:%s, error:%v", coin, addr, err)
+	}
+
+	// Convert recovered public key to compressed hex format
+	recoveredPubKeyHex := hex.EncodeToString(recoveredPub.SerializeCompressed())
+
+	// Compare the public keys
+	if !strings.EqualFold(expectedPubKeyHex, recoveredPubKeyHex) {
+		return fmt.Errorf("EOS public key mismatch, coin:%s, expected:%s, recovered:%s", coin, expectedPubKeyHex, recoveredPubKeyHex)
+	}
+
+	return nil
+}
+
+// convertEOSSignatureToECDSA converts EOS signature format to normal ECDSA format
+func convertEOSSignatureToECDSA(eosSignature string) ([]byte, error) {
+	if eosSignature == "" {
+		return nil, fmt.Errorf("signature cannot be empty")
+	}
+
+	if !strings.HasPrefix(eosSignature, "SIG_K1_") {
+		return nil, fmt.Errorf("EOS signature must start with 'SIG_K1_'")
+	}
+
+	// Remove SIG_K1_ prefix
+	base58Part := eosSignature[len("SIG_K1_"):]
+
+	// Decode Base58
+	decoded := base58.Decode(base58Part)
+
+	// EOS signature format: 65 bytes signature data + 4 bytes checksum
+	if len(decoded) != 69 {
+		return nil, fmt.Errorf("signature length incorrect, expected 69 bytes, actual %d bytes", len(decoded))
+	}
+
+	// Extract signature part (remove checksum)
+	signatureBytes := decoded[:len(decoded)-4]
+
+	// Verify checksum
+	// Checksum = RIPEMD160(signatureBytes + "K1")
+	ripemd := ripemd160.New()
+	ripemd.Write(signatureBytes)
+	ripemd.Write([]byte("K1"))
+	checksum := ripemd.Sum(nil)
+	expectedChecksum := checksum[:4]
+	actualChecksum := decoded[len(decoded)-4:]
+
+	if !bytes.Equal(expectedChecksum, actualChecksum) {
+		return nil, fmt.Errorf("signature checksum verification failed")
+	}
+
+	// Extract recovery ID, r, and s from EOS signature format
+	recoveryID := signatureBytes[0]
+	r := signatureBytes[1:33]
+	s := signatureBytes[33:65]
+
+	// Create normal ECDSA signature format: [r(32) + s(32) + recovery_id(1)]
+	normalSig := make([]byte, 65)
+	copy(normalSig[0:32], r)
+	copy(normalSig[32:64], s)
+	normalSig[64] = recoveryID
+
+	return normalSig, nil
+}
+
+// eosPublicKeyToHex converts EOS format public key to hex format (compressed)
+// Based on the Java implementation provided
+func eosPublicKeyToHex(eosPublicKey string) (string, error) {
+	const EOSPrefix = "EOS"
+
+	if eosPublicKey == "" {
+		return "", fmt.Errorf("public key cannot be empty")
+	}
+
+	if !strings.HasPrefix(eosPublicKey, EOSPrefix) {
+		return "", fmt.Errorf("EOS public key must start with '%s'", EOSPrefix)
+	}
+
+	// Remove EOS prefix
+	base58Part := eosPublicKey[len(EOSPrefix):]
+
+	// Decode Base58
+	decoded := base58.Decode(base58Part)
+	if len(decoded) < 4 {
+		return "", fmt.Errorf("invalid decoded length")
+	}
+
+	// Extract public key part (remove checksum)
+	publicKeyBytes := decoded[:len(decoded)-4]
+
+	// Verify checksum
+	ripemd := ripemd160.New()
+	ripemd.Write(publicKeyBytes)
+	checksum := ripemd.Sum(nil)
+	expectedChecksum := checksum[:4]
+	actualChecksum := decoded[len(decoded)-4:]
+
+	if !bytes.Equal(expectedChecksum, actualChecksum) {
+		return "", fmt.Errorf("public key checksum verification failed")
+	}
+
+	// Convert to hex
+	return hex.EncodeToString(publicKeyBytes), nil
 }

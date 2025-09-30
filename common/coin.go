@@ -10,6 +10,7 @@ const (
 	TrxCoinType  = "TRX"
 	BethCoinType = "BETH"
 	AlgoCoinType = "ALGO"
+	EOSCoinType  = "EOS"
 
 	BtcMessageSignatureHeader  = "Bitcoin Signed Message:\n"
 	LtcMessageSignatureHeader  = "Litecoin Signed Message:\n"
@@ -158,6 +159,10 @@ var (
 		"ADA":     "ADA",
 		"NEAR":    "NEAR",
 		"HBAR":    "HBAR",
+
+		// EOS
+		"EOS": "EOS",
+		"A":   "EOS",
 	}
 
 	PorCoinTypeMap = map[string]string{
@@ -290,6 +295,11 @@ var (
 		// STARKNET
 		"STARKNET-ETH": StarkCoinType,
 		"STARKNET":     StarkCoinType,
+
+		// EOS
+		"EOS":    EOSCoinType,
+		"A":      EOSCoinType,
+		"Vaulta": EOSCoinType,
 	}
 
 	PorCoinMessageSignatureHeaderMap = map[string]string{
@@ -417,6 +427,11 @@ var (
 
 		// ALGO
 		"USDT-ALGO": OKXMessageSignatureHeader,
+
+		// EOS
+		"EOS":    OKXMessageSignatureHeader,
+		"A":      OKXMessageSignatureHeader,
+		"Vaulta": OKXMessageSignatureHeader,
 	}
 
 	PorCoinUnitMap = map[string]string{
@@ -670,7 +685,6 @@ var (
 		"NEAR":        true,
 		"HBAR":        true,
 
-		"EOS":    true,
 		"RIPPLE": true,
 
 		"USDT-ALGO": true,
