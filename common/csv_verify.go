@@ -1,7 +1,9 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -42,7 +44,6 @@ func verifyCSVLineInternal(coin, addr, msg, sign1, sign2, publicKey, owner1, own
 	if !exists {
 		// If coin is not in mapping table, try using default ECDSA verification
 		coinType = EcdsaCoinType
-		t.Logf("Line %d: Coin %s not in mapping table, using default ECDSA verification (digitalAsset:%s)", lineNumber, coin, digitalAsset)
 	}
 
 	// Verify according to coin type
@@ -117,7 +118,27 @@ func verifyCSVLineInternal(coin, addr, msg, sign1, sign2, publicKey, owner1, own
 			t.Logf("Line %d: %s", lineNumber, errorMsg)
 			return false, coin, errorMsg
 		}
-		err = VerifyEOSCoin(coin, addr, msg, sign1, publicKey)
+
+		cleanKey := strings.TrimSpace(publicKey)
+		if strings.HasPrefix(cleanKey, "\"") && strings.HasSuffix(cleanKey, "\"") {
+			cleanKey = cleanKey[1 : len(cleanKey)-1]
+			cleanKey = strings.ReplaceAll(cleanKey, "\"\"", "\"") // 处理CSV转义的双引号
+		}
+
+		if strings.HasPrefix(cleanKey, "{") {
+			var pubKeys map[string]string
+			if json.Unmarshal([]byte(cleanKey), &pubKeys) == nil {
+				err1 := VerifyEOSCoin(coin, addr, msg, sign1, pubKeys["publicKey1"])
+				err2 := VerifyEOSCoin(coin, addr, msg, sign2, pubKeys["publicKey2"])
+				if err1 != nil || err2 != nil {
+					err = fmt.Errorf("EOS dual signature failed: sig1=%v, sig2=%v", err1, err2)
+				}
+			} else {
+				err = fmt.Errorf("invalid JSON public key format")
+			}
+		} else {
+			err = VerifyEOSCoin(coin, addr, msg, sign1, publicKey)
+		}
 	default:
 		errorMsg := fmt.Sprintf("Unsupported coin type %s (digitalAsset:%s, network:%s)", coinType, digitalAsset, coin)
 		t.Logf("Line %d: %s", lineNumber, errorMsg)
