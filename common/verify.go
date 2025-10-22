@@ -21,6 +21,8 @@ import (
 	"golang.org/x/crypto/ripemd160"
 
 	secp_ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
+	"github.com/okx/go-wallet-sdk/coins/cosmos"
+	"github.com/okx/go-wallet-sdk/coins/stacks"
 	tonWallet "github.com/xssnick/tonutils-go/ton/wallet"
 	"golang.org/x/crypto/sha3"
 )
@@ -274,6 +276,10 @@ func VerifyEvmCoin(coin, addr, msg, sign string) error {
 			return fmt.Errorf("convert eth address to fil address failed, coin:%s, addr:%s, error:%v", coin, addr, err)
 		}
 		recoverAddr = filAddress.String()
+	case "LAT":
+		ethAddress := PubkeyToAddress(*pubToEcdsa).String()
+		recoverAddr, _ = ConvertETHToLATAddress(ethAddress)
+
 	case "ETH":
 		if !VerifySignAddr(HexToAddress(addr), hash, s) {
 			// 获取恢复出来的地址用于错误信息
@@ -373,9 +379,9 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}
 		recoverAddrs = append(recoverAddrs, rAddr)
-	case "NEAR":
+	case "NEAR", "HBAR", "SC", "IOTA":
 		return nil
-	case "HBAR":
+	default:
 		return nil
 	}
 
@@ -400,6 +406,7 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 		return fmt.Errorf("failed to recover public key from signature, coin:%s, addr:%s, error:%v", coin, addr, err)
 	}
 	pubKey := pub.SerializeUncompressed()
+	pubKeyCompressed := pub.SerializeCompressed()
 
 	var recoverAddr string
 	addrType, exist := PorCoinAddressTypeMap[coin]
@@ -445,7 +452,34 @@ func VerifyEcdsaCoin(coin, addr, msg, sign string) error {
 			pubToEcdsa := pub.ToECDSA()
 			recoverAddr = PubkeyToAddress(*pubToEcdsa).String()
 		}
+	case "FLOW":
+		pubToEcdsa := pub.ToECDSA()
+		recoverAddr = PubkeyToAddress(*pubToEcdsa).String()
+	case "ICX":
+		recoverAddr, _ = GenerateICXAddress(pubKey)
+	case "STX":
+		recoverAddr, _ = stacks.GetAddressFromPublicKey(hex.EncodeToString(pubKey))
+	case "TIA":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "celestia")
+	case "ATOM":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "cosmos")
+	case "CRO":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "cro")
+	case "DORA":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "dora")
+	case "DYDX":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "dydx")
+	case "TERRA":
+		recoverAddr, _ = cosmos.GetAddressByPublicKey(hex.EncodeToString(pubKeyCompressed), "terra")
+	case "INJ":
+		hash := sha3.NewLegacyKeccak256()
+		hash.Write(pubKey[1:])
+		addressByte := hash.Sum(nil)
+		recoverAddr, _ = bech32.EncodeFromBase256("inj", addressByte[12:])
+	case "ONE":
+		recoverAddr, _ = GenerateONEAddress(pubKey)
 	}
+
 	if !strings.EqualFold(recoverAddr, addr) {
 		return fmt.Errorf("recovery address not match, coin:%s, recoverAddr:%s, addr:%s", coin, recoverAddr, addr)
 	}
@@ -478,6 +512,21 @@ func VerifyEcdsaCoinWithPub(msg, sign, publicKey string) error {
 		return fmt.Errorf("invalid public key format: %v", err)
 	}
 
+	if len(providedPubKey) == 64 {
+		x := providedPubKey[:32]
+		y := providedPubKey[32:]
+		compressed := make([]byte, 33)
+		copy(compressed[1:], x)
+
+		if y[31]&1 == 0 {
+			compressed[0] = 0x02
+		} else {
+			compressed[0] = 0x03
+		}
+
+		providedPubKey = compressed
+	}
+
 	// Compare the public keys directly
 	if !bytes.Equal(recoveredPubKey, providedPubKey) {
 		return fmt.Errorf("public key mismatch: recovered %x, provided %x", recoveredPubKey, providedPubKey)
@@ -493,7 +542,6 @@ func VerifyEOSCoin(coin, addr, msg, sign, publicKey string) error {
 
 	// Convert EOS signature to normal ECDSA format
 	normalSig, err := convertEOSSignatureToECDSA(sign)
-	fmt.Println(hex.EncodeToString(normalSig))
 	if err != nil {
 		return fmt.Errorf("failed to convert EOS signature to ECDSA format, coin:%s, addr:%s, error:%v", coin, addr, err)
 	}
@@ -613,4 +661,68 @@ func eosPublicKeyToHex(eosPublicKey string) (string, error) {
 
 	// Convert to hex
 	return hex.EncodeToString(publicKeyBytes), nil
+}
+
+func GenerateICXAddress(publicKey []byte) (string, error) {
+	if len(publicKey) < 2 {
+		return "", fmt.Errorf("public key too short, length: %d", len(publicKey))
+	}
+
+	pub := publicKey[1:]
+
+	hasher := sha3.New256()
+	hasher.Write(pub)
+	hash := hasher.Sum(nil)
+
+	if len(hash) < 20 {
+		return "", fmt.Errorf("hash too short, length: %d", len(hash))
+	}
+	result := hash[len(hash)-20:]
+
+	addr := "hx" + hex.EncodeToString(result)
+	return addr, nil
+}
+
+// ConvertETHToLATAddress
+func ConvertETHToLATAddress(ethAddress string) (string, error) {
+	if len(ethAddress) < 2 || ethAddress[:2] != "0x" {
+		return "", fmt.Errorf("invalid ETH address format: %s", ethAddress)
+	}
+
+	addressBytes, err := hex.DecodeString(ethAddress[2:])
+	if err != nil {
+		return "", fmt.Errorf("failed to decode ETH address: %v", err)
+	}
+
+	latAddress, err := bech32.EncodeFromBase256("lat", addressBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode LAT address: %v", err)
+	}
+
+	return latAddress, nil
+}
+
+func GenerateONEAddress(publicKey []byte) (string, error) {
+	if len(publicKey) < 65 {
+		return "", fmt.Errorf("public key too short, expected 65 bytes, got %d", len(publicKey))
+	}
+
+	var uncompressed []byte
+	if publicKey[0] == 0x04 && len(publicKey) == 65 {
+		uncompressed = publicKey[1:]
+	} else {
+		return "", fmt.Errorf("unsupported public key format, expected uncompressed format")
+	}
+
+	hasher := sha3.NewLegacyKeccak256()
+	hasher.Write(uncompressed)
+	hash := hasher.Sum(nil)
+
+	ethAddressBytes := hash[len(hash)-20:]
+	oneAddress, err := bech32.EncodeFromBase256("one", ethAddressBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode ONE address: %v", err)
+	}
+
+	return oneAddress, nil
 }

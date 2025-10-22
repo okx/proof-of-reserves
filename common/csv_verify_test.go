@@ -88,8 +88,8 @@ func TestVerifyCSVFileMultithread(t *testing.T) {
 			}
 		}
 
-		// Parse CSV line
-		fields := strings.Split(line, ",")
+		// Parse CSV line (handle JSON in fields)
+		fields := ParseCSVLine(line)
 		if len(fields) < 7 {
 			// Format error, add directly to failed results
 			result := VerifyResult{
@@ -264,8 +264,8 @@ func TestVerifyCSVFileStarknetOnly(t *testing.T) {
 			}
 		}
 
-		// Parse CSV line
-		fields := strings.Split(line, ",")
+		// Parse CSV line (handle JSON in fields)
+		fields := ParseCSVLine(line)
 		if len(fields) < 7 {
 			errorMsg := fmt.Sprintf("Format error, insufficient fields: %s", line)
 			t.Logf("Line %d: %s", lineNumber, errorMsg)

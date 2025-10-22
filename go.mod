@@ -5,16 +5,19 @@ go 1.17
 require (
 	github.com/Conflux-Chain/go-conflux-sdk v1.5.3
 	github.com/btcsuite/btcd v0.23.4
-	github.com/btcsuite/btcd/btcec/v2 v2.3.1
+	github.com/btcsuite/btcd/btcec/v2 v2.3.2
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1
 	github.com/dchest/blake2b v1.0.0
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0
-	github.com/ethereum/go-ethereum v1.10.26
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0
+	github.com/ethereum/go-ethereum v1.12.2
 	github.com/kilic/bls12-381 v0.1.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/martinboehm/bchutil v0.0.0-20190104112650-6373f11b6efe
 	github.com/martinboehm/btcd v0.0.0-20211010165247-d1f65b0f30fa
 	github.com/martinboehm/btcutil v0.0.0-20211010173611-6ef1889c1819
+	github.com/okx/go-wallet-sdk/coins/cosmos v0.0.0-20250922102525-ec52c2c6aed4
+	github.com/okx/go-wallet-sdk/coins/stacks v0.0.0-20250922102525-ec52c2c6aed4
+	github.com/okx/go-wallet-sdk/coins/starknet v0.0.0-20241112025950-be50d8cc4851
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/shopspring/decimal v1.3.1
@@ -26,10 +29,13 @@ require (
 
 require (
 	github.com/Groestlcoin/go-groestl-hash v0.0.0-20181012171753-790653ac190c // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
+	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/dchest/blake256 v1.0.0 // indirect
 	github.com/filecoin-project/go-amt-ipld/v4 v4.0.0 // indirect
 	github.com/filecoin-project/go-hamt-ipld/v3 v3.1.0 // indirect
+	github.com/holiman/uint256 v1.2.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/ipfs/go-ipfs-util v0.0.2 // indirect
 	github.com/ipfs/go-ipld-cbor v0.0.6 // indirect
@@ -40,7 +46,7 @@ require (
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-multihash v0.2.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20220328075252-7dd334e3daae // indirect
-	github.com/okx/go-wallet-sdk/coins/starknet v0.0.0-20241112025950-be50d8cc4851 // indirect
+	github.com/okx/go-wallet-sdk/crypto v0.0.1 // indirect
 	github.com/openweb3/go-rpc-provider v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
