@@ -253,6 +253,13 @@ func TestVerifyEd25519CoinSignature(t *testing.T) {
 			msg:  "I am an OKX address",
 			sign: "0xbbccff4544b0178700273db07846c25541123fbaa70e1e0102b66b0dcfb29f2f9aad23de02195128e0e634a4cab6890bf5db1063d454a69df811040ba298be0f",
 		},
+		{
+			coin: "ADA",
+			addr: "addr1v80axvuddhj0mhlyzk9ness59ev752qvpw53fvf5xjy24yqhvxq3j",
+			pub:  "0x6adf88e2c6c0773abdf059e16d1800af03a44e6031dbd66e27fa31256db08b69",
+			msg:  "I am an OKX address",
+			sign: "0xac22bb399d0f93c5e17e43a8f1dd3b145e4c439546b7aa41555f434f304b05020e16ae220dd5721b8cd7f280416217ac5d0905ecb9792c712d13b4ed7b005208",
+		},
 	}
 	for _, tt := range args {
 		err := VerifyEd25519Coin(tt.coin, tt.addr, tt.msg, tt.sign, tt.pub)
