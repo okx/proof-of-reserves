@@ -357,7 +357,7 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		}
 		recoverAddrs = append(recoverAddrs, walletHighload.String())
 		recoverAddrs = append(recoverAddrs, walletHighload.Bounce(false).String())
-	case "DOT":
+	case "DOT", "ASSET-HUB":
 		rAddr, err := GetDotAddressFromPublicKey(pubkey)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
