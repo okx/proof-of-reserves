@@ -8,14 +8,11 @@ POW_BITS = 20
 USER_NUM_INIT = 2**10 - 1
 MAX_USER_NUM_FOR_ONE_BATCH = 2**12
 MAX_USER_VALUE = 4**30//1000
-# MAIN_COINS_NUM = 31
 
-# COINS = ["BTC", "ETH", "USDT", "XXC", "HFB", "HPR", "YPS", "QCZ", "YJE", "OUS", "TKR", "AWM", "ATD", "NFI", "ZMV", "IRZ", "YIX", "KVB", "YJA", "PZH", "BRY", "ECF", "HZW", "EGN", "BVR", "IYY", "DKA", "LEH", "RJW", "YEM", "PTO", "JOU", "DUU", "YGH", "EYP", "AJV", "FJX", "SLY", "UXQ", "WSQ", "YSN", "UCK", "DHU", "WIF", "UQY", "WWK", "CAO", "VBA", "YYM", "DIZ", "JLM", "GXT", "ORF", "KRJ", "PEQ", "AJR", "JDX", "ELU", "WTS", "UNR", "VLS", "AUF", "ZZC", "MZZ", "AVF", "EZV", "XQV", "BUK", "OQB", "KNA", "CPJ", "ASI", "AZG", "QXJ", "UUH", "QJP", "VWB", "VEY", "TQK", "GVH", "JRX", "KDE", "VNH", "OKP", "BXE", "OUI", "KQV", "DWF", "WXX", "PQE", "VVI", "WEF", "MLM", "MGE", "ZWV", "VZF", "OMS", "UTJ", "OAK", "FDJ"]
-# # COINS = ["BTC", "ETH", "USDT"]
 UTS16 = 16
 UTS32 = 32
 UTS_FOR_TRUNK = 32
 MAX_UTS = 64
 USER_DATA_PATH = "./user_data/"
 CONFIG_PATH = "./sum_proof_data/config.json"
-
+PRECOMPUTED_PATH = "./precomputed_data/"
