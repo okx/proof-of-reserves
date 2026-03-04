@@ -69,12 +69,20 @@ func parseLine(line string) []string {
 	return result
 }
 
-func handle(i int, line string) (string, bool) {
+func handle(i int, line string) (coin string, success bool) {
 	if len(line) == 0 {
 		return "", true
 	}
 	as := parseLine(line)
 	coin, addr, balance, message, sign1, sign2, script := as[0], as[3], as[4], as[5], as[6], as[7], as[8]
+
+	// Recover from panic and print detailed error info
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("PANIC at line %d: %v | coin=%s, addr=%s, balance=%s, message=%s, sign1=%s, sign2=%s, script=%s\n", i+1, r, coin, addr, balance, message, sign1, sign2, script)
+			success = false
+		}
+	}()
 	var eoa1, eoa2 string
 	if len(as) > 10 {
 		eoa1 = as[9]

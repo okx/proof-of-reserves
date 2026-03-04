@@ -270,12 +270,17 @@ func VerifyEvmCoin(coin, addr, msg, sign string) error {
 	}
 	switch addrType {
 	case "FIL":
-		// convert eth address to fil address
-		filAddress, err := ConvertEthAddressToFilecoinAddress(PubkeyToAddress(*pubToEcdsa).Bytes())
-		if err != nil {
-			return fmt.Errorf("convert eth address to fil address failed, coin:%s, addr:%s, error:%v", coin, addr, err)
+		if strings.HasPrefix(strings.ToLower(addr), "0x") {
+			// 0x address, compare directly with ETH address
+			recoverAddr = PubkeyToAddress(*pubToEcdsa).String()
+		} else {
+			// f410 address, convert to filecoin address
+			filAddress, err := ConvertEthAddressToFilecoinAddress(PubkeyToAddress(*pubToEcdsa).Bytes())
+			if err != nil {
+				return fmt.Errorf("convert eth address to fil address failed, coin:%s, addr:%s, error:%v", coin, addr, err)
+			}
+			recoverAddr = filAddress.String()
 		}
-		recoverAddr = filAddress.String()
 	case "LAT":
 		ethAddress := PubkeyToAddress(*pubToEcdsa).String()
 		recoverAddr, _ = ConvertETHToLATAddress(ethAddress)
