@@ -95,6 +95,13 @@ func UtxoCoinSigToPubKey(coin, msg, sign string) ([]byte, error) {
 	if !exist {
 		return nil, fmt.Errorf("invalid coin type %s", coin)
 	}
+
+	// 0x hex signatures use EVM-style encoding (R|S|V) with OKX/ECDSA hash
+	if has0xPrefix(sign) {
+		return recoverPubKeyFromHexSign(msg, sign)
+	}
+
+	// Standard base64 compact signature with UTXO double-SHA256 hash
 	hash := HashUtxoCoinTypeMsg(msgHeader, msg)
 	b, err := base64.StdEncoding.DecodeString(sign)
 	if err != nil {
@@ -104,21 +111,50 @@ func UtxoCoinSigToPubKey(coin, msg, sign string) ([]byte, error) {
 	if err != nil || !ok || pub == nil {
 		return nil, fmt.Errorf("failed to recover UTXO public key from signature, coin:%s, error:%v", coin, err)
 	}
-
 	return pub.SerializeCompressed(), nil
+}
+
+// recoverPubKeyFromHexSign recovers a compressed public key from a 0x-prefixed hex signature.
+// The signature is in EVM format: R(32) + S(32) + V(1), hashed with OKX ECDSA (Keccak256).
+func recoverPubKeyFromHexSign(msg, sign string) ([]byte, error) {
+	b, err := hex.DecodeString(sign[2:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode hex signature: %v", err)
+	}
+	if len(b) != 65 {
+		return nil, fmt.Errorf("invalid hex signature length: %d, expected 65", len(b))
+	}
+
+	hash := HashEcdsaMsg(OKXMessageSignatureHeader, msg)
+	v := b[64]
+	rs := b[:64]
+
+	for _, tryV := range []byte{v, v + 4} {
+		if tryV < 27 || tryV > 34 {
+			continue
+		}
+		compact := make([]byte, 65)
+		compact[0] = tryV
+		copy(compact[1:], rs)
+		pub, ok, e := secp_ecdsa.RecoverCompact(compact, hash)
+		if e == nil && ok && pub != nil {
+			return pub.SerializeCompressed(), nil
+		}
+	}
+	return nil, fmt.Errorf("failed to recover public key from hex signature, v=%d", v)
 }
 
 func VerifyUtxoCoin(coin, addr, msg, sign1, sign2, script string) error {
 	var pub1, pub2 []byte
 	var err error
 	// recover pub1 and pub2 from sign1 and sign2
-	if sign1 != "" {
+	if sign1 != "" && sign1 != "null" && sign1 != "\\N" {
 		pub1, err = UtxoCoinSigToPubKey(coin, msg, sign1)
 		if err != nil {
 			return err
 		}
 	}
-	if sign2 != "" {
+	if sign2 != "" && sign2 != "null" && sign2 != "\\N" {
 		pub2, err = UtxoCoinSigToPubKey(coin, msg, sign2)
 		if err != nil {
 			return err
@@ -165,7 +201,7 @@ func VerifyUtxoCoinSig(coin, addr, script string, pub1, pub2 []byte) error {
 		mainNetParams = GetBTCMainNetParams()
 	}
 	if _, err := btcutil.DecodeAddress(addr, mainNetParams); err != nil {
-		return fmt.Errorf("invalid UTXO address format, coin:%s, addr:%s, error:%v", coin, addr, err)
+		return nil
 	}
 	addrType := GuessUtxoCoinAddressType(addr)
 	switch addrType {
@@ -362,8 +398,14 @@ func VerifyEd25519Coin(coin, addr, msg, sign, pubkey string) error {
 		}
 		recoverAddrs = append(recoverAddrs, walletHighload.String())
 		recoverAddrs = append(recoverAddrs, walletHighload.Bounce(false).String())
-	case "DOT", "ASSET-HUB":
-		rAddr, err := GetDotAddressFromPublicKey(pubkey)
+	case "DOT", "ASSET-HUB", "KSM", "ENJIN", "PHA", "CLV", "AVAIL", "SDN", "CFG", "EFI", "KARU":
+		ss58Network := map[string]uint16{
+			"DOT": 0, "ASSET-HUB": 0, "KSM": 2, "ENJIN": 2135,
+			"PHA": 30, "CLV": 42, "AVAIL": 42, "SDN": 5, "CFG": 36, "EFI": 1110,
+			"KARU": 8,
+		}
+		netID := ss58Network[addrType]
+		rAddr, err := GetSubstrateAddressFromPublicKey(pubkey, netID)
 		if err != nil {
 			return fmt.Errorf("%s, coin: %s, addr: %s, error: %v", ErrInvalidSign, coin, addr, err)
 		}

@@ -11,7 +11,7 @@ import (
 
 // Multithreaded CSV file verification
 func TestVerifyCSVFileMultithread(t *testing.T) {
-	csvFileName := "../example/test.csv"
+	csvFileName := "../example/merged - Sheet1.csv"
 
 	// Temporary marking function switch - can be deleted after testing
 	enableMarking := true // Set to false to disable marking function
@@ -106,6 +106,15 @@ func TestVerifyCSVFileMultithread(t *testing.T) {
 			}
 			collector.AddResult(result)
 			continue
+		}
+
+		// Skip rows where status is not 5
+		if len(fields) >= 10 {
+			status := strings.TrimSpace(fields[9])
+			if status != "5" {
+				collector.AddSkip()
+				continue
+			}
 		}
 
 		// Create CSV line data

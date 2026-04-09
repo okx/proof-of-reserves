@@ -87,7 +87,7 @@ func verifyCSVLineInternal(coin, addr, msg, sign1, sign2, publicKey, owner1, own
 		}
 	case EcdsaCoinType:
 		// For XRP and other coins using ECDSA, use public key verification if available
-		if publicKey != "" && publicKey != "null" {
+		if publicKey != "" && publicKey != "null" && publicKey != "\\N" {
 			err = VerifyEcdsaCoinWithPub(msg, sign1, publicKey)
 		} else {
 			err = VerifyEcdsaCoin(coin, addr, msg, sign1)
