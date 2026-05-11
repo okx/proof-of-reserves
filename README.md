@@ -2,6 +2,7 @@
 
 ## Background
 
+
 OKX launches [Proof of Reserves (PoR)](https://www.okx.com/proof-of-reserves) to improve the security and transparency
 of user's assets. These tools will allow you to independently audit OKX's Proof of Reserves and verify OKX's reserves
 exceed the exchange's known liabilities to users, in order to confirm the solvency of OKX.
