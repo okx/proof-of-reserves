@@ -114,13 +114,13 @@ Verify the inclusion constraint
 
 1. To verify if your asset balance has been included as a Merkle leaf, navigate to ["Audits"](https://www.okx.com/balance/audit) and click **Details** to access your audit data.
 2. Get the data you need for verification by clicking **Copy data** and pasting the JSON string as a file in a new folder. 
-3. Download [zk-STARKValidator](https://github.com/okx/proof-of-reserves/releases/tag/v3.0.0), the OKX open-source verification tool, and save it to the same folder containing the JSON file. 
+3. Download [zk-STARKValidator](https://github.com/okx/proof-of-reserves/releases), the OKX open-source verification tool, and save it to the same folder containing the JSON file. 
 4. Open zk-STARKValidator to auto-run the JSON file you saved to check whether the inclusion constraint is satisfied. 
 
 Verify the total balance and non-negative constraints
 1. Under ["Audit files"](https://www.okx.com/proof-of-reserves/download?tab=liabilities), download the zk-STARK file from the "Liability report" tab.
 2. Unzip the file to reveal a "sum proof data" folder with branch and trunk folders containing "sum_proof.json," "sum_value.json" files.
-3. Download [zk-STARKValidator](https://github.com/okx/proof-of-reserves/releases/tag/v3.0.0), the OKX open-source verification tool, and place it in the same root folder as the "sum proof data" folder.
+3. Download [zk-STARKValidator](https://github.com/okx/proof-of-reserves/releases), the OKX open-source verification tool, and place it in the same root folder as the "sum proof data" folder.
 4. Open zk-STARKValidator to auto-run the unzipped zk-STARK file to check whether the total balance and non-negative constraints are satisfied. 
 
 
