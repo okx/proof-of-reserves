@@ -161,9 +161,18 @@ func handle(i int, line string) (coin string, success bool) {
 			}
 		}
 	case common.Ed25519CoinType:
-		if err := common.VerifyEd25519Coin(coin, addr, message, sign1, script); err != nil {
-			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
-			return coin, false
+		// owner mode: when eoa1 (current authentication key, e.g. a rotated APTOS account)
+		// is present, verify against eoa1 instead of the claimed address (mirrors EVM owner mode).
+		if eoa1 != "" {
+			if err := common.VerifyEd25519Coin(coin, eoa1, message, sign1, script); err != nil {
+				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", eoa1, i+1, err))
+				return coin, false
+			}
+		} else {
+			if err := common.VerifyEd25519Coin(coin, addr, message, sign1, script); err != nil {
+				fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
+				return coin, false
+			}
 		}
 	case common.TrxCoinType:
 		if err := common.VerifyTRX(addr, message, sign1); err != nil {
