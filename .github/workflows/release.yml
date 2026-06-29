@@ -44,13 +44,20 @@ jobs:
 
       - name: Resolve version and previous version
         id: version
+        env:
+          # Bind context values to env vars so they are never interpolated into
+          # the shell command string (prevents script injection via crafted
+          # tag names or dispatch inputs).
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "push" ]; then
-            VERSION="${{ github.ref_name }}"        # tag-triggered: use the tag name
+          if [ "$EVENT_NAME" = "push" ]; then
+            VERSION="$REF_NAME"        # tag-triggered: use the tag name
             echo "Triggered by tag, version = $VERSION"
           else
-            VERSION="${{ github.event.inputs.version }}"   # manual: use the provided version
+            VERSION="$INPUT_VERSION"   # manual: use the provided version
             echo "Manual dispatch, version = $VERSION"
           fi
           # Latest existing release is treated as the previous version (for the changelog)
@@ -89,7 +96,7 @@ jobs:
       - name: Build artifacts for four platforms
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          GOFLAGS: -mod=mod   # go.sum is not committed; allow build to download deps and fill it in
+          GOFLAGS: -mod=readonly   # go.sum is committed; fail the build if deps drift from the lock file
         run: |
           set -euo pipefail
           mkdir -p dist
