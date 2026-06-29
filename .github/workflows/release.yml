@@ -18,26 +18,36 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:
-  contents: write   # needed to create release / tag and upload assets
+# No workflow-level permissions; each job requests the minimum it needs.
+permissions: {}
+
+env:
+  # Source release tag holding the fixed zk_STARK_Validator_V2 (v3.1.0) artifacts.
+  # These four files have not changed since v3.1.0; reuse them by downloading.
+  ZK_SOURCE_TAG: v3.1.0
 
 jobs:
-  build-and-release:
+  # ---------------------------------------------------------------------------
+  # Build job: read-only token. Produces the 8 artifacts and the release notes,
+  # then hands them to the release job via an uploaded artifact.
+  # ---------------------------------------------------------------------------
+  build:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-      # Source release tag holding the fixed zk_STARK_Validator_V2 (v3.1.0) artifacts.
-      # These four files have not changed since v3.1.0; reuse them by downloading.
-      ZK_SOURCE_TAG: v3.1.0
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prev: ${{ steps.version.outputs.prev }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          fetch-depth: 0      # full history needed for the release-notes git log
-          fetch-tags: true    # all tags needed to compute previous version / changelog range
+          fetch-depth: 0            # full history needed for the release-notes git log
+          fetch-tags: true          # all tags needed to compute previous version / changelog range
+          persist-credentials: false  # do not leave the git token in the checkout
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           # go.mod declares go 1.17, but dependencies use net/netip (needs 1.18+), so pin a newer version
           go-version: '1.23'
@@ -45,6 +55,7 @@ jobs:
       - name: Resolve version and previous version
         id: version
         env:
+          GH_TOKEN: ${{ github.token }}   # read-only, only this step needs gh
           # Bind context values to env vars so they are never interpolated into
           # the shell command string (prevents script injection via crafted
           # tag names or dispatch inputs).
@@ -60,14 +71,18 @@ jobs:
             VERSION="$INPUT_VERSION"   # manual: use the provided version
             echo "Manual dispatch, version = $VERSION"
           fi
+          # Enforce a strict version format (used in tag/release names and file paths)
+          if ! printf '%s' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::invalid version format: '$VERSION' (expected vMAJOR.MINOR.PATCH[-suffix])" && exit 1
+          fi
           # Latest existing release is treated as the previous version (for the changelog)
           PREV="$(gh release view --json tagName -q .tagName 2>/dev/null || true)"
           # Fail if a release with this version already exists, to avoid overwriting
           if gh release view "$VERSION" >/dev/null 2>&1; then
             echo "::error::release $VERSION already exists, please use a different version" && exit 1
           fi
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+          printf 'version=%s\n' "$VERSION" >> "$GITHUB_OUTPUT"
+          printf 'prev=%s\n' "$PREV" >> "$GITHUB_OUTPUT"
 
       - name: Generate release notes
         env:
@@ -114,18 +129,55 @@ jobs:
           build linux   amd64 "proof-of-reserves-linux-amd64-${VERSION}" ""
           build windows amd64 "proof-of-reserves-windows-${VERSION}"     ".exe"
 
-      - name: Download fixed zk_STARK_Validator_V2 artifacts
+      - name: Download and verify fixed zk_STARK_Validator_V2 artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}   # read-only, only this step needs gh
         run: |
           set -euo pipefail
           gh release download "$ZK_SOURCE_TAG" \
             --repo "${{ github.repository }}" \
             --pattern 'zk_STARK_Validator_V2_*.zip' \
             --dir dist
-          echo "Downloaded zk artifacts:" && ls -1 dist/zk_STARK_Validator_V2_*.zip
+          # Pinned SHA256 of the trusted v3.1.0 zk artifacts; abort if a source asset was altered.
+          cat > dist/zk_checksums.txt <<'EOF'
+          b435624b0c3166135a273288d88b6ae0307e7ccd43c9df5b5bf90082eebffb77  zk_STARK_Validator_V2_aarch64-apple-darwin_v3.1.0.zip
+          bf7d3ff7f97035169f13f4f994d5b0c2a500feaf0817f5e7be705bd81a81eb75  zk_STARK_Validator_V2_x86_64-apple-darwin_v3.1.0.zip
+          c740d4a271a363e112ef8f879b467add440212aacf2cc17781fdb9d7e0274363  zk_STARK_Validator_V2_x86_64-pc-windows-gnu_v3.1.0.zip
+          2e76db097c5752636140e22676f70f8cb3e244d47855c165a6ca0312db30b888  zk_STARK_Validator_V2_x86_64-unknown-linux-gnu_v3.1.0.zip
+          EOF
+          ( cd dist && sha256sum -c zk_checksums.txt )
+          rm -f dist/zk_checksums.txt
+          echo "zk artifacts verified:" && ls -1 dist/zk_STARK_Validator_V2_*.zip
+
+      - name: Upload artifacts for release job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-assets
+          path: |
+            dist/
+            RELEASE_NOTES.md
+          retention-days: 1
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Release job: the only job with write permission. It just downloads the
+  # prebuilt assets and publishes the release.
+  # ---------------------------------------------------------------------------
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-assets
 
       - name: Create release and upload all artifacts
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}   # write token scoped to this step
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
           set -euo pipefail
           gh release create "$VERSION" \
