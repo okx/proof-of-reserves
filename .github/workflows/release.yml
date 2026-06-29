@@ -1,0 +1,136 @@
+name: Build and Release
+
+# Triggered when a tag starting with "v" is pushed; the tag name is used as the
+# version to package and publish a release.
+# Also supports manual dispatch: provide a version and it creates the tag and release.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. v3.1.11); used to create the tag and publish the release'
+        required: true
+
+# Only one release run at a time per tag
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # needed to create release / tag and upload assets
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # Source release tag holding the fixed zk_STARK_Validator_V2 (v3.1.0) artifacts.
+      # These four files have not changed since v3.1.0; reuse them by downloading.
+      ZK_SOURCE_TAG: v3.1.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # full history needed for the release-notes git log
+          fetch-tags: true    # all tags needed to compute previous version / changelog range
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # go.mod declares go 1.17, but dependencies use net/netip (needs 1.18+), so pin a newer version
+          go-version: '1.23'
+
+      - name: Resolve version and previous version
+        id: version
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${{ github.ref_name }}"        # tag-triggered: use the tag name
+            echo "Triggered by tag, version = $VERSION"
+          else
+            VERSION="${{ github.event.inputs.version }}"   # manual: use the provided version
+            echo "Manual dispatch, version = $VERSION"
+          fi
+          # Latest existing release is treated as the previous version (for the changelog)
+          PREV="$(gh release view --json tagName -q .tagName 2>/dev/null || true)"
+          # Fail if a release with this version already exists, to avoid overwriting
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "::error::release $VERSION already exists, please use a different version" && exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PREV: ${{ steps.version.outputs.prev }}
+        run: |
+          set -euo pipefail
+          {
+            if [ -n "$PREV" ]; then
+              echo "Changes since ${PREV}."
+              echo
+              echo "Changes:"
+              git log "${PREV}..HEAD" --no-merges --pretty='- %h %s'
+              echo
+              echo "**Full Changelog**: ${{ github.server_url }}/${{ github.repository }}/compare/${PREV}...${VERSION}"
+            else
+              echo "Release ${VERSION}."
+              echo
+              echo "Changes:"
+              git log -n 20 --no-merges --pretty='- %h %s'
+            fi
+          } > RELEASE_NOTES.md
+          echo "---- release notes preview ----"
+          cat RELEASE_NOTES.md
+
+      - name: Build artifacts for four platforms
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GOFLAGS: -mod=mod   # go.sum is not committed; allow build to download deps and fill it in
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          build() {
+            local goos="$1" goarch="$2" outdir="$3" ext="$4"
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -o "${outdir}/CheckBalance${ext}" cmd/checkbalance/main.go
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -o "${outdir}/VerifyAddress${ext}" cmd/verifyaddress/main.go
+            cp example/rpc.json "${outdir}/rpc.json"
+            zip -r "dist/${outdir}.zip" "${outdir}"
+          }
+
+          build darwin  amd64 "proof-of-reserves-macos-${VERSION}"       ""
+          build linux   arm64 "proof-of-reserves-linux-arm64-${VERSION}" ""
+          build linux   amd64 "proof-of-reserves-linux-amd64-${VERSION}" ""
+          build windows amd64 "proof-of-reserves-windows-${VERSION}"     ".exe"
+
+      - name: Download fixed zk_STARK_Validator_V2 artifacts
+        run: |
+          set -euo pipefail
+          gh release download "$ZK_SOURCE_TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern 'zk_STARK_Validator_V2_*.zip' \
+            --dir dist
+          echo "Downloaded zk artifacts:" && ls -1 dist/zk_STARK_Validator_V2_*.zip
+
+      - name: Create release and upload all artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "$VERSION" \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "$VERSION" \
+            --notes-file RELEASE_NOTES.md \
+            dist/proof-of-reserves-linux-amd64-"$VERSION".zip \
+            dist/proof-of-reserves-linux-arm64-"$VERSION".zip \
+            dist/proof-of-reserves-macos-"$VERSION".zip \
+            dist/proof-of-reserves-windows-"$VERSION".zip \
+            dist/zk_STARK_Validator_V2_aarch64-apple-darwin_v3.1.0.zip \
+            dist/zk_STARK_Validator_V2_x86_64-apple-darwin_v3.1.0.zip \
+            dist/zk_STARK_Validator_V2_x86_64-pc-windows-gnu_v3.1.0.zip \
+            dist/zk_STARK_Validator_V2_x86_64-unknown-linux-gnu_v3.1.0.zip
