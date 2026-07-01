@@ -69,12 +69,30 @@ func parseLine(line string) []string {
 	return result
 }
 
-func handle(i int, line string) (coin string, success bool) {
+// detectFormatOffset inspects a detail-section header and returns the column offset for the
+// report format: 1 when a "Type" column is present (the 12-column format that inserts a Type
+// column right after coin), otherwise 0 for the legacy 11-column format. Every column after
+// coin shifts right by this offset; a missing Type column means the section is parsed exactly
+// as before and each row is treated as non-staking.
+func detectFormatOffset(header []string) int {
+	for _, col := range header {
+		if strings.EqualFold(strings.TrimSpace(col), "Type") {
+			return 1
+		}
+	}
+	return 0
+}
+
+func handle(i int, line string, off int) (coin string, success bool) {
 	if len(line) == 0 {
 		return "", true
 	}
 	as := parseLine(line)
-	coin, addr, balance, message, sign1, sign2, script := as[0], as[3], as[4], as[5], as[6], as[7], as[8]
+	if len(as) < 9+off {
+		fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d has fewer columns than the report header.", i+1))
+		return "", false
+	}
+	coin, addr, balance, message, sign1, sign2, script := as[0], as[3+off], as[4+off], as[5+off], as[6+off], as[7+off], as[8+off]
 
 	// Recover from panic and print detailed error info
 	defer func() {
@@ -84,9 +102,9 @@ func handle(i int, line string) (coin string, success bool) {
 		}
 	}()
 	var eoa1, eoa2 string
-	if len(as) > 10 {
-		eoa1 = as[9]
-		eoa2 = as[10]
+	if len(as) > 10+off {
+		eoa1 = as[9+off]
+		eoa2 = as[10+off]
 	}
 
 	val, err := decimal.NewFromString(balance)
@@ -212,6 +230,7 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 	}
 	buf := bufio.NewReader(f)
 	count, lineSize, flag := 0, 0, 2
+	off := 0
 	success, fail := make(map[string]uint64), make(map[string]uint64)
 	for {
 		line, _, err := buf.ReadLine()
@@ -239,10 +258,12 @@ func AddressVerify(cmd *cobra.Command, args []string) {
 		if flag > 0 {
 			if flag == 1 {
 				flag--
+				// Resolve the detail-section column layout from its header.
+				off = detectFormatOffset(strings.Split(temp, ","))
 			}
 			continue
 		}
-		coin, ok := handle(count, strings.TrimSpace(temp))
+		coin, ok := handle(count, strings.TrimSpace(temp), off)
 
 		if common.IsVerifyAddressBannedCoin(coin) {
 			continue
