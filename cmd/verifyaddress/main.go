@@ -107,6 +107,12 @@ func handle(i int, line string, off int) (coin string, success bool) {
 		eoa2 = as[10+off]
 	}
 
+	// Eigenlayer Staking rows fill EOA2 with the EigenPod contract address; a contract
+	// cannot produce a signature (signature2 is empty), so only EOA1 is verifiable.
+	if off == 1 && strings.EqualFold(strings.TrimSpace(as[1]), "Eigenlayer Staking") {
+		eoa2 = ""
+	}
+
 	val, err := decimal.NewFromString(balance)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Fail to verify address signature.The line %d  has invalid balance number.", i+1))
