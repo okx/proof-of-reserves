@@ -93,6 +93,7 @@
 | OKB-X1-ETH  | XLAYER           |
 | OKB-X1-USDT | XLAYER           |
 | OKB-X1-USDC | XLAYER           |
+| PRL         | Pearl            |
 
 
 

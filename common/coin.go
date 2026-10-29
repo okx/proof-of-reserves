@@ -11,6 +11,8 @@ const (
 	BethCoinType = "BETH"
 	AlgoCoinType = "ALGO"
 	EOSCoinType  = "EOS"
+	// PearlCoinType: Taproot script-path 2-of-2 proofs (two signatures plus tapscript).
+	PearlCoinType = "PEARL"
 
 	BtcMessageSignatureHeader  = "Bitcoin Signed Message:\n"
 	LtcMessageSignatureHeader  = "Litecoin Signed Message:\n"
@@ -47,6 +49,7 @@ var (
 		"QTUM":      "QTUM",
 		"RVN":       "RVN",
 		"ZEC":       "ZEC",
+		"PRL":       "PRL",
 
 		// ETH
 		"ETH":                  "ETH",
@@ -170,6 +173,7 @@ var (
 		"DGB":       8,
 		"QTUM":      8,
 		"RVN":       8,
+		"PRL":       8,
 		"ZEC":       8,
 
 		// ETH

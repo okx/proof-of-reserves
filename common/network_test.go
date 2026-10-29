@@ -17,6 +17,7 @@ func TestNetworkTypeSamples(t *testing.T) {
 		{"BETH", BethCoinType},
 		{"STARKNET", StarkCoinType}, {"STARK", StarkCoinType},
 		{"Vaulta", EOSCoinType}, {"WAXP", EOSCoinType},
+		{"PRL", PearlCoinType}, {"PEARL", PearlCoinType}, {"PEARL-MAINNET", PearlCoinType},
 	}
 	for _, c := range cases {
 		got, ok := NetworkType(c.network)

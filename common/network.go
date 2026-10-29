@@ -155,6 +155,9 @@ var (
 		// EOS
 		"EOS": EOSCoinType, "A": EOSCoinType, "VAULTA": EOSCoinType,
 		"WAX": EOSCoinType, "WAXP": EOSCoinType,
+
+		// PEARL
+		"PRL": PearlCoinType, "PEARL": PearlCoinType, "PEARL_MAINNET": PearlCoinType,
 	}
 
 	// utxoMsgHeaderExceptions lists UTXO networks whose message header is not

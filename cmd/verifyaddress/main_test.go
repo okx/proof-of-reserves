@@ -40,3 +40,22 @@ func TestHandleTooFewColumns(t *testing.T) {
 		t.Fatalf("a short row must fail, not panic")
 	}
 }
+
+// A Pearl 2-of-2 row (signatures and tapscript from okcoin-signature PearlPorTest) routes by the
+// Network column to common.VerifyPearl; swapping the two signatures must fail.
+func TestHandlePearlRow(t *testing.T) {
+	const (
+		addr   = "prl1pg8uak7ghkg84y3fdzqrjf4s0e8md6l5galn4j8q40pc98k3nf62qaay2u2"
+		script = "208ce13849b588985e19f2fffe34c2c98150efb70285b17557da647379b188a1cfac200203711eaf703c17670691044de6cfc706b5fe091e78b80f6b6bb4b578151996ba529c"
+		sig1   = "2959c03e595c6c86ce1cf425c3a285e46444861e4afa494f30832b5064e3ae5ca73e0238d20cfd8df627f974b2fb23b81a2b0f613b2da85d0f96acd3e3212b74"
+		sig2   = "4adfe80f213012e8ed700802726b8a96e1072d35973943372039bc510a832b1bc00fbebcecf461305748095b75f9249b908bdf2217f88da3c5311b83b7203c39"
+	)
+	row := "PRL,Non Staking,PEARL,1," + addr + ",1.5,hello world," + sig1 + "," + sig2 + "," + script + ",,"
+	if _, ok := handle(4, row, 1); !ok {
+		t.Fatalf("Pearl row should verify")
+	}
+	swapped := "PRL,Non Staking,PEARL,1," + addr + ",1.5,hello world," + sig2 + "," + sig1 + "," + script + ",,"
+	if _, ok := handle(5, swapped, 1); ok {
+		t.Fatalf("Pearl row with swapped signatures must fail")
+	}
+}
