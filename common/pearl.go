@@ -13,7 +13,6 @@ package common
 
 import (
 	"bytes"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -104,7 +103,7 @@ func VerifyPearl(addr, msg, sign1, sign2, script string) error {
 // pearlTapscript decodes script and accepts only the canonical 2-of-2 leaf
 // PUSH32 key1 CHECKSIG PUSH32 key2 CHECKSIGADD 2 NUMEQUAL with two distinct keys.
 func pearlTapscript(script string) ([]byte, error) {
-	b, err := hex.DecodeString(strings.TrimPrefix(strings.TrimPrefix(script, "0x"), "0X"))
+	b, err := Decode(script)
 	if err != nil || len(b) != pearlTapscriptLen ||
 		b[0] != btc_txscript.OP_DATA_32 || b[33] != btc_txscript.OP_CHECKSIG ||
 		b[34] != btc_txscript.OP_DATA_32 || b[67] != btc_txscript.OP_CHECKSIGADD ||
@@ -132,15 +131,18 @@ func pearlAddress(program []byte) (string, error) {
 	return bech32.EncodeM(pearlMainnetHRP, append([]byte{1}, converted...))
 }
 
-// pearlSignature decodes one hex BIP-340 signature: 64 bytes for
-// SIGHASH_DEFAULT, or 65 bytes carrying an explicit sighash type.
+// pearlSignature decodes one hex BIP-340 signature; the length and sighash
+// byte follow the same BIP-341 rules as BIP-322 witnesses (splitTaprootSig).
 func pearlSignature(sign, addr string) ([]byte, error) {
 	if sign == "" || sign == "null" || sign == "\\N" {
 		return nil, fmt.Errorf("%w: both signatures are required, addr:%s", ErrPearlSignature, addr)
 	}
-	b, err := hex.DecodeString(strings.TrimPrefix(strings.TrimPrefix(sign, "0x"), "0X"))
-	if err != nil || (len(b) != 64 && len(b) != 65) {
+	b, err := Decode(sign)
+	if err != nil {
 		return nil, fmt.Errorf("%w: invalid signature encoding, addr:%s", ErrPearlSignature, addr)
+	}
+	if _, _, err := splitTaprootSig(b, addr); err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrPearlSignature, err)
 	}
 	return b, nil
 }

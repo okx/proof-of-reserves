@@ -11,8 +11,6 @@ const (
 	BethCoinType = "BETH"
 	AlgoCoinType = "ALGO"
 	EOSCoinType  = "EOS"
-	// PearlCoinType: Taproot script-path 2-of-2 proofs (two signatures plus tapscript).
-	PearlCoinType = "PEARL"
 
 	BtcMessageSignatureHeader  = "Bitcoin Signed Message:\n"
 	LtcMessageSignatureHeader  = "Litecoin Signed Message:\n"
@@ -309,6 +307,8 @@ var (
 		"OKB-X1-ETH":  true,
 		"OKB-X1-USDT": true,
 		"OKB-X1-USDC": true,
+
+		"PRL": true,
 	}
 
 	VerifyAddressCoinBlackList = map[string]bool{

@@ -17,7 +17,7 @@ func TestNetworkTypeSamples(t *testing.T) {
 		{"BETH", BethCoinType},
 		{"STARKNET", StarkCoinType}, {"STARK", StarkCoinType},
 		{"Vaulta", EOSCoinType}, {"WAXP", EOSCoinType},
-		{"PRL", PearlCoinType}, {"PEARL", PearlCoinType}, {"PEARL-MAINNET", PearlCoinType},
+		{"PRL", UTXOCoinType}, {"PEARL", UTXOCoinType}, {"PEARL-MAINNET", UTXOCoinType},
 	}
 	for _, c := range cases {
 		got, ok := NetworkType(c.network)
@@ -39,6 +39,7 @@ func TestNetworkAddressTypeSamples(t *testing.T) {
 		{"SOL", "SOL"}, {"ADA", "ADA"}, {"APTOS", "APTOS"},
 		{"BCHN", "BCH"}, {"XEC", "BCH"}, {"ZCASH", "ZEC"}, {"BCHSV", "BTC"},
 		{"HARMONY-ONE", "ONE"}, {"LUNA_TERRA", "TERRA"}, {"HEDERA", "HBAR"},
+		{"PRL", "PRL"}, {"PEARL", "PRL"}, {"PEARL-MAINNET", "PRL"},
 	}
 	for _, c := range cases {
 		if got := NetworkAddressType(c.network); got != c.want {

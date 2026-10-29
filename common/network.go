@@ -65,6 +65,7 @@ var (
 		"QTUM": UTXOCoinType, "RVN": UTXOCoinType, "ZEC": UTXOCoinType,
 		"ZCASH": UTXOCoinType, "XEC": UTXOCoinType, "ZEN": UTXOCoinType,
 		"DCR": UTXOCoinType,
+		"PRL": UTXOCoinType, "PEARL": UTXOCoinType, "PEARL_MAINNET": UTXOCoinType,
 
 		// EVM
 		"ETH": EvmCoinTye, "ETC": EvmCoinTye, "ETHW": EvmCoinTye, "ETHF": EvmCoinTye,
@@ -155,9 +156,6 @@ var (
 		// EOS
 		"EOS": EOSCoinType, "A": EOSCoinType, "VAULTA": EOSCoinType,
 		"WAX": EOSCoinType, "WAXP": EOSCoinType,
-
-		// PEARL
-		"PRL": PearlCoinType, "PEARL": PearlCoinType, "PEARL_MAINNET": PearlCoinType,
 	}
 
 	// utxoMsgHeaderExceptions lists UTXO networks whose message header is not
@@ -188,5 +186,6 @@ var (
 		"HARMONY_ONE": "ONE",
 		"A": "EOS", "VAULTA": "EOS", "WAX": "EOS", "WAXP": "EOS",
 		"FOGO": "SOL",
+		"PEARL": "PRL", "PEARL_MAINNET": "PRL",
 	}
 )

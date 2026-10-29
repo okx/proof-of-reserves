@@ -72,7 +72,7 @@ func TestVerifyPearl_Rejects(t *testing.T) {
 	}
 }
 
-// Both report flows route Pearl rows here by the Network column.
+// Both report flows route Pearl rows through the UTXO scheme by the Network column.
 func TestVerifyPearl_Dispatch(t *testing.T) {
 	ok, _, msg := verifyCSVLineInternal("PEARL", pearlHotAddr, pearlMsg, pearlHotSig1, pearlHotSig2, pearlHotScript, "", "", "PRL", 1, t)
 	if !ok {

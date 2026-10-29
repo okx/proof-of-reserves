@@ -198,11 +198,6 @@ func handle(i int, line string, off int) (coin string, success bool) {
 			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
 			return coin, false
 		}
-	case common.PearlCoinType:
-		if err := common.VerifyPearl(addr, message, sign1, sign2, script); err != nil {
-			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))
-			return coin, false
-		}
 	case common.StarkCoinType:
 		if err := common.VerifyStarkCoin(network, addr, message, sign1, script); err != nil {
 			fmt.Println(fmt.Sprintf("Fail to verify address %s signature.The line %d  has error:%s.", addr, i+1, err))

@@ -141,6 +141,12 @@ func VerifyUtxoCoin(network, addr, msg, sign1, sign2, script string) error {
 	var pub1, pub2 []byte
 	var err error
 
+	// Pearl proofs are 2-of-2 tapscript spends under Pearl's own verifymessage
+	// rules; prl addresses never decode as BTC, so route them before P2TR.
+	if NetworkAddressType(network) == "PRL" {
+		return VerifyPearl(addr, msg, sign1, sign2, script)
+	}
+
 	// P2TR is signed per BIP-322 with Schnorr, which is not a recoverable
 	// signature scheme, so the pubkey-recovery path below cannot apply. The
 	// signing key is taken from the address itself instead.

@@ -105,8 +105,6 @@ func verifyCSVLineInternal(coin, addr, msg, sign1, sign2, publicKey, owner1, own
 		err = VerifyBETH(addr, msg, sign1)
 	case UTXOCoinType:
 		err = VerifyUtxoCoin(coin, addr, msg, sign1, sign2, publicKey)
-	case PearlCoinType:
-		err = VerifyPearl(addr, msg, sign1, sign2, publicKey)
 	case StarkCoinType:
 		if publicKey == "" || publicKey == "null" {
 			errorMsg := fmt.Sprintf("STARK coin %s missing public key (digitalAsset:%s)", coin, digitalAsset)
