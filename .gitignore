@@ -18,3 +18,4 @@ zk_STARK/sum_proof_data/batches/*
 zk_STARK/sum_proof_data/trunk/*
 zk_STARK/user_data/*
 .DS_Store
+/build/
