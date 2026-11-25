@@ -519,6 +519,12 @@ func VerifyEcdsaCoin(network, addr, msg, sign string) error {
 		recoverAddr, _ = bech32.EncodeFromBase256("inj", addressByte[12:])
 	case "ONE":
 		recoverAddr, _ = GenerateONEAddress(pubKey)
+	case "RIPPLE", "XRP":
+		recoverAddr = rippleClassicAddress(pubKeyCompressed)
+		if recoverAddr != addr {
+			return fmt.Errorf("ripple address mismatch, expected: %s, recovered: %s", addr, recoverAddr)
+		}
+		return nil
 	}
 
 	if !strings.EqualFold(recoverAddr, addr) {
@@ -526,6 +532,15 @@ func VerifyEcdsaCoin(network, addr, msg, sign string) error {
 	}
 
 	return nil
+}
+
+func rippleClassicAddress(compressedPubKey []byte) string {
+	const bitcoinAlphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+	const rippleAlphabet = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
+	address := base58.CheckEncode(btcutil.Hash160(compressedPubKey), []byte{0}, base58.Sha256D)
+	return strings.Map(func(char rune) rune {
+		return rune(rippleAlphabet[strings.IndexRune(bitcoinAlphabet, char)])
+	}, address)
 }
 
 func VerifyStarkCoin(network, addr, msg, sign, publicKey string) error {
