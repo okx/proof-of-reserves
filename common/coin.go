@@ -57,6 +57,7 @@ var (
 		"USDG-ERC20":           "USDG",
 		"USDG-XLAYER":          "USDG",
 		"USDG-ROBINHOOD-D168":  "USDG",
+		"RLUSD_ERC20":          "RLUSD",
 		"USDT-POLY":            "USDT",
 		"USDT-AVAXC":           "USDT",
 		"USDT-ARBITRUM":        "USDT",
@@ -147,6 +148,9 @@ var (
 		"EOS":    "EOS",
 		"A":      "A",
 		"RIPPLE": "RIPPLE",
+
+		// XRP Ledger
+		"RIPPLE_RLUSD": "RLUSD",
 
 		// ALGO
 		"USDT-ALGO": "USDT",
